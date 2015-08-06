@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# shell-model.sh
+# shell-model.bash
 # by Pierre Cassat (me at e-piwi dot fr) & contributors
 # <http://gitlab.com/piwi/shell-model.git>
 # file licensed under CC BY 4.0 <http://creativecommons.org/licenses/by/4.0/legalcode>
