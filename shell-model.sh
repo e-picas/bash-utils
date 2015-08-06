@@ -88,15 +88,23 @@ cleanup()
     : # draw your own cleanup stuff here
 }
 
+# write a comment string on STDOUT
+# usage: `comment <string>`
+comment()
+{
+    [ -n "$1" ] && echo "# $@" >&1
+}
+
 # common options treatment
 # usage: `common_options`
 common_options()
 {
     for arg in $*; do
         case "$arg" in
+            'about')    about;;
+            'debug')    debug && exit 0;;
             'help')     help;;
             'usage')    usage && exit 0;;
-            'about')    about;;
             'version')  version && exit 0;;
         esac
     done
@@ -107,13 +115,9 @@ common_options()
 debug()
 {
     echo '----'
-    echo "REQ:      $0 $CMD_CALL"
-    echo "VERBOSE : $VERBOSE"
-    echo "QUIET :   $QUIET"
-    echo "DEBUG :   $DEBUG"
-    echo "FORCE :   $FORCE"
-    echo "DRY_RUN : $DRY_RUN"
-    echo "args :    $@"
+    for i in "${TO_DEBUG[@]}"; do
+        echo "$i:  ${!i}"
+    done
     echo '----'
 }
 
@@ -149,6 +153,14 @@ error()
         usage
     } >&2
     exit "${2:-1}"
+}
+
+# test if a function exists - returns a boolean
+# usage: `func_exists <func_name>`
+func_exists()
+{
+    [ $# -eq 0 ] && return 1;
+    [ "$(type -t "$1")" == 'function' ]
 }
 
 # write help string to STDERR & exit
@@ -226,16 +238,21 @@ version()
     fi
 }
 
+# write an error string on STDERR without exiting
+# usage: `warning <string>`
+warning()
+{
+    [ -n "$1" ] && echo "> $@" >&2
+}
+
 ## common setup ##
 
-# redirect file descriptor 3 to STDOUT:
-#       echo '...' >3
-#       $QUIET || exec 3>&1
-exec 3>&1
 # trap errors to 'die'
 trap 'die ${BASH_SOURCE} ${FUNCNAME:-} ${BASH_LINENO:-}' 1 2 3 15 ERR
 # trap exit to 'cleanup'
 trap 'cleanup' EXIT
+# test of old Bash versions
+[[ "$BASH_VERSION" =~ "4."* ]] || warning "you are running an old version of Bash ($BASH_VERSION) - some errors are expected.";
 
 # command variables
 declare -xr CMD_PROG="$(basename "$0")"
@@ -253,21 +270,27 @@ declare -x QUIET=false          # write in not quiet mode:  $QUIET || echo '...'
 declare -x DEBUG=false          # write in debug mode:      $DEBUG && echo '...';
 declare -x FORCE=false          # write in force mode:      $FORCE && echo '...';
 declare -x DRY_RUN=false        # exec in not dry-run mode: $DRY_RUN || ...;
+declare -xa TO_DEBUG=(
+    CMD_PROG CMD_ROOT CMD_HOST CMD_USER CMD_CWD CMD_PID
+    CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN
+)
 
 ## options & arguments ##
 set +E
 getoptvers="$(getopt --test > /dev/null; echo $?)"
 if [ $getoptvers -eq 4 ]; then
     # GNU enhanced getopt is available
-    CMD_CALL="$(getopt --shell 'bash' --options "${CMD_OPTS_SHORT}-:" --longoptions "$CMD_OPTS_LONG" --name "$CMD_PROG" -- "$@")"
+    CMD_REQ="$(getopt --shell 'bash' --options "${CMD_OPTS_SHORT}-:" --longoptions "$CMD_OPTS_LONG" --name "$CMD_PROG" -- "$@")"
 else
     # original getopt is available
-    CMD_CALL="$(getopt "$CMD_OPTS_SHORT" "$@")"
+    CMD_REQ="$(getopt "$CMD_OPTS_SHORT" "$@")"
 fi
 set -E
-eval set -- "$CMD_CALL"
+eval set -- "$CMD_REQ"
+CMD_CALL="$0 $CMD_REQ"
 while [ $# -gt 0 ]; do
     case "$1" in
+        # default options
         -f | --force )  FORCE=true;;
         -q | --quiet )  QUIET=true; VERBOSE=false;;
         -v | --verbose ) VERBOSE=true; QUIET=false;;
@@ -281,7 +304,7 @@ while [ $# -gt 0 ]; do
         # declare -xr CMD_OPTS_LONG='force,quiet,verbose,debug,dry-run,test1:,test2::'
         #
         # -a | --test1 ) OPTARG="$(echo "$2" | cut -d'=' -f2)"; TEST1="${OPTARG}"; shift;;
-        # -b | --test2 ) OPTARG="$(echo "$2" | cut -d'=' -f2)"; TEST2="${OPTARG:-yo2}"; shift;;
+        # -b | --test2 ) OPTARG="$(echo "$2" | cut -d'=' -f2)"; TEST2="${OPTARG:-default}"; shift;;
         #
         
         # end of options & errors
@@ -290,6 +313,9 @@ while [ $# -gt 0 ]; do
     esac
     shift
 done
+
+# argument required
+[ $# -eq 0 ] && usage && exit 1;
 
 # common arguments
 [ $# -gt 0 ] && common_options "$*";
