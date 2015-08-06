@@ -6,6 +6,33 @@ You can use it as a base to build quickly robust shell scripts for UNIX systems 
 The model is licensed under a [Creative Commons Attribution][2] license.
 
 
+How-to
+------
+
+To use the model, just follow these steps:
+
+    # 1_ go to the model directory
+    cd path/to/shell-model-clone
+
+    # 2_ copy the model as your target script
+    cp shell-model.bash ~/bin/name-of-your-script
+
+    # 3_ render it executable
+    chmod a+x ~/bin/name-of-your-script
+
+    # 4_ edit it
+    vi ~/bin/name-of-your-script
+
+    # 5_ and use it
+    ~/bin/name-of-your-script
+
+The target script in this example is named `name-of-your-script` and stored in user's `bin/` directory. None of these
+are mandatory ; you can name your script following your preferences and place it where you want as long as you can
+access it easily. The file extension has no incidence upon the script's type (`bash` in our case) as the interpreter
+is designed by the [*shebang* directive][5] ; you could name your script with an `.sh`, a `.bash` and even a `.py` 
+extension (which would have no real sense here) or let it without extension at all with no difference.
+
+
 Customize the model
 -------------------
 
@@ -115,6 +142,12 @@ To make robust scripts, here are some reminders:
 -   to use a variable eventually unset: `echo ${VARIABLE:-default}`
 -   to make a silent sub-command call: `val=$(sub-command 2>/dev/null)`
 
+To enable "per-user" binaries (let the system look in any `$HOME/bin/` directory when searching scripts), be
+sure to add that directory to the `$PATH` environment variable (in your `$HOME/.bashrc` for instance):
+
+    # user binaries path
+    [ -d "${HOME}/bin" ] && export PATH="${PATH}:${HOME}/bin";
+
 
 Useful links
 ------------
@@ -130,3 +163,4 @@ Useful links
 [2]: http://creativecommons.org/licenses/by/4.0/legalcode
 [3]: http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_12_02.html
 [4]: http://man7.org/linux/man-pages/man1/getopt.1.html
+[5]: https://en.wikipedia.org/wiki/Shebang_%28Unix%29
