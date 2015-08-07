@@ -12,10 +12,20 @@ the library itself.
 How-to
 ------
 
+### Basic template
+
 To use the library, just *source* it at the top of your script:
 
     #!/usr/bin/env bash
     source ~/bin/bash-utils.bash
+    
+    # write your scripts logic here
+    # ...
+    
+    # a script should always return a status
+    exit 0
+
+### Library model
 
 The library embeds a model you can use "as-is":
 
@@ -40,9 +50,24 @@ access it easily. The file extension has no incidence upon the script's type (`b
 is designed by the [*shebang* directive][5] ; you could name your script with an `.sh`, a `.bash` and even a `.py` 
 extension (which would have no real sense here) or let it without extension at all with no difference.
 
+### Installation & access
 
-Customize the model
--------------------
+To make the library accessible for all users, the best practice is to install it in a global path like `/usr/bin/`.
+This way, any user can use in its scripts:
+
+    source /usr/bin/bash-utils.bash
+
+To enable "per-user" binaries (let the system look in any `$HOME/bin/` directory when searching scripts), be
+sure to add that directory to the `$PATH` environment variable (in your `$HOME/.bashrc` for instance):
+
+    # user binaries path
+    [ -d "${HOME}/bin" ] && export PATH="${PATH}:${HOME}/bin";
+
+
+Library's usage
+---------------
+
+### Customize your script
 
 To use this model to build your own command, you must first override informational variables:
 
@@ -61,10 +86,9 @@ Then you can customize script's options (see below) to fit your needs and write 
 part of the model.
 
 
-Script's library
-----------------
+### Library's methods
 
-The library embeds a short library of methods to facilitate your scripts:
+The library embeds a short set of methods to facilitate your scripts:
 
 -   the `die()` method will exit with an error message and a back trace, all to STDERR
 -   the `error()` method will exit with an error message to STDERR (user friendly)
@@ -86,9 +110,26 @@ for default options and arguments. To use this, add in your script:
     common_options "$@"
     common_arguments "$*";
 
+You can **overwrite any method** by re-defining it after having sourced the library:
 
-Script's options
-----------------
+    source .../bash-utils.bash
+    
+    error() {
+        # your custom error handler
+    }
+
+The best practice is to create user methods instead of overwrite native ones and call them:
+
+    source .../bash-utils.bash
+    
+    user_error() {
+        # your custom error handler
+    }
+    
+    [ -f filename ] || user_error 'file not found';
+
+
+### Script's options
 
 Default options handled by the library are:
 
@@ -138,8 +179,7 @@ Due to known limitations of the [getopt][4] program, you should always use an eq
 an option (short or long) and its argument: `-o=arg` or `--option=arg`.
 
 
-Script's arguments
-------------------
+### Script's arguments
 
 The library handles by default the following arguments:
 
@@ -156,8 +196,7 @@ over script's arguments:
     esac
 
 
-Technical points
-----------------
+### Technical points
 
 The library uses the following *Bash* options by default:
 
@@ -171,12 +210,6 @@ To make robust scripts, here are some reminders:
 
 -   to use a variable eventually unset: `echo ${VARIABLE:-default}`
 -   to make a silent sub-command call: `val=$(sub-command 2>/dev/null)`
-
-To enable "per-user" binaries (let the system look in any `$HOME/bin/` directory when searching scripts), be
-sure to add that directory to the `$PATH` environment variable (in your `$HOME/.bashrc` for instance):
-
-    # user binaries path
-    [ -d "${HOME}/bin" ] && export PATH="${PATH}:${HOME}/bin";
 
 
 Useful links
