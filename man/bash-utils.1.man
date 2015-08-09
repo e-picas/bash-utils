@@ -1,0 +1,122 @@
+.\" man: Bash-Utils Manual
+.\" man-name: bash-utils
+.\" author: Pierre Cassat
+.\" section: 1
+.\" date: 2015-08-09
+.\" version: 0.0.1
+.TH  "bash-utils" "1" "2015-08-09" "Version 0.0.1" "Bash-Utils Manual"
+.SH NAME
+.PP
+Bash-Utils - A short \fIbash\fP library for better scripting.
+.SH SYNOPSIS
+.PP
+Usage of the library in a script:
+.RS
+
+.EX
+source bash-utils.bash || { echo "> bash-utils not found!" >&2; exit 1; };
+.EE
+.RE
+.PP
+Usage of the library as a command:
+.PP
+\fBbash-utils.bash\fP [\fB-fqvVx\fP]
+    [\fB--debug\fP|\fB--dry-run\fP|\fB--force\fP|\fB--quiet\fP|\fB--verbose\fP|\fB--version\fP]
+    [\fB-e\fP|\fB--exec\fP[=\fIarg\fP]] <arguments> --
+.SH DESCRIPTION
+.PP
+The \fIbash-utils\fP shell script is a short library of utilities to use to quickly build robust \fIbash\fP scripts.
+It proposes a set of useful functions and pre-defined environment variables to let you build a script with
+options and arguments, generate some informational output about the script's usage, handle errors and more
+features (see bash-utils(7) for a full documentation).
+.SH OPTIONS
+.SS Scripts using the library
+.PP
+The following options are supported by default for any script using the library:
+.TP
+\fI-dry-run\fP
+Process a dry-run.
+.TP
+\fI-f\fP, \fI--force\fP
+Force some commands to not prompt confirmation.
+.TP
+\fI-q\fP, \fI--quiet\fP
+Decrease script's verbosity.
+.TP
+\fI-v\fP, \fI--verbose\fP
+Increase script's verbosity.
+.TP
+\fI-x\fP, \fI--debug\fP
+See debug info.
+.PP
+The following internal actions are available:
+.TP
+\fIabout\fP
+See script's information
+.TP
+\fIhelp / usage\fP
+See the help information about the script.
+.TP
+\fIversion\fP
+See script's version
+.SS Using the library as a command
+.PP
+The following additional options are available when you call the library itself:
+.TP
+\fI-e\fP, \fI--exec\fP [\fB=<arg>\fP]
+Execute the argument in the library's environment ; without argument, any piped
+content will be evaluated:
+.br
+bash-utils --exec='e_color "<bold>test</bold>"'
+.br
+echo 'e_color "<bold>test</bold>"' | bash-utils --exec
+.br
+.TP
+\fI-V\fP, \fI--version\fP
+Get current version of the library (alias of the 'version' argument).
+.PP
+The following additional arguments are available when you call the library itself:
+.TP
+\fImodel\fP [\fB<file_path>\fP]
+See the 'bash-utils-model.bash' model content or copy it in 'file_path'.
+.SH EXAMPLES
+.PP
+Have a look at the `\fSbash-utils-model.bash\fP` script for a full base template of a script
+using the library. A starter template is available in bash-utils(7).
+.PP
+To copy the model as a base for your own scripts, you may use the `\fSmodel\fP` argument:
+.RS
+
+.EX
+bash-utils.bash model /path/to/script
+.EE
+.RE
+.SH LICENSE
+.PP
+Copyright (c) 2015, Pierre Cassat <me@e-piwi.fr> & contributors
+.PP
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>.
+.PP
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+.PP
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+.PP
+For documentation, sources & updates, see <http://gitlab.com/piwi/bash-utils.git>. 
+To read Apache-2.0 license conditions, see <http://www.apache.org/licenses/LICENSE-2.0>>.
+.SH BUGS
+.PP
+To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
+.SH AUTHOR
+.PP
+\fBBash-Utils\fP is created and maintained by Pierre Cassat (piwi - <http://e-piwi.fr/>)
+& contributors.
+.SH SEE ALSO
+.PP
+bash(1), bash-utils(7)
