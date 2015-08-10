@@ -27,20 +27,21 @@ CMD_COPYRIGHT='My command copyright'
 CMD_LICENSE='My command license'
 CMD_SOURCES='My command sources'
 CMD_DESCRIPTION='A model for *bash* scripts using the *bash-utils* library.'
-CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
+# the synopsis should not be overwrite as it is automatically built with `CMD_OPTS_...`
+# CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
 CMD_HELP="
 My command help string ...
 
 Available options:
-    -v|--verbose    increase script's verbosity
-    -q|--quiet      decrease script's verbosity
-    -f|--force      do not prompt for choices if a default choice exists
-    -x|--debug      see some debugging information
     --dry-run       process a dry-run
+    -f|--force      do not prompt for choices if a default choice exists
+    -q|--quiet      decrease script's verbosity
+    -v|--verbose    increase script's verbosity
+    -x|--debug      see some debugging information
 
 Use arguments 'usage', 'about' or 'version' for application information.";
-CMD_OPTS_SHORT='fqvx'
-CMD_OPTS_LONG='debug,dry-run,force,quiet,verbose'
+CMD_OPTS_SHORT=(f q v x)
+CMD_OPTS_LONG=(debug dry-run force quiet verbose)
 
 #######################
 ## command options & arguments
@@ -55,14 +56,11 @@ common_options "$@"
 # custom options eventually
 while [ $# -gt 0 ]; do
     case "$1" in
-        # do not throw error for common options
-        -f | -q | -v | -x | --force | --quiet | --verbose | --debug | --dry-run ) true;;
-
         # user options
         # to add your own options, use:
         #
-        # declare -xr CMD_OPTS_SHORT='fqvxa:b::'
-        # declare -xr CMD_OPTS_LONG='force,quiet,verbose,debug,dry-run,test1:,test2::'
+        # declare -xr CMD_OPTS_SHORT=(f q v x 'a:' 'b::')
+        # declare -xr CMD_OPTS_LONG=(force quiet verbose debug dry-run 'test1:' 'test2::')
         #
         # -a | --test1 ) OPTARG="$(echo "$2" | cut -d'=' -f2)"; TEST1="${OPTARG}"; shift;;
         # -b | --test2 ) OPTARG="$(echo "$2" | cut -d'=' -f2)"; TEST2="${OPTARG:-default}"; shift;;
@@ -70,8 +68,8 @@ while [ $# -gt 0 ]; do
         
         # end of options
         -- ) shift; break;;
-        # unknown option
-        * )  error "unknown option '$1'";;
+        # error for unknown option
+        * )  ! is_known_option "$1" && error "unknown option '$1'";;
     esac
     shift
 done
