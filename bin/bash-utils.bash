@@ -280,6 +280,18 @@ function_exists()
     [ "$(type -t "$1")" == 'function' ]
 }
 
+# get the number of the line matching a mask in a file (empty result if not found)
+# usage: `get_line_number_matching <file_path> <mask>`
+get_line_number_matching()
+{
+    [ $# -lt 1 ] && die 'usage: `get_line_number_matching <file_path> <mask>`';
+    local path="$1"
+    [ ! -e "$path" ] && die "file '${path}' not found";
+    local match="$2"
+    grep -n "$match" "$path" | cut -f1 -d:
+    return 0
+}
+
 # write help string to STDERR & exit
 # usage: `help_info`
 help_info()
