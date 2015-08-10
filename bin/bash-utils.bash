@@ -42,14 +42,14 @@ set -T
 ## command info ##
 ##################
 # Available options:
-#     -v|--verbose    increase script's verbosity
-#     -q|--quiet      decrease script's verbosity
-#     -f|--force      do not prompt for choices if a default choice exists
-#     -x|--debug      see some debugging information
 #     --dry-run       process a dry-run
+#     -f|--force      do not prompt for choices if a default choice exists
+#     -q|--quiet      decrease script's verbosity
+#     -v|--verbose    increase script's verbosity
+#     -x|--debug      see some debugging information
 #
 # Use arguments 'usage', 'about' or 'version' for application information.
-declare -x CMD_SYNOPSIS="$0 [-f|-q|-v|-x] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
+declare -x CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
 declare -x CMD_NAME='overwrite the CMD_NAME variable to customize this information'
 declare -x CMD_VERSION='overwrite the CMD_VERSION variable to customize this information'
 declare -x CMD_COPYRIGHT='overwrite the CMD_COPYRIGHT variable to customize this information'
