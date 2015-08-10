@@ -49,7 +49,6 @@ set -T
 #     -x|--debug      see some debugging information
 #
 # Use arguments 'usage', 'about' or 'version' for application information.
-declare -x CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
 declare -x CMD_NAME='overwrite the CMD_NAME variable to customize this information'
 declare -x CMD_VERSION='overwrite the CMD_VERSION variable to customize this information'
 declare -x CMD_COPYRIGHT='overwrite the CMD_COPYRIGHT variable to customize this information'
@@ -57,13 +56,16 @@ declare -x CMD_LICENSE='overwrite the CMD_LICENSE variable to customize this inf
 declare -x CMD_SOURCES='overwrite the CMD_SOURCES variable to customize this information'
 declare -x CMD_DESCRIPTION='overwrite the CMD_DESCRIPTION variable to customize this information'
 declare -x CMD_HELP='overwrite the CMD_HELP variable to customize this information'
-declare -x CMD_OPTS_SHORT='fqvx'
-declare -x CMD_OPTS_LONG='debug,dry-run,force,quiet,verbose'
+declare -xa CMD_OPTS_SHORT=( f q v x )
+declare -xa CMD_OPTS_LONG=( debug dry-run force quiet verbose )
 declare -x CMD_LOGFILE='/var/log/bash-utils.log'
 declare -xa TO_DEBUG=(
     CMD_PROG CMD_ROOT CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_OS
     CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN
 )
+# the synopsis should be left empty as it will be automatically generated with options declarations
+declare -x CMD_SYNOPSIS
+#declare -x CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
 
 # script flags used as booleans
 declare -x VERBOSE=false        # write in verbose mode:    $VERBOSE && echo '...';
@@ -177,7 +179,8 @@ common_options()
             -x | --debug )  DEBUG=true;;
             --dry-run )     DRY_RUN=true;;
             -- )            shift; break;;
-            * )             if [ "${CMD_OPTS_SHORT:0:1}" != ":" ]; then error "unknown option '$1'"; fi;;
+            * )             if ! is_known_option "$1" && [ "${CMD_OPTS_SHORT[0]}" != ":" ]
+                                then error "unknown option '$1'"; fi;;
         esac
         shift
     done
@@ -322,6 +325,27 @@ in_array()
     fi
     for item in "${args[@]}"; do
         [ "$needle" = "$item" ] && return 0
+    done
+    return 1
+}
+
+# test if an option is known by a command
+# usage: `is_known_option <option_name>`
+is_known_option()
+{
+    [ $# -lt 1 ] && die 'usage: `is_known_option <option_name>`';
+    local opt="$1"
+    opt="$(echo "$opt" | cut -d'=' -f1)"
+    opt="${opt//:}"
+    for o in "${CMD_OPTS_SHORT[@]}"; do
+        o="${o//:}"
+        [ -z "$o" ] && continue;
+        [ "$o" = "$opt" ] && return 0;
+    done
+    for o in "${CMD_OPTS_LONG[@]}"; do
+        o="${o//:}"
+        [ -z "$o" ] && continue;
+        [ "$o" = "$opt" ] && return 0;
     done
     return 1
 }
@@ -599,14 +623,23 @@ real_path_dirname()
 # usage: `rearrange_options "$@"`
 rearrange_options()
 {
+    local shorts=''
+    for opt in "${CMD_OPTS_SHORT[@]}"; do
+        shorts+="${opt}"
+    done
+    local longs=''
+    for opt in "${CMD_OPTS_LONG[@]}"; do
+        longs+="${opt},"
+    done
+    longs="${longs%,}"
     set +E
     getoptvers="$(getopt --test > /dev/null; echo $?)"
     if [[ "$getoptvers" -eq 4 ]]; then
         # GNU enhanced getopt is available
-        CMD_REQ="$(getopt --shell 'bash' --options "${CMD_OPTS_SHORT}-:" --longoptions "$CMD_OPTS_LONG" --name "$CMD_PROG" -- "$@")"
+        CMD_REQ="$(getopt --shell 'bash' --options "${shorts}-:" --longoptions "$longs" --name "$CMD_PROG" -- "$@")"
     else
         # original getopt is available
-        CMD_REQ="$(getopt "$CMD_OPTS_SHORT" "$@")"
+        CMD_REQ="$(getopt "shorts" "$@")"
     fi
     set -E
     CMD_CALL="$0 $CMD_REQ"
@@ -700,11 +733,38 @@ try()
     return "$retval"
 }
 
+# echo synopsis info after having built it if it was empty
+# usage: `get_synopsis`
+synopsis_info()
+{
+    if [ -z "$CMD_SYNOPSIS" ]; then
+        local shorts='' shorts_args=''
+        for opt in "${CMD_OPTS_SHORT[@]}"; do
+            [ "$opt" = ':' ] && continue;
+            [ "${opt: -2}" = '::' ] && shorts_args+="|-${opt/::/}[=<arg>]" && continue;
+            [ "${opt: -1}" = ':' ] && shorts_args+="|-${opt/:/} <arg>" && continue;
+            shorts+="${opt}"
+        done
+        local longs=''
+        for opt in "${CMD_OPTS_LONG[@]}"; do
+            [ "$opt" = ':' ] && continue;
+            [ "${opt: -2}" = '::' ] && longs+="--${opt/::/}[=<arg>]|" && continue;
+            [ "${opt: -1}" = ':' ] && longs+="--${opt/:/} <arg>|" && continue;
+            longs+="--${opt}|"
+        done
+        longs="${longs%|}"
+        CMD_SYNOPSIS="$0 [-${shorts}${shorts_args}] [${longs}] [--] <arguments> --"
+    fi
+    echo "$CMD_SYNOPSIS"
+    return 0
+}
+
 # echo usage string
 # usage: `usage_info`
 usage_info()
 {
-    echo "usage: $CMD_SYNOPSIS"
+    local synopsis="$(synopsis_info)"
+    echo "usage: $synopsis"
     return 0
 }
 
@@ -775,7 +835,8 @@ CMD_COPYRIGHT='Copyright (c) 2015 Pierre Cassat & contributors'
 CMD_LICENSE='Apache License version 2.0 <http://www.apache.org/licenses/LICENSE-2.0>'
 CMD_SOURCES='Sources & updates: <http://gitlab.com/piwi/bash-utils.git>'
 CMD_DESCRIPTION='A short *bash* library for better scripting.'
-CMD_SYNOPSIS="$0 [-fqvVx] [--debug|--dry-run|--force|--quiet|--verbose|--version] [-e|--exec[=<arg>]] <arguments> --"
+#CMD_SYNOPSIS="$0 [-fqvVx] [--debug|--dry-run|--force|--quiet|--verbose|--version] [-e|--exec[=<arg>]] <arguments> --"
+CMD_SYNOPSIS=''
 CMD_HELP="arguments:
     about               get library information (license, version etc)
     help                see this help string
@@ -799,8 +860,8 @@ paths:
     $BASH_UTILS
     $BASH_UTILS_MODEL
 ";
-CMD_OPTS_SHORT=':e::fqvVx'
-CMD_OPTS_LONG='exec::,debug,dry-run,force,quiet,verbose,version'
+CMD_OPTS_SHORT=( ':' 'e::' f q v V x )
+CMD_OPTS_LONG=( 'exec::' debug dry-run force quiet verbose version )
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_KEY
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_MODEL
