@@ -136,7 +136,8 @@ array_search ()
 # usage: `cleanup`
 cleanup()
 {
-    : # draw your own cleanup stuff here
+    # draw your own cleanup stuff here
+    return 0
 }
 
 # write a comment string on STDOUT
@@ -144,6 +145,7 @@ cleanup()
 comment()
 {
     [ -n "$1" ] && echo "# $*" >&1
+    return 0
 }
 
 # treat common arguments
@@ -159,6 +161,7 @@ common_arguments()
             'version')  version_info && exit 0;;
         esac
     done
+    return 0
 }
 
 # treat common options
@@ -178,6 +181,7 @@ common_options()
         esac
         shift
     done
+    return 0
 }
 
 # debug environment variables from the `$TO_DEBUG` array
@@ -193,6 +197,7 @@ debug()
         printf "%$((length+1))s : %s\n" "$i" "${!i}"
     done
     echo '---------------'
+    return 0
 }
 
 # write an internal error on STDERR & exit with status 1
@@ -252,6 +257,7 @@ e_color()
         $(which echo) -e "$line"
 #        printf '%s\n' "$line"
     done <<< "$1"
+    return 0
 }
 
 # write a full error on STDERR & show usage string & exit
@@ -314,6 +320,7 @@ log()
 {
     [ $# -eq 0 ] && return 0;
     echo "$(date +'%x %R') ${CMD_USER}@${CMD_HOST} [$$]: $*" >> "$CMD_LOGFILE";
+    return 0
 }
 
 # print a list with optional headers
@@ -390,6 +397,7 @@ print_list()
     for ((j=0; j<"${#_LIST_NAMES[@]}"; j++)); do
         print_list_line "${LIST_NAMES[$j]}" "${LIST_VALUES[$j]}"
     done
+    return 0
 }
 
 # print one line of a list
@@ -410,6 +418,7 @@ print_list_line()
         0 $((${_LIST_LENGTHS[1]} - ${#_ITEM_NAME})) "${_LIST_PADDERS[1]}" \
     )";
     echo "$line"
+    return 0
 }
 
 # print a separation line of a list
@@ -426,6 +435,7 @@ print_list_separator_line()
         0 $((${_LIST_LENGTHS[1]} + ${_LIST_PADDINGS[1]} - ${_LIST_PADDINGS[0]})) "${_LIST_PADDERS[0]}" \
     )";
     echo "$line"
+    return 0
 }
 
 # print a table with optional headers
@@ -508,6 +518,7 @@ print_table()
     done
     # print last contents' separator line
     print_table_separator_line
+    return 0
 }
 
 # print one line of a table
@@ -530,6 +541,7 @@ print_table_line()
         )";
     done
     echo "${_TABLE_SEPARATORS[1]}${line}"
+    return 0
 }
 
 # print a separation line of a table
@@ -547,6 +559,7 @@ print_table_separator_line()
         )";
     done
     echo "${_TABLE_SEPARATORS[0]}${line}"
+    return 0
 }
 
 # get absolute path of a dir
@@ -564,6 +577,7 @@ real_path_dirname()
     done
     pwd
     cd "$cwd"
+    return 0
 }
 
 # rearrange options & arguments and load them in `$CMD_REQ`
@@ -584,6 +598,7 @@ rearrange_options()
     fi
     set -E
     CMD_CALL="$0 $CMD_REQ"
+    return 0
 }
 
 # read any piped content and load it in `_PIPED_INPUT`
@@ -596,6 +611,7 @@ read_from_pipe()
     if [ -e "$fpipe" ] && [ -p "$fpipe" ]; then
         _PIPED_INPUT="$(cat "$fpipe")"
     fi
+    return 0
 }
 
 # resolve symbolic link
@@ -605,6 +621,7 @@ resolve_link()
 {
     [ $# -lt 1 ] && die 'usage: `resolve_link <path>`';
     $(type -p greadlink readlink | head -1) "$1"
+    return 0
 }
 
 # get script stack trace
@@ -617,6 +634,7 @@ stack_trace()
             echo "  $i: ${BASH_SOURCE[$i+1]:-}:${BASH_LINENO[$i]} ${FUNCNAME[$i]}(...)"
         done
     fi
+    return 0
 }
 
 # transform a string in upper case
@@ -625,6 +643,7 @@ string_to_upper()
 {
     [ $# -lt 1 ] && die 'usage: `string_to_upper <string>`';
     echo "$@" | tr '[:lower:]' '[:upper:]';
+    return 0
 }
 
 # transform a string in lower case
@@ -633,6 +652,7 @@ string_to_lower()
 {
     [ $# -lt 1 ] && die 'usage: `string_to_lower <string>`';
     echo "$@" | tr '[:upper:]' '[:lower:]';
+    return 0
 }
 
 # delete eventual trailing slash
@@ -642,6 +662,7 @@ strip_trailing_slash()
     [ $# -lt 1 ] && die 'usage: `strip_trailing_slash <path>`';
     local path="$1"
     echo "${1%/}"
+    return 0
 }
 
 # try a command and catch errors throwing them to the 'die' function
@@ -672,6 +693,7 @@ try()
 usage_info()
 {
     echo "usage: $CMD_SYNOPSIS"
+    return 0
 }
 
 # version string
@@ -683,6 +705,7 @@ version_info()
     else
         echo "$CMD_NAME $CMD_VERSION"
     fi
+    return 0
 }
 
 # write an error string on STDERR without exiting
@@ -690,6 +713,7 @@ version_info()
 warning()
 {
     [ -n "$1" ] && echo "> $*" >&2
+    return 0
 }
 
 ################
