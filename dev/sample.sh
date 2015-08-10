@@ -4,15 +4,13 @@
 #
 set -eETu
 set -o pipefail
-source bash-utils.bash || { echo "> bash-utils not found!" >&2; exit 1; };
+source "$(pwd)/bin/bash-utils.bash" || { echo "> bash-utils not found!" >&2; exit 1; };
 CMD_NAME='script-model-sample'
 CMD_VERSION='0.0.0'
 CMD_COPYRIGHT='(CC-BY) 2015 Pierre Cassat & contributors'
 CMD_LICENSE='Creative Commons 4.0 BY license <http://creativecommons.org/licenses/by/4.0/legalcode>'
 CMD_SOURCES='Sources & updates: <http://gitlab.com/piwi/bash-utils.git>'
 CMD_DESCRIPTION="A sample script from *bash* scripts' model."
-CMD_SYNOPSIS="$0 [-f|-q|-v|-x] [--debug|--dry-run|--force|--quiet|--verbose]
-        [-a:|-b::] [--test1:|--test2::] <arguments> --";
 CMD_HELP="Example of usage:
     ./sample.sh usage
     ./sample.sh help
@@ -37,8 +35,8 @@ Available options:
     --dry-run           process a dry-run
 
 Use arguments 'usage', 'about' or 'version' for application information.";
-CMD_OPTS_SHORT=':fqvxa:b::'
-CMD_OPTS_LONG='debug,dry-run,force,quiet,verbose,test1:,test2::'
+CMD_OPTS_SHORT=(':' f q v x 'a:' 'b::')
+CMD_OPTS_LONG=(debug dry-run force quiet verbose 'test1:' 'test2::')
 TO_DEBUG=(
     CMD_PROG CMD_ROOT CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_OS
     CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN TEST1 TEST2
@@ -124,7 +122,7 @@ case "$1" in
     # test a try/catch statement
     try)
         echo 'test'
-        try "ls *.bash"
+        try "ls bin/*.bash"
         try "echo test"
         try "grep some-string /non/existent/file | sort"
         ;;
@@ -286,6 +284,26 @@ MSG
 
     test)
 
+        echo "is known option a?"
+        is_known_option a && echo '> known' || echo '> unknown';
+
+        echo "is known option test1:?"
+        is_known_option 'test1:' && echo '> known' || echo '> unknown';
+
+        echo "is known option test2::?"
+        is_known_option 'test2::' && echo '> known' || echo '> unknown';
+
+        echo "is known option test3::?"
+        is_known_option 'test3::' && echo '> known' || echo '> unknown';
+
+        echo "is known option v?"
+        is_known_option v && echo '> known' || echo '> unknown';
+
+        echo "is known option verbose?"
+        is_known_option verbose && echo '> known' || echo '> unknown';
+
+        echo "is known option z?"
+        is_known_option z && echo '> known' || echo '> unknown';
 
         ;;
 

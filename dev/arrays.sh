@@ -4,8 +4,7 @@
 #
 set -eETu
 set -o pipefail
-source bash-utils.bash || { echo "> bash-utils not found!" >&2; exit 1; };
-
+source "$(pwd)/bin/bash-utils.bash" || { echo "> bash-utils not found!" >&2; exit 1; };
 
 ######################################################
 echo "> demo of a table-like printing:"
