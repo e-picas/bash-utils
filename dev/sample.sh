@@ -41,8 +41,8 @@ TO_DEBUG=(
     CMD_PROG CMD_ROOT CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_OS
     CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN TEST1 TEST2
 )
-declare -x TEST1
-declare -x TEST2
+declare -x TEST1=''
+declare -x TEST2=''
 
 # write colorized texts
 # inspired by <http://natelandau.com/bash-scripting-utilities/>
@@ -106,7 +106,7 @@ $FORCE && comment "force mode is enabled";
 $DRY_RUN && comment "dry-run mode is enabled";
 
 # test cases
-case "$1" in
+case "${1:-}" in
 
     # debug arguments
     args)
@@ -307,7 +307,7 @@ MSG
 
         ;;
 
-    *) error "unknown action '$1'";
+    *) error "unknown action '${1:-}'";
 esac
 
 exit 0

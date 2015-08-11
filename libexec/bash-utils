@@ -64,7 +64,7 @@ declare -xa TO_DEBUG=(
     CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN
 )
 # the synopsis should be left empty as it will be automatically generated with options declarations
-declare -x CMD_SYNOPSIS
+declare -x CMD_SYNOPSIS=''
 #declare -x CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
 
 # script flags used as booleans
@@ -82,7 +82,7 @@ declare -x DRY_RUN=false        # exec in not dry-run mode: $DRY_RUN || ...;
 declare -arx EMPTY_ARRAY=()
 
 # any piped input is loaded in that variable calling `read_from_pipe`
-declare -x _PIPED_INPUT
+declare -x _PIPED_INPUT=''
 
 # colors and styles lists
 declare -rxa TEXTOPTIONS=(normal bold small underline blink reverse hidden)
@@ -216,7 +216,7 @@ die()
             echo "**** ${1:-unknown error} ****"
             echo "# exiting with status ${err}"
             echo "# in ${BASH_SOURCE[1]##*/} at line ${BASH_LINENO[0]}"
-            echo "# running ${CMD_PID}:${CMD_CALL}"
+            echo "# running ${CMD_PID}:${CMD_CALL:-${CMD_CALL_ORIGINAL}}"
             echo "# stack trace:"
             stack_trace
             echo '----'
@@ -235,20 +235,18 @@ die()
 e_color()
 {
     [ $# -eq 0 ] && return 0;
-    local tag_code tag_reset
+    local tag_code='' tag_reset=''
     while read -r line; do
         for opt in $(echo "$line" | grep -o '<[^/>]*>' | sed "s|^.*<\([^\/>]*\)>.*\$|\1|g"); do
-            if [ "${opt: -3}" = '_bg' ]; then
-                tag_code="${TEXTCOLORS_CODES_BACKGROUND[$(array_search "${opt/_bg/}" "${TEXTCOLORS[@]}")]}"
+            if [ "${opt: -3}" = '_bg' ] && in_array "${opt/_bg}" "${TEXTCOLORS[@]}"; then
+                tag_code="${TEXTCOLORS_CODES_BACKGROUND[$(array_search "${opt/_bg}" "${TEXTCOLORS[@]}")]}"
                 tag_reset="${TEXTCOLORS_CODES_BACKGROUND[0]}"
-            else
-                if in_array "$opt" "${TEXTCOLORS[@]}"; then
-                    tag_code="${TEXTCOLORS_CODES_FOREGROUND[$(array_search "$opt" "${TEXTCOLORS[@]}")]}"
-                    tag_reset="${TEXTCOLORS_CODES_FOREGROUND[0]}"
-                elif in_array "$opt" "${TEXTOPTIONS[@]}"; then
-                    tag_code="${TEXTOPTIONS_CODES[$(array_search "$opt" "${TEXTOPTIONS[@]}")]}"
-                    tag_reset="${TEXTOPTIONS_CODES[0]}"
-                fi
+            elif in_array "$opt" "${TEXTCOLORS[@]}"; then
+                tag_code="${TEXTCOLORS_CODES_FOREGROUND[$(array_search "$opt" "${TEXTCOLORS[@]}")]}"
+                tag_reset="${TEXTCOLORS_CODES_FOREGROUND[0]}"
+            elif in_array "$opt" "${TEXTOPTIONS[@]}"; then
+                tag_code="${TEXTOPTIONS_CODES[$(array_search "$opt" "${TEXTOPTIONS[@]}")]}"
+                tag_reset="${TEXTOPTIONS_CODES[0]}"
             fi
             if [ -n "$tag_code" ] && [ -n "$tag_reset" ]; then
                 tag_code="$(printf '\%s' "\033[${tag_code}m")"
@@ -801,7 +799,7 @@ declare -xr BASH_UTILS_VERSION='0.0.1@dev'
 ## common setup ##
 ##################
 # trap errors to 'die'
-trap 'die ${BASH_SOURCE} ${FUNCNAME:-} ${BASH_LINENO:-}' 1 2 3 15 ERR
+trap 'die "trapped error at ${BASH_SOURCE}:${BASH_LINENO:-}:${FUNCNAME:-}()"' 1 2 3 15 ERR
 # trap exit to 'cleanup'
 trap 'cleanup' EXIT
 
@@ -817,7 +815,7 @@ declare -xr CMD_USER="$(id -un)"
 declare -xr CMD_CWD="$(pwd)"
 declare -xr CMD_PID="$$"
 declare -xr CMD_CALL_ORIGINAL="$0 $*"
-declare -x CMD_CALL
+declare -x CMD_CALL=''
 
 # test of old Bash versions
 [[ ${BASH_VERSION:0:1} -lt $CMD_MIN_BASH_VERSION ]] && \
@@ -874,7 +872,6 @@ read_from_pipe
 $DEBUG && debug;
 while [ $# -gt 0 ]; do
     case "$1" in
-        -f | -q | -v | -x | --force | --quiet | --verbose | --debug | --dry-run ) true;;
         -V | --version ) version_info && exit 0;;
         -e | --exec* )
             OPTARG="$(echo "$2" | cut -d'=' -f2)"
@@ -884,7 +881,7 @@ while [ $# -gt 0 ]; do
             exit $?
             ;;
         -- ) shift; break;;
-        * )  error "unknown option '$1'";;
+        * )  ! is_known_option "$1" && error "unknown option '$1'";;
     esac
     shift
 done
@@ -892,6 +889,7 @@ done
 while [ $# -gt 0 ]; do
     case "$1" in
         model )
+            [ ! -f "$BASH_UTILS_MODEL" ] && error "model '$BASH_UTILS_MODEL' not found";
             shift
             arg="${1:-}"
             if [ -n "$arg" ]; then

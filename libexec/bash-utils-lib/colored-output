@@ -1,0 +1,205 @@
+#!/usr/bin/env bash
+
+[ -z "$BASH_UTILS_VERSION" ] && { \
+    source "$(dirname "${BASH_SOURCE[0]}")/bash-utils.bash" || \
+        { echo "> bash-utils not found!" >&2; exit 1; }; \
+};
+
+#### COLORIZED CONTENTS #############################################################################
+
+##@ LIBCOLORS = ( default black red green yellow blue magenta cyan grey white lightred lightgreen lightyellow lightblue lightmagenta lightcyan lightgrey ) (read-only)
+## Terminal colors table
+declare -rxa LIBCOLORS=(default black red green yellow blue magenta cyan grey white lightred lightgreen lightyellow lightblue lightmagenta lightcyan lightgrey)
+declare -rxa LIBCOLORS_CODES_FOREGROUND=(39 30 31 32 33 34 35 36 90 97 91 92 93 94 95 96 37)
+declare -rxa LIBCOLORS_CODES_BACKGROUND=(49 40 41 42 43 44 45 46 100 107 101 102 103 104 105 106 47)
+
+##@ LIBTEXTOPTIONS = ( normal bold small underline blink reverse hidden ) (read-only)
+## Terminal text options table
+declare -rxa LIBTEXTOPTIONS=(normal bold small underline blink reverse hidden)
+declare -rxa LIBTEXTOPTIONS_CODES=(0 1 2 4 5 7 8)
+
+#### get_text_format_tag ( code )
+## echoes the terminal tag code for color: "\ 033[CODEm"
+##@param code must be one of the library colors or text-options codes
+get_text_format_tag () {
+    if [ -n "$1" ]; then
+        case "$USEROS" in
+            Linux|FreeBSD|OpenBSD|SunOS)
+                echo "\033[${1}m";;
+            *)
+                echo "\x1B[${1}m";;
+        esac
+        return 0
+    fi
+    return 1
+}
+
+#### get_color_code ( name , background = false )
+##@param name must be in LIBCOLORS
+get_color_code () {
+    if [ -n "$1" ]; then
+        if in_array "$1" "${LIBCOLORS[@]}"; then
+            if [ $# -gt 1 ]
+                then echo "${LIBCOLORS_CODES_BACKGROUND[$(array_search "$1" "${LIBCOLORS[@]}")]}";
+                else echo "${LIBCOLORS_CODES_FOREGROUND[$(array_search "$1" "${LIBCOLORS[@]}")]}";
+            fi
+            return 0
+        fi
+    fi
+    return 1
+}
+
+#### get_color_tag ( name , background = false )
+##@param name must be in LIBCOLORS
+get_color_tag () {
+    if [ -n "$1" ]; then
+        if in_array "$1" "${LIBCOLORS[@]}"; then
+            if [ $# -gt 1 ]
+                then get_text_format_tag "${LIBCOLORS_CODES_BACKGROUND[$(array_search "$1" "${LIBCOLORS[@]}")]}";
+                else get_text_format_tag "${LIBCOLORS_CODES_FOREGROUND[$(array_search "$1" "${LIBCOLORS[@]}")]}";
+            fi
+            return 0;
+        fi
+    fi
+    return 1
+}
+
+#### get_text_option_code ( name )
+##@param name must be in LIBTEXTOPTIONS
+get_text_option_code () {
+    if [ -n "$1" ]; then
+        if in_array "$1" "${LIBTEXTOPTIONS[@]}"
+        then
+            echo "${LIBTEXTOPTIONS_CODES[$(array_search "$1" "${LIBTEXTOPTIONS[@]}")]}";
+            return 0;
+        fi
+    fi
+    return 1
+}
+
+#### get_text_option_tag ( name )
+##@param name must be in LIBTEXTOPTIONS
+get_text_option_tag () {
+    if [ -n "$1" ]; then
+        if in_array "$1" "${LIBTEXTOPTIONS[@]}"
+        then
+            get_text_format_tag "${LIBTEXTOPTIONS_CODES[$(array_search "$1" "${LIBTEXTOPTIONS[@]}")]}";
+            return 0;
+        fi
+    fi
+    return 1
+}
+
+#### get_text_option_tag_close ( name )
+##@param name must be in LIBTEXTOPTIONS
+get_text_option_tag_close () {
+    if [ -n "$1" ]; then
+        if in_array "$1" "${LIBTEXTOPTIONS[@]}"
+        then
+            get_text_format_tag "2${LIBTEXTOPTIONS_CODES[$(array_search "$1" "${LIBTEXTOPTIONS[@]}")]}";
+            return 0;
+        fi
+    fi
+    return 1
+}
+
+# usage: `colorize <string> <text_option> <foreground> <background>`
+## echoes a colorized string ; all arguments are optional except `string`
+##@param text_option must be in LIBTEXTOPTIONS
+##@param foreground must be in LIBCOLORS
+##@param background must be in LIBCOLORS
+colorize()
+{
+    [ $# -eq 0 ] && return 0;
+    local textopt fgopt bgopt
+    [ $# -gt 1 ] && textopt=$(get_text_option_code "$2");
+    [ $# -gt 2 ] && fgopt=$(get_color_code "$3");
+    [ $# -gt 3 ] && bgopt=$(get_color_code "$4" true);
+    local add=''
+    if [ ! -z "$textopt" ]; then add+="$textopt"; fi
+    if [ ! -z "$fgopt" ]; then
+        if [ -n "$add" ]; then add+=";${fgopt}"; else add+="$fgopt"; fi
+    fi
+    if [ ! -z "$bgopt" ]; then
+        if [ -n "$add" ]; then add+=";${bgopt}"; else add+="$bgopt"; fi
+    fi
+    opentag="$(get_text_format_tag "$add")"
+    closetag="$(get_text_format_tag "$(get_text_option_code normal)")"
+    if [ ! -n "$add" ]
+        then echo "$1"
+        else echo "${opentag}${1}${closetag}"
+    fi
+    return 0
+}
+
+# usage: `parse_color_tags <"string with <bold>tags</bold>">`
+## parse in-text tags like:
+##     ... <bold>my text</bold> ...     // "tag" in LIBTEXTOPTIONS
+##     ... <red>my text</red> ...       // "tag" in LIBCOLORS
+##     ... <bgred>my text</bgred> ...   // "tag" in LIBCOLORS, constructed as "bgTAG"
+parse_color_tags()
+{
+    if [ $# -eq 0 ]; then return 0; fi
+    transformed=''
+    while read -r line; do
+        doneopts=()
+        transformedline="$line"
+        for opt in $(echo "$line" | grep -o '<.[^/>]*>' | sed "s|^.*<\(.[^>]*\)>.*\$|\1|g"); do
+            opt="${opt/\//}"
+            if in_array "$opt" "${doneopts[@]-}"; then continue; fi
+            doneopts+=("$opt")
+            if in_array "$opt" "${LIBTEXTOPTIONS[@]}"; then
+                code="$(get_text_option_code "$opt")"
+                tag="$(get_text_option_tag "$opt")"
+                if in_array "$USEROS" "${LINUX_OS[@]}"
+                    then normaltag="$(get_text_option_tag_close "$opt")"
+                    else normaltag="$(get_text_option_tag normal)"
+                fi
+            elif in_array "$opt" "${LIBCOLORS[@]}"; then
+                code="$(get_color_code "$opt")"
+                tag="$(get_color_tag "$opt")"
+                normaltag="$(get_color_tag default)"
+            else
+                code="$(get_color_code "${opt/bg/}" true)"
+                tag="$(get_color_tag "${opt/bg/}" true)"
+                normaltag="$(get_color_tag default true)"
+           fi
+            if in_array "$USEROS" "${LINUX_OS[@]}"; then
+                 tag="$(printf '\%s' "$tag")"
+                 normaltag="$(printf '\%s' "$normaltag")"
+            fi
+            if [ ! -z "$tag" ]; then
+                strsubstituted=$(echo "$transformedline" | sed "s|<${opt}>|${tag}|g;s|</${opt}>|${normaltag}|g" 2> /dev/null);
+                if [ ! -z "$strsubstituted" ]; then transformedline="$strsubstituted"; fi
+            fi
+        done
+        if [ -n "$transformed" ]; then transformed+="\n"; fi
+        transformed+="$transformedline"
+    done <<< "$1"
+    _echo "$transformed"
+    return 0
+}
+
+# usage: `strip_colors <string>`
+strip_colors()
+{
+    if [ $# -eq 0 ]; then return 0; fi
+    transformed=''
+    while read -r line; do
+        case "$USEROS" in
+            Linux|FreeBSD|OpenBSD|SunOS)
+                stripped_line=$(echo "${line}" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g");;
+            *)
+                stripped_line=$(echo "${line}" | sed 's|\x1B\[[0-9;]*[a-zA-Z]||g');;
+        esac
+        if [ -n "${transformed}" ]; then transformed+="\n"; fi
+        transformed+="${stripped_line}"
+    done <<< "$1"
+    _echo "${transformed}"
+    return 0
+}
+
+
+##@!@##
+[ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
+# vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

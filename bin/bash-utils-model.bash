@@ -27,7 +27,7 @@ CMD_COPYRIGHT='My command copyright'
 CMD_LICENSE='My command license'
 CMD_SOURCES='My command sources'
 CMD_DESCRIPTION='A model for *bash* scripts using the *bash-utils* library.'
-# the synopsis should not be overwrite as it is automatically built with `CMD_OPTS_...`
+# the synopsis should not be overwritten as it is automatically built with `CMD_OPTS_...`
 # CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
 CMD_HELP="
 My command help string ...
