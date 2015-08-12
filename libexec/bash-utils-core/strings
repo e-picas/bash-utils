@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+#
+# bash-utils - A *bash* library for better scripting
+# <http://gitlab.com/piwi/bash-utils>
+# Copyright (c) 2015 Pierre Cassat & contributors
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# For sources & updates, see <http://gitlab.com/piwi/bash-utils>.
+#
+# To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
+#
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code or see <http://www.gnu.org/licenses/>.
+#
+
+[ -z "$BASH_UTILS_VERSION" ] && { \
+    source "$(dirname "${BASH_SOURCE[0]}")/bash-utils-core" || \
+        { echo "> bash-utils-core not found!" >&2; exit 1; }; \
+};
+
+##@!@##
+#### STRINGS ####
+
+declare -x TESTVAR_STRINGS='toto'
+#export TESTVAR_STRINGS='toto'
+
+# transform a string in upper case
+# usage: `string_to_upper <string>`
+string_to_upper()
+{
+    [ $# -lt 1 ] && die 'usage: `string_to_upper <string>`';
+    echo "$@" | tr '[:lower:]' '[:upper:]';
+    return 0
+}
+
+# transform a string in lower case
+# usage: `string_to_lower <string>`
+string_to_lower()
+{
+    [ $# -lt 1 ] && die 'usage: `string_to_lower <string>`';
+    echo "$@" | tr '[:upper:]' '[:lower:]';
+    return 0
+}
+
+##@!@##
+[ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
+# vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

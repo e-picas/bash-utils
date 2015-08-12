@@ -1,0 +1,304 @@
+#!/usr/bin/env bash
+#
+# bash-utils - A *bash* library for better scripting
+# <http://gitlab.com/piwi/bash-utils>
+# Copyright (c) 2015 Pierre Cassat & contributors
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# For sources & updates, see <http://gitlab.com/piwi/bash-utils>.
+#
+# To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
+#
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code or see <http://www.gnu.org/licenses/>.
+#
+##@!@##
+
+#### BASH OPTIONS ####
+
+#shopt -s expand_aliases
+
+# export all modified vars
+#set -a
+set -o allexport
+# match the POSIX 1003.2 standard
+set -o posix
+# exit if a command has a non-zero status
+#set -e
+set -o errexit
+# do not mask pipeline's errors
+set -o pipefail
+# trap on ERR are inherited by shell functions
+#set -E
+set -o errtrace
+# trap on DEBUG and RETURN are inherited by shell functions
+#set -T
+set -o functrace
+## throw error on unset variable usage
+#set -u
+set -o nounset
+## for dev usage: debug commands before to execute them
+##set -x
+#set -o xtrace
+## for dev usage: print shell input lines as they are read
+##set -v
+#set -o verbose
+
+#### ID ####
+
+declare -x TESTVAR_CORE='toto'
+
+declare -xr BASH_UTILS_KEY='bash-utils'
+declare -xr BASH_UTILS_VERSION='0.0.1@dev'
+
+#### CORE ####
+# functions are written in alphabetical order
+
+# trap errors to 'die'
+trap 'die "trapped error at ${BASH_SOURCE}:${BASH_LINENO:-}:${FUNCNAME:-}()"' 1 2 3 15 ERR
+# trap exit to 'shutdown_handler'
+trap 'shutdown_handler' EXIT
+
+# debug environment variables from the `$TO_DEBUG` array
+# usage: `debug`
+debug()
+{
+    echo '---- DEBUG ----'
+    local length=0
+    for i in "${TO_DEBUG[@]}"; do
+        [ "${#i}" -gt "$length" ] && length="${#i}";
+    done
+    for i in "${TO_DEBUG[@]}"; do
+        printf "%$((length+1))s : %s\n" "$i" "${!i}"
+    done
+    echo '---------------'
+    return 0
+}
+
+# write an internal error on STDERR & exit with status 1
+# usage: `die [string='unknown error']`
+die()
+{
+    local err=$?
+    if ${QUIET:-false}; then
+        echo "${1:-unknown error}" >&2
+    else
+        {   echo '----'
+            echo "**** ${1:-unknown error} ****"
+            echo "# exiting with status ${err}"
+            echo "# in ${BASH_SOURCE[1]##*/} at line ${BASH_LINENO[0]}"
+            echo "# running ${CMD_PID}:${CMD_CALL:-${CMD_CALL_ORIGINAL}}"
+            echo "# stack trace:"
+            stack_trace
+            echo '----'
+        } >&2
+    fi
+    exit "${err:-1}"
+}
+
+# write a full error on STDERR & show usage string & exit
+# usage: `error [string='unknown error'] [status=1]`
+error()
+{
+    {   echo "error: ${1:-unknown error}"
+        $VERBOSE && echo "# in ${BASH_SOURCE[1]##*/} at line ${BASH_LINENO[0]}";
+        echo '---'
+        usage_info
+    } >&2
+    exit "${2:-1}"
+}
+
+# find an app's subcommand
+# usage: `find_subcommand <command_name>`
+find_subcommand()
+{
+    [ $# -lt 1 ] && die 'usage: `find_subcommand <command_name>`';
+    local subcommand="$1" cmdfile=''
+    [ "$subcommand" = 'core' ] && return 1;
+    [ -f "${BASH_UTILS_ROOT}/bash-utils-${subcommand}" ] && cmdfile="${BASH_UTILS_ROOT}/bash-utils-${subcommand}";
+    [ -f "${BASH_UTILS_ROOT}/${subcommand}" ] && cmdfile="${BASH_UTILS_ROOT}/${subcommand}";
+    if [ -n "$cmdfile" ] && [ -f "$cmdfile" ]; then
+        echo "$cmdfile" && return 0
+    else
+        return 1
+    fi
+}
+
+# test if a function exists - returns a boolean
+# usage: `function_exists <func_name>`
+function_exists()
+{
+    [ $# -eq 0 ] && return 1;
+    [ "$(type -t "$1")" == 'function' ]
+}
+
+# add an entry in `$CMD_LOGFILE`
+# usage: `log <message>`
+log()
+{
+    [ $# -eq 0 ] && return 0;
+    echo "$(date +'%x %R') ${CMD_USER}@${CMD_HOST} [$$]: $*" >> "$CMD_LOGFILE";
+    return 0
+}
+
+# cleanup after the script exits
+# this one should never be called directly as it is trapped on EXIT
+# usage: `shutdown_handler`
+shutdown_handler()
+{
+    # draw your own cleanup stuff here
+    return 0
+}
+
+# get script stack trace
+# usage: `stack_trace`
+stack_trace()
+{
+    set +o xtrace
+    if [ ${#FUNCNAME[@]} -gt 2 ]; then
+        for ((i=1;i<${#FUNCNAME[@]};i++)); do
+            echo "  $i: ${BASH_SOURCE[$i+1]:-}:${BASH_LINENO[$i]} ${FUNCNAME[$i]}(...)"
+        done
+    fi
+    return 0
+}
+
+# test if an app's subcommand exists
+# usage: `subcommand_exists <command_name>`
+subcommand_exists()
+{
+    [ $# -lt 1 ] && return 1;
+    local subcommand="$1" cmd=''
+    cmd=$(find_subcommand "$subcommand")
+    return $?
+}
+
+# test Bash version required
+# usage: `test_bash_version <min_version_number>`
+test_bash_version()
+{
+    local version="$1"
+    if [[ ${BASH_VERSION:0:1} -lt $version ]]; then
+        warning "you are running an old version of Bash ($BASH_VERSION) - some errors are expected.";
+        return 1
+    fi
+    return 0
+}
+
+# try a command and catch errors throwing them to the 'die' function
+# from: <http://askubuntu.com/a/53759>
+# usage: `try "command"`
+try()
+{
+    local error retval e
+    [[ ! "$-" =~ e ]] || e=1
+    # Run the command and store error messages (output to the standard error
+    # stream in $error, but send regular output to file descriptor 3 which
+    # redirects to standard output
+    exec 3>&1
+    set +e
+    error="$($@ 2>&1 >&3)"
+    retval=$?
+    [ -z "$e" ] || set -e
+    # if the command failed (returned a non-zero exit code)
+    if [ $retval -gt 0 ]; then
+        retstr="command '$*' failed: ${error:-} ($retval)"
+        die "$retstr" "$retval"
+    fi
+    return "$retval"
+}
+
+# run an app's subcommand
+# usage: `run <command_name> [args ...]`
+run()
+{
+    [ $# -lt 1 ] && die 'usage: `run <command_name> [args ...]`';
+    local subcommand="$1" cmdfile=''
+    declare -a args=("${!2}")
+    cmdfile="$(find_subcommand "$subcommand")"
+    if [ -z "$cmdfile" ] && [ -f "$cmdfile" ]; then
+        set +o history
+        "$cmdfile" ${args[*]}
+        status=$?
+        set -o history
+        return $status
+    fi
+    warning "subcommand '$subcommand' not found"
+    return 1
+}
+
+# load an app's library
+# @see <http://stackoverflow.com/a/3524860/3592658>
+# usage: `use <command_name>`
+use()
+{
+    [ $# -lt 1 ] && die 'usage: use <command_name>';
+    local subcommand="$1" cmdfile
+    cmdfile="$(find_subcommand "$subcommand")"
+    if [ -n "$cmdfile" ] && [ -f "$cmdfile" ]; then
+        echo "> sourcing '$cmdfile'"
+        source "$cmdfile" || error "sourcing '$cmdfile' failed";
+        return $?;
+    else
+        return 1;
+    fi
+}
+
+# write an error string on STDERR without exiting
+# usage: `warning <string>`
+warning()
+{
+    [ -n "$1" ] && echo "> $*" >&2
+    return 0
+}
+
+#### Bash-Utils ENVIRONMENT ####
+
+abs_dirname() {
+    local cwd="$(pwd)"
+    local path="$1"
+    while [ -n "$path" ]; do
+        cd "${path%/*}"; local name="${path##*/}"; path="$($(type -p greadlink readlink | head -1) "$name" || true)";
+    done
+    pwd
+    cd "$cwd"
+}
+sourcename="$(basename "${BASH_SOURCE[0]}")"
+declare -xr BASH_UTILS="$(abs_dirname "${BASH_SOURCE[0]}")/${sourcename}"
+declare -xr BASH_UTILS_MODEL="$(abs_dirname "${BASH_SOURCE[0]}")/${sourcename/.bash/-model.bash}"
+declare -xr BASH_UTILS_ROOT="$(abs_dirname "${BASH_SOURCE[0]}")"
+
+declare -xr CMD_PROG="$(basename "$0")"
+declare -xr CMD_ROOT="$(abs_dirname "$0")"
+declare -xr CMD_OS="$(uname)"
+declare -xr CMD_HOST="$(hostname -f)"
+declare -xr CMD_USER="$(id -un)"
+declare -xr CMD_CWD="$(pwd)"
+declare -xr CMD_PID="$$"
+declare -xr CMD_CALL_ORIGINAL="$0 $*"
+declare -x CMD_CALL=''
+
+# load defaults
+cmdfile="$(find_subcommand commons)"
+if [ -n "$cmdfile" ] && [ -f "$cmdfile" ]; then
+    source "$cmdfile";
+else
+    error '> "commons" not found!';
+fi
+
+# the core always returns a no-error status
+##@!@##
+[ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
+# vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

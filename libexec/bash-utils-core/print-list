@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+#
+# bash-utils - A *bash* library for better scripting
+# <http://gitlab.com/piwi/bash-utils>
+# Copyright (c) 2015 Pierre Cassat & contributors
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# For sources & updates, see <http://gitlab.com/piwi/bash-utils>.
+#
+# To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
+#
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code or see <http://www.gnu.org/licenses/>.
+#
+
+[ -z "$BASH_UTILS_VERSION" ] && { \
+    source "$(dirname "${BASH_SOURCE[0]}")/bash-utils-core" || \
+        { echo "> bash-utils-core not found!" >&2; exit 1; }; \
+};
+
+##@!@##
+#### PRINT LIST ####
+
+# print a list with optional headers
+#
+# how to:
+#
+# - declare the list arrays for names and values
+#       declare -a LIST_NAMES=()
+#       declare -a LIST_VALUES=()
+#
+# - decalre list headers as an array (optional)
+#       declare -a LIST_HEADERS=('name' 'value')
+#
+# - add some name/value items
+#       LIST_NAMES[${#LIST_NAMES[@]}]='my name 1'
+#       LIST_VALUES[${#LIST_VALUES[@]}]='my value 1'
+#
+# - declare the list padders (characters used to fill blank spaces)
+#   - item [0] is padder for the separation line
+#   - item [1] is padder for contents lines
+#       declare -a LIST_PADDERS=()
+#       LIST_PADDERS[0]="$(printf '%0.1s' "-"{1..120})"
+#       LIST_PADDERS[1]="$(printf '%0.1s' " "{1..120})"
+#
+# - declare the list paddings (number of space(s) from line to central separator)
+#   - item [0] is padding for the separation line
+#   - item [1] is padding for contents lines
+#       declare -a LIST_PADDINGS=(0 1)
+#
+# - declare the list separators (characters used to separate cells)
+#   - item [0] is the separator for the separation line
+#   - item [1] is the separator for contents lines
+#       declare -a LIST_SEPARATORS=('+' '|')
+#
+# - call the `print_list` method with all variables:
+#       print_list LIST_NAMES[@] LIST_VALUES LIST_HEADERS[@] LIST_PADDINGS[@] LIST_PADDERS[@] LIST_SEPARATORS[@]
+#
+# usage: `print_list <names[@]> <values[@]> <headers[@]> <paddings[@]> <padders[@]> <separators[@]>`
+print_list()
+{
+    [ $# -lt 2 ] && return 0;
+    declare -ax _LIST_NAMES _LIST_VALUES _LIST_HEADERS _LIST_PADDINGS _LIST_PADDERS _LIST_SEPARATORS _LIST_LENGTHS _ITEM_NAME _ITEM_VALUE
+    _LIST_NAMES=("${!1}")
+    _LIST_VALUES=("${!2}")
+    [ $# -gt 2 ] && _LIST_HEADERS=("${!3}")    || _LIST_HEADERS=();
+    [ $# -gt 3 ] && _LIST_PADDINGS=("${!4}")   || _LIST_PADDINGS=(0 1);
+    [ $# -gt 4 ] && _LIST_PADDERS=("${!5}")    || _LIST_PADDERS=("$(printf '%0.1s' "-"{1..120})" "$(printf '%0.1s' " "{1..120})");
+    [ $# -gt 5 ] && _LIST_SEPARATORS=("${!6}") || _LIST_SEPARATORS=('+' '|');
+    # get lengths
+    _LIST_LENGTHS=(0 0)
+    for ((j=0; j<2; j++)); do
+        if [ ${#_LIST_HEADERS[$j]} -gt "${_LIST_LENGTHS[0]}" ]; then
+            _LIST_LENGTHS[0]=${#_LIST_HEADERS[$j]}
+        fi
+    done
+    for ((j=0; j<"${#_LIST_NAMES[@]}"; j++)); do
+        if [ ${#_LIST_NAMES[$j]} -gt "${_LIST_LENGTHS[0]}" ]; then
+            _LIST_LENGTHS[0]=${#_LIST_NAMES[$j]}
+        fi
+    done
+    for ((j=0; j<"${#_LIST_VALUES[@]}"; j++)); do
+        if [ ${#_LIST_VALUES[$j]} -gt "${_LIST_LENGTHS[1]}" ]; then
+            _LIST_LENGTHS[1]=${#_LIST_VALUES[$j]}
+        fi
+    done
+    # print headers line if so
+    if [ "${#_LIST_HEADERS[@]}" -gt 0 ]; then
+        # print headers line
+        print_list_line "${_LIST_HEADERS[0]}" "${_LIST_HEADERS[1]}"
+        # print separator line
+        print_list_separator_line
+    fi
+    # print each line
+    for ((j=0; j<"${#_LIST_NAMES[@]}"; j++)); do
+        print_list_line "${LIST_NAMES[$j]}" "${LIST_VALUES[$j]}"
+    done
+    return 0
+}
+
+# print one line of a list
+# called by `print_list()`
+# usage: `print_list_line <name> <value>`
+print_list_line()
+{
+    [ $# -lt 2 ] && return 0;
+    _ITEM_NAME="${1}"
+    _ITEM_VALUE="${2}"
+    line="$(printf "%*.*s%s%*.*s%s%*.*s%s%*.*s" \
+        0 $((${_LIST_LENGTHS[0]} - ${#_ITEM_NAME})) "${_LIST_PADDERS[1]}" \
+        "${_ITEM_NAME}" \
+        0 "${_LIST_PADDINGS[1]}" "${_LIST_PADDERS[1]}" \
+        "${_LIST_SEPARATORS[1]}" \
+        0 "${_LIST_PADDINGS[1]}" "${_LIST_PADDERS[1]}" \
+        "${_ITEM_VALUE}" \
+        0 $((${_LIST_LENGTHS[1]} - ${#_ITEM_NAME})) "${_LIST_PADDERS[1]}" \
+    )";
+    echo "$line"
+    return 0
+}
+
+# print a separation line of a list
+# called by `print_list()`
+# usage: `print_list_separator_line`
+print_list_separator_line()
+{
+    local line
+    line="$(printf "%*.*s%*.*s%s%*.*s%*.*s" \
+        0 $((${_LIST_LENGTHS[0]} + ${_LIST_PADDINGS[1]} - ${_LIST_PADDINGS[0]})) "${_LIST_PADDERS[0]}" \
+        0 "${_LIST_PADDINGS[0]}" "${_LIST_PADDERS[1]}" \
+        "${_LIST_SEPARATORS[0]}" \
+        0 "${_LIST_PADDINGS[0]}" "${_LIST_PADDERS[1]}" \
+        0 $((${_LIST_LENGTHS[1]} + ${_LIST_PADDINGS[1]} - ${_LIST_PADDINGS[0]})) "${_LIST_PADDERS[0]}" \
+    )";
+    echo "$line"
+    return 0
+}
+
+##@!@##
+[ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
+# vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

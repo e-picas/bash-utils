@@ -1,0 +1,257 @@
+#!/usr/bin/env bash
+#
+# bash-utils - A *bash* library for better scripting
+# <http://gitlab.com/piwi/bash-utils>
+# Copyright (c) 2015 Pierre Cassat & contributors
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# For sources & updates, see <http://gitlab.com/piwi/bash-utils>.
+#
+# To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
+#
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code or see <http://www.gnu.org/licenses/>.
+#
+##@!@##
+
+#### COMMAND INFO ####
+
+# Available options:
+#     --dry-run       process a dry-run
+#     -f|--force      do not prompt for choices if a default choice exists
+#     -q|--quiet      decrease script's verbosity
+#     -v|--verbose    increase script's verbosity
+#     -x|--debug      see some debugging information
+#
+# Use arguments 'usage', 'about' or 'version' for application information.
+
+declare -x CMD_NAME='overwrite the CMD_NAME variable to customize this information'
+declare -x CMD_VERSION='overwrite the CMD_VERSION variable to customize this information'
+declare -x CMD_COPYRIGHT='overwrite the CMD_COPYRIGHT variable to customize this information'
+declare -x CMD_LICENSE='overwrite the CMD_LICENSE variable to customize this information'
+declare -x CMD_SOURCES='overwrite the CMD_SOURCES variable to customize this information'
+declare -x CMD_DESCRIPTION='overwrite the CMD_DESCRIPTION variable to customize this information'
+declare -x CMD_HELP='overwrite the CMD_HELP variable to customize this information'
+declare -xa CMD_OPTS_SHORT=( f q v x )
+declare -xa CMD_OPTS_LONG=( debug dry-run force quiet verbose )
+declare -x CMD_LOGFILE='/var/log/bash-utils.log'
+declare -xa TO_DEBUG=(
+    CMD_PROG CMD_ROOT CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_OS
+    CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN
+)
+# the synopsis should be left empty as it will be automatically generated with options declarations
+declare -x CMD_SYNOPSIS=''
+#declare -x CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
+
+# script flags used as booleans
+declare -x VERBOSE=false        # write in verbose mode:    $VERBOSE && echo '...';
+declare -x QUIET=false          # write in not quiet mode:  $QUIET || echo '...';
+declare -x DEBUG=false          # write in debug mode:      $DEBUG && echo '...';
+declare -x FORCE=false          # write in force mode:      $FORCE && echo '...';
+declare -x DRY_RUN=false        # exec in not dry-run mode: $DRY_RUN || ...;
+
+declare -x TESTVAR_COMMONS='toto'
+
+# load defaults
+source "$(dirname "${BASH_SOURCE[0]}")/arrays"
+#use arrays || error '> "arrays" not found!';
+use strings || error '> "strings" not found!';
+use file-system || error '> "file-system" not found!';
+
+#### COMMONS LIB ####
+# functions are written in alphabetical order
+
+# about string on STDOUT & exit
+# usage: `about_info`
+about_info()
+{
+    cat <<MSG
+$CMD_NAME $CMD_VERSION
+$CMD_COPYRIGHT
+$CMD_LICENSE
+$CMD_SOURCES
+MSG
+    exit 0
+}
+
+# write a comment string on STDOUT
+# usage: `comment <string>`
+comment()
+{
+    [ -n "$1" ] && echo "# $*" >&1
+    return 0
+}
+
+# treat common arguments
+# usage: `common_arguments "$@"`
+common_arguments()
+{
+    for arg in "$@"; do
+        case "$arg" in
+            'about')    about_info   && exit 0;;
+            'debug')    debug        && exit 0;;
+            'help')     help_info    && exit 0;;
+            'usage')    usage_info   && exit 0;;
+            'version')  version_info && exit 0;;
+        esac
+    done
+    return 0
+}
+
+# treat common options
+# this will throw an error for unknown option if the `$CMD_OPTS_SHORT` is not prefixed by a colon `:`
+# usage: `common_options "$@"`
+common_options()
+{
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -f | --force )  FORCE=true;;
+            -q | --quiet )  QUIET=true; VERBOSE=false;;
+            -v | --verbose ) VERBOSE=true; QUIET=false;;
+            -x | --debug )  DEBUG=true;;
+            --dry-run )     DRY_RUN=true;;
+            -- )            shift; break;;
+            * )             if ! is_known_option "$1" && [ "${CMD_OPTS_SHORT[0]}" != ":" ]
+                                then error "unknown option '$1'"; fi;;
+        esac
+        shift
+    done
+    return 0
+}
+
+# write help string to STDERR & exit
+# usage: `help_info`
+help_info()
+{
+    {   version_info
+        echo
+        echo "$CMD_DESCRIPTION"
+        echo
+        usage_info
+        echo
+        echo "$CMD_HELP"
+    } >&2
+    exit 0
+}
+
+# test if an option is known by a command
+# usage: `is_known_option <option_name>`
+is_known_option()
+{
+    [ $# -lt 1 ] && die 'usage: `is_known_option <option_name>`';
+    local opt="$1"
+    opt="$(echo "$opt" | cut -d'=' -f1)"
+    opt="${opt//:}"
+    for o in "${CMD_OPTS_SHORT[@]}"; do
+        o="${o//:}"
+        [ -z "$o" ] && continue;
+        [ "$o" = "$opt" ] && return 0;
+    done
+    for o in "${CMD_OPTS_LONG[@]}"; do
+        o="${o//:}"
+        [ -z "$o" ] && continue;
+        [ "$o" = "$opt" ] && return 0;
+    done
+    return 1
+}
+
+# rearrange options & arguments and load them in `$CMD_REQ`
+# howto:
+#    rearrange_options "$@"
+#    [ -n "$CMD_REQ" ] && eval set -- "$CMD_REQ";
+# usage: `rearrange_options "$@"`
+rearrange_options()
+{
+    local shorts=''
+    for opt in "${CMD_OPTS_SHORT[@]}"; do
+        shorts+="${opt}"
+    done
+    local longs=''
+    for opt in "${CMD_OPTS_LONG[@]}"; do
+        longs+="${opt},"
+    done
+    longs="${longs%,}"
+    set +E
+    getoptvers="$(getopt --test > /dev/null; echo $?)"
+    if [[ "$getoptvers" -eq 4 ]]; then
+        # GNU enhanced getopt is available
+        CMD_REQ="$(getopt --shell 'bash' --options "${shorts}-:" --longoptions "$longs" --name "$CMD_PROG" -- "$@")"
+    else
+        # original getopt is available
+        CMD_REQ="$(getopt "shorts" "$@")"
+    fi
+    set -E
+    CMD_CALL="$0 $CMD_REQ"
+    return 0
+}
+
+# echo synopsis info after having built it if it was empty
+# usage: `get_synopsis`
+synopsis_info()
+{
+    if [ -z "$CMD_SYNOPSIS" ]; then
+        local shorts='' shorts_args=''
+        for opt in "${CMD_OPTS_SHORT[@]}"; do
+            [ "$opt" = ':' ] && continue;
+            [ "${opt: -2}" = '::' ] && shorts_args+="|-${opt/::/}[=<arg>]" && continue;
+            [ "${opt: -1}" = ':' ] && shorts_args+="|-${opt/:/} <arg>" && continue;
+            shorts+="${opt}"
+        done
+        local longs=''
+        for opt in "${CMD_OPTS_LONG[@]}"; do
+            [ "$opt" = ':' ] && continue;
+            [ "${opt: -2}" = '::' ] && longs+="--${opt/::/}[=<arg>]|" && continue;
+            [ "${opt: -1}" = ':' ] && longs+="--${opt/:/} <arg>|" && continue;
+            longs+="--${opt}|"
+        done
+        longs="${longs%|}"
+        CMD_SYNOPSIS="$0 [-${shorts}${shorts_args}] [${longs}] [--] <arguments> --"
+    fi
+    echo "$CMD_SYNOPSIS"
+    return 0
+}
+
+# echo usage string
+# usage: `usage_info`
+usage_info()
+{
+    local synopsis="$(synopsis_info)"
+    echo "usage: $synopsis"
+    return 0
+}
+
+# version string
+# usage: `version_info`
+version_info()
+{
+    if $QUIET; then
+        echo "$CMD_VERSION"
+    else
+        echo "$CMD_NAME $CMD_VERSION"
+    fi
+    return 0
+}
+
+# write an error string on STDERR without exiting
+# usage: `warning <string>`
+warning()
+{
+    [ -n "$1" ] && echo "> $*" >&2
+    return 0
+}
+
+##@!@##
+[ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
+# vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

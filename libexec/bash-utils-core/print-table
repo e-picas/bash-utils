@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+#
+# bash-utils - A *bash* library for better scripting
+# <http://gitlab.com/piwi/bash-utils>
+# Copyright (c) 2015 Pierre Cassat & contributors
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# For sources & updates, see <http://gitlab.com/piwi/bash-utils>.
+#
+# To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
+#
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code or see <http://www.gnu.org/licenses/>.
+#
+
+[ -z "$BASH_UTILS_VERSION" ] && { \
+    source "$(dirname "${BASH_SOURCE[0]}")/bash-utils-core" || \
+        { echo "> bash-utils-core not found!" >&2; exit 1; }; \
+};
+
+##@!@##
+#### PRINT TABLE ####
+
+# print a table with optional headers
+#
+# how to:
+#
+# - declare the table array
+#       declare -a TABLE_ITEMS=()
+#
+# - declare the table padders (characters used to fill blank spaces)
+#   - item [0] is padder for separation lines cells
+#   - item [1] is padder for contents lines cells
+#       declare -a TABLE_PADDERS=()
+#       TABLE_PADDERS[0]="$(printf '%0.1s' "-"{1..120})"
+#       TABLE_PADDERS[1]="$(printf '%0.1s' " "{1..120})"
+#
+# - declare the table paddings (number of space(s) from line to cell's contents)
+#   - item [0] is padding for separation lines cells
+#   - item [1] is padding for contents lines cells
+#       declare -a TABLE_PADDINGS=()
+#       TABLE_PADDINGS[0]=0
+#       TABLE_PADDINGS[1]=1
+#
+# - declare the table separators (characters used to separate cells)
+#   - item [0] is the separator for separation lines
+#   - item [1] is the separator for contents lines
+#       declare -a TABLE_SEPARATORS=('+' '|')
+#
+# - declare the table headers as an array
+#       declare -a TABLE_HEADERS=( "name" "value" "comment" )
+#
+# - add each line of the table as an array, declared itself as another array
+#       declare -a ITEM_0=("my name1" "my value1" "my comment1")
+#       TABLE_ITEMS[${#TABLE_ITEMS[@]}]=ITEM_0[@]
+#
+# - call the `print_table` method with all variables:
+#       print_table TABLE_ITEMS[@] TABLE_HEADERS[@] TABLE_PADDINGS[@] TABLE_PADDERS[@] TABLE_SEPARATORS[@]
+#
+# usage: `print_table <items[@]> <headers[@]> <paddings[@]> <padders[@]> <separators[@]>`
+print_table()
+{
+    [ $# -eq 0 ] && return 0;
+    declare -xa _TABLE_ITEMS _TABLE_HEADERS _TABLE_PADDERS _TABLE_PADDINGS _TABLE_SEPARATORS _TABLE_ITEM _TABLE_LENGTHS
+    _TABLE_ITEMS=("${!1}")
+    [ $# -gt 1 ] && _TABLE_HEADERS=("${!2}")    || _TABLE_HEADERS=();
+    [ $# -gt 2 ] && _TABLE_PADDINGS=("${!3}")   || _TABLE_PADDINGS=(0 1);
+    [ $# -gt 3 ] && _TABLE_PADDERS=("${!4}")    || _TABLE_PADDERS=("$(printf '%0.1s' "-"{1..120})" "$(printf '%0.1s' " "{1..120})");
+    [ $# -gt 4 ] && _TABLE_SEPARATORS=("${!5}") || _TABLE_SEPARATORS=('+' '|');
+    # get length for each column
+    local i j
+    _TABLE_LENGTHS=()
+    if [ "${#_TABLE_HEADERS[@]}" -gt 0 ]; then
+        for ((j=0; j<"${#_TABLE_HEADERS[@]}"; j++)); do
+            if [ ! "${_TABLE_LENGTHS[$j]+x}" ] || [ ${#_TABLE_HEADERS[$j]} -gt "${_TABLE_LENGTHS[$j]}" ]; then
+                _TABLE_LENGTHS[$j]=${#_TABLE_HEADERS[$j]}
+            fi
+        done
+    fi
+    for ((i=0; i<"${#_TABLE_ITEMS[@]}"; i++)); do
+        _TABLE_ITEM=("${!_TABLE_ITEMS[$i]}")
+        for ((j=0; j<"${#_TABLE_ITEM[@]}"; j++)); do
+            if [ ! "${_TABLE_LENGTHS[$j]+x}" ] || [ ${#_TABLE_ITEM[$j]} -gt "${_TABLE_LENGTHS[$j]}" ]; then
+                _TABLE_LENGTHS[$j]=${#_TABLE_ITEM[$j]}
+            fi
+        done
+    done
+    # print headers line if so
+    if [ "${#_TABLE_HEADERS[@]}" -gt 0 ]; then
+        # print separator line
+        print_table_separator_line
+        # print headers line
+        print_table_line _TABLE_HEADERS[@]
+    fi
+    # print first contents' separator line
+    print_table_separator_line
+    # print each contents line
+    for ((i=0; i<"${#_TABLE_ITEMS[@]}"; i++)); do
+        _TABLE_ITEM=("${!_TABLE_ITEMS[$i]}")
+        print_table_line _TABLE_ITEM[@]
+    done
+    # print last contents' separator line
+    print_table_separator_line
+    return 0
+}
+
+# print one line of a table
+# called by `print_table()`
+# usage: `print_table_line <item[@]>`
+print_table_line()
+{
+    [ $# -eq 0 ] && return 0;
+    _TABLE_ITEM=("${!1}")
+    local line value j
+    line=''
+    for ((j=0; j<"${#_TABLE_LENGTHS[@]}"; j++)); do
+        value=''
+        [ "${_TABLE_ITEM[$j]+x}" ] && value="${_TABLE_ITEM[$j]}";
+        line+="$(printf '%*.*s%s%*.*s%s' \
+            0 "${_TABLE_PADDINGS[1]}" "${_TABLE_PADDERS[1]}" \
+            "$value" \
+            0 $((${_TABLE_LENGTHS[$j]} + ${_TABLE_PADDINGS[1]} - ${#_TABLE_ITEM[$j]})) "${_TABLE_PADDERS[1]}" \
+            "${_TABLE_SEPARATORS[1]}" \
+        )";
+    done
+    echo "${_TABLE_SEPARATORS[1]}${line}"
+    return 0
+}
+
+# print a separation line of a table
+# called by `print_table()`
+# usage: `print_table_separator_line`
+print_table_separator_line()
+{
+    local line=''
+    for ((j=0; j<"${#_TABLE_LENGTHS[@]}"; j++)); do
+        line+="$(printf '%*.*s%*.*s%*.*s%s' \
+            0 ${_TABLE_PADDINGS[0]} "${_TABLE_PADDERS[1]}" \
+            0 $((${_TABLE_LENGTHS[$j]} + (2 * ${_TABLE_PADDINGS[1]}) - (2 * ${_TABLE_PADDINGS[0]}) )) "${_TABLE_PADDERS[0]}" \
+            0 ${_TABLE_PADDINGS[0]} "${_TABLE_PADDERS[1]}" \
+            "${_TABLE_SEPARATORS[0]}" \
+        )";
+    done
+    echo "${_TABLE_SEPARATORS[0]}${line}"
+    return 0
+}
+
+##@!@##
+[ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
+# vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh
