@@ -30,6 +30,9 @@
         { echo "> bash-utils-core not found!" >&2; exit 1; }; \
 };
 
+## stop here on pre-loading
+if ${PRELOAD:-false}; then return 0; fi
+
 ##@!@##
 #### PRINT LIST ####
 

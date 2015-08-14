@@ -33,23 +33,28 @@
 ##@!@##
 #### COLORIZED CONTENTS #############################################################################
 
-##@ LIBCOLORS = ( default black red green yellow blue magenta cyan grey white lightred lightgreen lightyellow lightblue lightmagenta lightcyan lightgrey ) (read-only)
-## Terminal colors table
-declare -rxa LIBCOLORS=(default black red green yellow blue magenta cyan grey white lightred lightgreen lightyellow lightblue lightmagenta lightcyan lightgrey)
-declare -rxa LIBCOLORS_CODES_FOREGROUND=(39 30 31 32 33 34 35 36 90 97 91 92 93 94 95 96 37)
-declare -rxa LIBCOLORS_CODES_BACKGROUND=(49 40 41 42 43 44 45 46 100 107 101 102 103 104 105 106 47)
+if [ -z "${TEXTCOLORS:-}" ]; then
+    ##@ TEXTCOLORS = ( default black red green yellow blue magenta cyan grey white lightred lightgreen lightyellow lightblue lightmagenta lightcyan lightgrey ) (read-only)
+    ## Terminal colors table
+    declare -rxa TEXTCOLORS=(default black red green yellow blue magenta cyan grey white lightred lightgreen lightyellow lightblue lightmagenta lightcyan lightgrey)
+    declare -rxa TEXTCOLORS_CODES_FOREGROUND=(39 30 31 32 33 34 35 36 90 97 91 92 93 94 95 96 37)
+    declare -rxa TEXTCOLORS_CODES_BACKGROUND=(49 40 41 42 43 44 45 46 100 107 101 102 103 104 105 106 47)
 
-##@ LIBTEXTOPTIONS = ( normal bold small underline blink reverse hidden ) (read-only)
-## Terminal text options table
-declare -rxa LIBTEXTOPTIONS=(normal bold small underline blink reverse hidden)
-declare -rxa LIBTEXTOPTIONS_CODES=(0 1 2 4 5 7 8)
+    ##@ TEXTOPTIONS = ( normal bold small underline blink reverse hidden ) (read-only)
+    ## Terminal text options table
+    declare -rxa TEXTOPTIONS=(normal bold small underline blink reverse hidden)
+    declare -rxa TEXTOPTIONS_CODES=(0 1 2 4 5 7 8)
+fi
+
+## stop here on pre-loading
+if ${PRELOAD:-false}; then return 0; fi
 
 #### get_text_format_tag ( code )
 ## echoes the terminal tag code for color: "\ 033[CODEm"
 ##@param code must be one of the library colors or text-options codes
 get_text_format_tag () {
     if [ -n "$1" ]; then
-        case "$USEROS" in
+        case "$CMD_OS" in
             Linux|FreeBSD|OpenBSD|SunOS)
                 echo "\033[${1}m";;
             *)
@@ -61,13 +66,13 @@ get_text_format_tag () {
 }
 
 #### get_color_code ( name , background = false )
-##@param name must be in LIBCOLORS
+##@param name must be in TEXTCOLORS
 get_color_code () {
     if [ -n "$1" ]; then
-        if in_array "$1" "${LIBCOLORS[@]}"; then
+        if in_array "$1" "${TEXTCOLORS[@]}"; then
             if [ $# -gt 1 ]
-                then echo "${LIBCOLORS_CODES_BACKGROUND[$(array_search "$1" "${LIBCOLORS[@]}")]}";
-                else echo "${LIBCOLORS_CODES_FOREGROUND[$(array_search "$1" "${LIBCOLORS[@]}")]}";
+                then echo "${TEXTCOLORS_CODES_BACKGROUND[$(array_search "$1" "${TEXTCOLORS[@]}")]}";
+                else echo "${TEXTCOLORS_CODES_FOREGROUND[$(array_search "$1" "${TEXTCOLORS[@]}")]}";
             fi
             return 0
         fi
@@ -76,13 +81,13 @@ get_color_code () {
 }
 
 #### get_color_tag ( name , background = false )
-##@param name must be in LIBCOLORS
+##@param name must be in TEXTCOLORS
 get_color_tag () {
     if [ -n "$1" ]; then
-        if in_array "$1" "${LIBCOLORS[@]}"; then
+        if in_array "$1" "${TEXTCOLORS[@]}"; then
             if [ $# -gt 1 ]
-                then get_text_format_tag "${LIBCOLORS_CODES_BACKGROUND[$(array_search "$1" "${LIBCOLORS[@]}")]}";
-                else get_text_format_tag "${LIBCOLORS_CODES_FOREGROUND[$(array_search "$1" "${LIBCOLORS[@]}")]}";
+                then get_text_format_tag "${TEXTCOLORS_CODES_BACKGROUND[$(array_search "$1" "${TEXTCOLORS[@]}")]}";
+                else get_text_format_tag "${TEXTCOLORS_CODES_FOREGROUND[$(array_search "$1" "${TEXTCOLORS[@]}")]}";
             fi
             return 0;
         fi
@@ -91,12 +96,12 @@ get_color_tag () {
 }
 
 #### get_text_option_code ( name )
-##@param name must be in LIBTEXTOPTIONS
+##@param name must be in TEXTOPTIONS
 get_text_option_code () {
     if [ -n "$1" ]; then
-        if in_array "$1" "${LIBTEXTOPTIONS[@]}"
+        if in_array "$1" "${TEXTOPTIONS[@]}"
         then
-            echo "${LIBTEXTOPTIONS_CODES[$(array_search "$1" "${LIBTEXTOPTIONS[@]}")]}";
+            echo "${TEXTOPTIONS_CODES[$(array_search "$1" "${TEXTOPTIONS[@]}")]}";
             return 0;
         fi
     fi
@@ -104,12 +109,12 @@ get_text_option_code () {
 }
 
 #### get_text_option_tag ( name )
-##@param name must be in LIBTEXTOPTIONS
+##@param name must be in TEXTOPTIONS
 get_text_option_tag () {
     if [ -n "$1" ]; then
-        if in_array "$1" "${LIBTEXTOPTIONS[@]}"
+        if in_array "$1" "${TEXTOPTIONS[@]}"
         then
-            get_text_format_tag "${LIBTEXTOPTIONS_CODES[$(array_search "$1" "${LIBTEXTOPTIONS[@]}")]}";
+            get_text_format_tag "${TEXTOPTIONS_CODES[$(array_search "$1" "${TEXTOPTIONS[@]}")]}";
             return 0;
         fi
     fi
@@ -117,12 +122,12 @@ get_text_option_tag () {
 }
 
 #### get_text_option_tag_close ( name )
-##@param name must be in LIBTEXTOPTIONS
+##@param name must be in TEXTOPTIONS
 get_text_option_tag_close () {
     if [ -n "$1" ]; then
-        if in_array "$1" "${LIBTEXTOPTIONS[@]}"
+        if in_array "$1" "${TEXTOPTIONS[@]}"
         then
-            get_text_format_tag "2${LIBTEXTOPTIONS_CODES[$(array_search "$1" "${LIBTEXTOPTIONS[@]}")]}";
+            get_text_format_tag "2${TEXTOPTIONS_CODES[$(array_search "$1" "${TEXTOPTIONS[@]}")]}";
             return 0;
         fi
     fi
@@ -131,9 +136,9 @@ get_text_option_tag_close () {
 
 # usage: `colorize <string> <text_option> <foreground> <background>`
 ## echoes a colorized string ; all arguments are optional except `string`
-##@param text_option must be in LIBTEXTOPTIONS
-##@param foreground must be in LIBCOLORS
-##@param background must be in LIBCOLORS
+##@param text_option must be in TEXTOPTIONS
+##@param foreground must be in TEXTCOLORS
+##@param background must be in TEXTCOLORS
 colorize()
 {
     [ $# -eq 0 ] && return 0;
@@ -160,37 +165,39 @@ colorize()
 
 # usage: `parse_color_tags <"string with <bold>tags</bold>">`
 ## parse in-text tags like:
-##     ... <bold>my text</bold> ...     // "tag" in LIBTEXTOPTIONS
-##     ... <red>my text</red> ...       // "tag" in LIBCOLORS
-##     ... <bgred>my text</bgred> ...   // "tag" in LIBCOLORS, constructed as "bgTAG"
+##     ... <bold>my text</bold> ...     // "tag" in TEXTOPTIONS
+##     ... <red>my text</red> ...       // "tag" in TEXTCOLORS
+##     ... <bgred>my text</bgred> ...   // "tag" in TEXTCOLORS, constructed as "bgTAG"
 parse_color_tags()
 {
     if [ $# -eq 0 ]; then return 0; fi
     transformed=''
     while read -r line; do
-        doneopts=()
+        declare -a doneopts=()
         transformedline="$line"
         for opt in $(echo "$line" | grep -o '<.[^/>]*>' | sed "s|^.*<\(.[^>]*\)>.*\$|\1|g"); do
             opt="${opt/\//}"
             if in_array "$opt" "${doneopts[@]-}"; then continue; fi
             doneopts+=("$opt")
-            if in_array "$opt" "${LIBTEXTOPTIONS[@]}"; then
+            if in_array "$opt" "${TEXTOPTIONS[@]}"; then
                 code="$(get_text_option_code "$opt")"
                 tag="$(get_text_option_tag "$opt")"
-                if in_array "$USEROS" "${LINUX_OS[@]}"
+                if in_array "$CMD_OS" "${LINUX_OS[@]}"
                     then normaltag="$(get_text_option_tag_close "$opt")"
                     else normaltag="$(get_text_option_tag normal)"
                 fi
-            elif in_array "$opt" "${LIBCOLORS[@]}"; then
+            elif in_array "$opt" "${TEXTCOLORS[@]}"; then
                 code="$(get_color_code "$opt")"
                 tag="$(get_color_tag "$opt")"
                 normaltag="$(get_color_tag default)"
-            else
+            elif in_array "${opt/bg/}" "${TEXTCOLORS[@]}"; then
                 code="$(get_color_code "${opt/bg/}" true)"
                 tag="$(get_color_tag "${opt/bg/}" true)"
                 normaltag="$(get_color_tag default true)"
-           fi
-            if in_array "$USEROS" "${LINUX_OS[@]}"; then
+            else
+                continue
+            fi
+            if in_array "$CMD_OS" "${LINUX_OS[@]}"; then
                  tag="$(printf '\%s' "$tag")"
                  normaltag="$(printf '\%s' "$normaltag")"
             fi
@@ -212,7 +219,7 @@ strip_colors()
     if [ $# -eq 0 ]; then return 0; fi
     transformed=''
     while read -r line; do
-        case "$USEROS" in
+        case "$CMD_OS" in
             Linux|FreeBSD|OpenBSD|SunOS)
                 stripped_line=$(echo "${line}" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g");;
             *)

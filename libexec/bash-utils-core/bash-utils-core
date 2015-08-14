@@ -28,8 +28,8 @@
 
 #### BASH OPTIONS ####
 
-#shopt -s expand_aliases
-
+# use aliases
+shopt -s expand_aliases
 # export all modified vars
 #set -a
 set -o allexport
@@ -57,8 +57,6 @@ set -o nounset
 #set -o verbose
 
 #### ID ####
-
-declare -x TESTVAR_CORE='toto'
 
 declare -xr BASH_UTILS_KEY='bash-utils'
 declare -xr BASH_UTILS_VERSION='0.0.1@dev'
@@ -226,11 +224,12 @@ run()
 {
     [ $# -lt 1 ] && die 'usage: `run <command_name> [args ...]`';
     local subcommand="$1" cmdfile=''
-    declare -a args=("${!2}")
+    shift
+    declare -a args=("$*")
     cmdfile="$(find_subcommand "$subcommand")"
-    if [ -z "$cmdfile" ] && [ -f "$cmdfile" ]; then
+    if [ -n "$cmdfile" ] && [ -f "$cmdfile" ]; then
         set +o history
-        "$cmdfile" ${args[*]}
+        "$cmdfile" "${args[*]}"
         status=$?
         set -o history
         return $status
@@ -248,7 +247,7 @@ use()
     local subcommand="$1" cmdfile
     cmdfile="$(find_subcommand "$subcommand")"
     if [ -n "$cmdfile" ] && [ -f "$cmdfile" ]; then
-        echo "> sourcing '$cmdfile'"
+        $DEBUG && echo "> sourcing '$cmdfile'"
         source "$cmdfile" || error "sourcing '$cmdfile' failed";
         return $?;
     else
@@ -290,13 +289,16 @@ declare -xr CMD_PID="$$"
 declare -xr CMD_CALL_ORIGINAL="$0 $*"
 declare -x CMD_CALL=''
 
+##@ LINUX_OS = ( Linux FreeBSD OpenBSD SunOS ) (read-only)
+## List of Linux-like OSs.
+declare -rxa LINUX_OS=(Linux FreeBSD OpenBSD SunOS)
+
 # load defaults
-cmdfile="$(find_subcommand commons)"
-if [ -n "$cmdfile" ] && [ -f "$cmdfile" ]; then
-    source "$cmdfile";
-else
-    error '> "commons" not found!';
-fi
+export PRELOAD=true
+for f in "$BASH_UTILS_ROOT"/*; do
+    [ "$(basename "$f")" != "$(basename "${BASH_SOURCE[0]}")" ] && source "$f";
+done
+export PRELOAD=false
 
 # the core always returns a no-error status
 ##@!@##

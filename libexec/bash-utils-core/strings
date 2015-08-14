@@ -33,8 +33,36 @@
 ##@!@##
 #### STRINGS ####
 
-declare -x TESTVAR_STRINGS='toto'
-#export TESTVAR_STRINGS='toto'
+##@ ECHOCMD (read-only: 'builtin' or 'gnu')
+## Test if 'echo' is shell builtin or program
+if [ "$($(which echo) --version)" = '--version' ]
+then declare -rx ECHOCMD='builtin' 2>/dev/null;
+else declare -rx ECHOCMD='gnu' 2>/dev/null;
+fi
+
+#### _echo ( string )
+## echoes the string with the true 'echo -e' command
+## use this for colorization
+_echo () {
+#    tput sgr0
+    case "$ECHOCMD" in
+        gnu) $(which echo) -e "$*";;
+        builtin) echo "$*";;
+    esac
+    return 0
+}
+
+#### _necho ( string )
+## echoes the string with the true 'echo -en' command
+## use this for colorization and no new line
+_necho () {
+#    tput sgr0
+    case "$ECHOCMD" in
+        gnu) $(which echo) -en "$*";;
+        builtin) echo -n "$*" >&2;;
+    esac
+    return 0
+}
 
 # transform a string in upper case
 # usage: `string_to_upper <string>`

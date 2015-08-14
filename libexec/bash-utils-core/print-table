@@ -30,6 +30,9 @@
         { echo "> bash-utils-core not found!" >&2; exit 1; }; \
 };
 
+## stop here on pre-loading
+if ${PRELOAD:-false}; then return 0; fi
+
 ##@!@##
 #### PRINT TABLE ####
 
@@ -156,6 +159,18 @@ print_table_separator_line()
     echo "${_TABLE_SEPARATORS[0]}${line}"
     return 0
 }
+
+#set -o noglob
+#[ $# -gt 0 ] && print_table "$*";
+#if [ $# -gt 0 ]; then
+#    declare -a TABLE_ITEMS TABLE_HEADERS TABLE_PADDERS TABLE_PADDINGS TABLE_SEPARATORS
+#    TABLE_ITEMS=("${!1}")
+#    [ $# -gt 1 ] && TABLE_HEADERS=("${!2}")    || TABLE_HEADERS=();
+#    [ $# -gt 2 ] && TABLE_PADDINGS=("${!3}")   || TABLE_PADDINGS=(0 1);
+#    [ $# -gt 3 ] && TABLE_PADDERS=("${!4}")    || TABLE_PADDERS=("$(printf '%0.1s' "-"{1..120})" "$(printf '%0.1s' " "{1..120})");
+#    [ $# -gt 4 ] && TABLE_SEPARATORS=("${!5}") || TABLE_SEPARATORS=('+' '|');
+#    print_table TABLE_ITEMS[@] TABLE_HEADERS[@] TABLE_PADDINGS[@] TABLE_PADDERS[@] TABLE_SEPARATORS[@]
+#fi
 
 ##@!@##
 [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;

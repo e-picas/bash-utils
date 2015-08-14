@@ -4,7 +4,9 @@
 #
 set -eETu
 set -o pipefail
-source "$(pwd)/bin/bash-utils.bash" || { echo "> bash-utils not found!" >&2; exit 1; };
+
+source "$(dirname "${BASH_SOURCE[0]}")/../bin/bash-utils" || { echo "> bash-utils not found!" >&2; exit 1; };
+
 CMD_NAME='script-model-sample'
 CMD_VERSION='0.0.0'
 CMD_COPYRIGHT='(CC-BY) 2015 Pierre Cassat & contributors'
@@ -49,37 +51,36 @@ declare -x TEST2=''
 # usage: `e_*** <strings>`
 e_header()
 {
-    e_color "\n<bold><lightmagenta>==========  $@  ==========</bold></lightmagenta>"
+    parse_color_tags "\n<bold><lightmagenta>==========  $@  ==========</bold></lightmagenta>"
 }
 e_arrow()
 {
-    e_color "➜ $@"
+    parse_color_tags "➜ $@"
 }
 e_success()
 {
-    e_color "<lightgreen>✔ $@</lightgreen>"
+    parse_color_tags "<lightgreen>✔ $@</lightgreen>"
 }
 e_error()
 {
-    e_color "<red>✖ $@</red>"
+    parse_color_tags "<red>✖ $@</red>"
 }
 e_warning()
 {
-    e_color "<yellow>➜ $@</yellow>"
+    parse_color_tags "<yellow>➜ $@</yellow>"
 }
 e_underline()
 {
-    e_color "<underline><bold>$@</bold></underline>"
+    parse_color_tags "<underline><bold>$@</bold></underline>"
 }
 e_bold()
 {
-    e_color "<bold>$@</bold>"
+    parse_color_tags "<bold>$@</bold>"
 }
 e_note()
 {
-    e_color "<underline><bold><cyan>Note:</underline></bold></cyan>  <cyan>$@</cyan>"
+    parse_color_tags "<underline><bold><cyan>Note:</underline></bold></cyan>  <cyan>$@</cyan>"
 }
-
 
 [ $# -eq 0 ] && usage_info && exit 1;
 rearrange_options "$@"
@@ -142,6 +143,8 @@ case "${1:-}" in
 
     # test colors
     colors)
+        use colored-output
+
         e_header "I am a sample script"
         e_success "I am a success message"
         e_error "I am an error message"
@@ -159,7 +162,7 @@ case "${1:-}" in
         for i in "${TEXTOPTIONS[@]}"; do
             [ "$i" = 'normal' ] && continue;
             text="<${i}>${loremipsum}</${i}>"
-            printf "%16s | %20s | %s\n" "$i" "$(e_color "$text")" "$text"
+            printf "%16s | %20s | %s\n" "$i" "$(parse_color_tags "$text")" "$text"
         done
 
         title="TEXTCOLORS (foregrounds)"
@@ -167,32 +170,30 @@ case "${1:-}" in
         for i in "${TEXTCOLORS[@]}"; do
             [ "$i" = 'normal' ] && continue;
             text="<${i}>${loremipsum}</${i}>"
-            printf "%16s | %20s | %s\n" "$i" "$(e_color "$text")" "$text"
+            printf "%16s | %20s | %s\n" "$i" "$(parse_color_tags "$text")" "$text"
         done
 
         title="TEXTCOLORS (backgrounds)"
         printf "%*.*s | %s %*.*s\n" 0 16 "$padder" "$title" 0 $((80 - ${#title})) "$padder"
         for i in "${TEXTCOLORS[@]}"; do
             [ "$i" = 'normal' ] && continue;
-            text="<${i}_bg>${loremipsum}</${i}_bg>"
-            printf "%16s | %20s | %s\n" "${i}_bg" "$(e_color "$text")" "$text"
+            text="<bg${i}>${loremipsum}</bg${i}>"
+            printf "%16s | %20s | %s\n" "bg${i}" "$(parse_color_tags "$text")" "$text"
         done
 
         printf "%*.*s | %*.*s\n" 0 16 "$padder" 0 80 "$padder"
 
         echo "## raw examples:"
-        e_color "$(cat <<MSG
+        parse_color_tags "$(cat <<MSG
 <bold>mlkj</bold>
 <magenta>qsdfqsf qsdfqsdfc </magenta>
-<magenta_bg>qsdfqsf qsdfqsdfc </magenta_bg>
-Lorem ipsum <bold>dolor</bold> sit amet <cyan>Lorem ipsum dolor sit amet</cyan> Lorem <underline>ipsum</underline> <red_bg>dolor</red_bg> sit amet .
-Lorem ipsum <bold>dolor</bold> sit amet <cyan>Lorem ipsum <bold>dolor</bold> sit amet</cyan> Lorem ipsum <red_bg>dolor</red_bg> sit amet .
-a string with <bold>tags</bold> to <red>set</red> <red_bg>styles</red_bg>
+<bgmagenta>qsdfqsf qsdfqsdfc </bgmagenta>
+Lorem ipsum <bold>dolor</bold> sit amet <cyan>Lorem ipsum dolor sit amet</cyan> Lorem <underline>ipsum</underline> <bgred>dolor</bgred> sit amet .
+Lorem ipsum <bold>dolor</bold> sit amet <cyan>Lorem ipsum <bold>dolor</bold> sit amet</cyan> Lorem ipsum <bgred>dolor</bgred> sit amet .
+a string with <bold>tags</bold> to <red>set</red> <bgred>styles</bgred>
 <unknown>mlkj</unknown>
 MSG
 )";
-
-        e_color '<bold>yo</bold> test'
 
         ;;
 

@@ -33,8 +33,6 @@
 ##@!@##
 #### ARRAYS ####
 
-declare -x TESTVAR_ARRAYS='toto'
-
 # use this variable to pass empty an array reference `EMPTY_ARRAY[@]`
 declare -arx EMPTY_ARRAY=()
 
@@ -43,19 +41,19 @@ declare -arx EMPTY_ARRAY=()
 array_search ()
 {
     [ $# -lt 2 ] && die 'usage: `array_search <item> <$array[@]>`';
-    local i=0 j
+    local i=-1 j
     local search="$1"
     shift
     declare -a args
     if [ $# -gt 1 ]; then
         args=("$@")
     else
-        args=("${!1}")
+        [ -n "${!1:-}" ] && args=("${!1}") || return 1;
     fi
     for ((j=0; j<"${#args[@]}"; j++)); do
         [ "$search" = "${args[$j]}" ] && i="$j";
     done
-    [ "$i" != '0' ] && echo "$i" && return 0
+    [[ $i -ne -1 ]] && echo "$i" && return 0
     return 1
 }
 
@@ -70,7 +68,7 @@ in_array()
     if [ $# -gt 1 ]; then
         args=("$@")
     else
-        args=("${!1}")
+        [ -n "${!1:-}" ] && args=("${!1}") || return 1;
     fi
     for item in "${args[@]}"; do
         [ "$needle" = "$item" ] && return 0

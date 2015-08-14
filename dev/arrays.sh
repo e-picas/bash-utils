@@ -4,7 +4,15 @@
 #
 set -eETu
 set -o pipefail
-source "$(pwd)/bin/bash-utils.bash" || { echo "> bash-utils not found!" >&2; exit 1; };
+source "$(dirname "${BASH_SOURCE[0]}")/../bin/bash-utils" || { echo "> bash-utils not found!" >&2; exit 1; };
+rearrange_options "$@"
+eval set -- "$CMD_REQ";
+common_options "$@"
+common_arguments "$@"
+$DEBUG && debug;
+use print-table
+use print-list
+
 
 ######################################################
 echo "> demo of a table-like printing:"

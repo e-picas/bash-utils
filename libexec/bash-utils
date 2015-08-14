@@ -57,31 +57,25 @@ getapplibexec() {
     pwd
     cd "$cwd"
 }
-appfile="$(getapplibexec "$0")/bash-utils-core/bash-utils-core"
+appfile="$(getapplibexec "$(dirname "$0")")/libexec/bash-utils-core/bash-utils-core"
 if [ ! -f "$appfile" ]; then echo "> required file '$appfile' not found!" >&2; exit 1; fi
 source "$appfile"
 ########## common block ##########
 
+#echo "${CMD_LOGFILE}"
+#echo "$TESTVAR_CORE"
+#echo "$TESTVAR_COMMONS"
+#echo "$TESTVAR_ARRAYS"
+#echo "$TESTVAR_STRINGS"
+#echo "${TO_DEBUG[@]}"
+#for i in ${TO_DEBUG[*]}; do echo "$i"; done
+#echo 'end'
+#exit 0
 
-echo "${CMD_LOGFILE}"
-
-echo "$TESTVAR_CORE"
-echo "$TESTVAR_COMMONS"
-echo "$TESTVAR_ARRAYS"
-echo "$TESTVAR_STRINGS"
-
-echo "${TO_DEBUG[@]}"
-
-for i in "${TO_DEBUG[*]}"; do
-    echo "$i"
-done
-
-echo 'end'
-exit 0
 # if the lib is NOT called directly, distribute the work
 if [ "$(basename "$0")" != "$(basename "${BASH_SOURCE[0]}")" ]; then
 
-    true
+    return 0
 
 fi
 

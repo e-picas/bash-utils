@@ -62,14 +62,6 @@ declare -x DEBUG=false          # write in debug mode:      $DEBUG && echo '...'
 declare -x FORCE=false          # write in force mode:      $FORCE && echo '...';
 declare -x DRY_RUN=false        # exec in not dry-run mode: $DRY_RUN || ...;
 
-declare -x TESTVAR_COMMONS='toto'
-
-# load defaults
-source "$(dirname "${BASH_SOURCE[0]}")/arrays"
-#use arrays || error '> "arrays" not found!';
-use strings || error '> "strings" not found!';
-use file-system || error '> "file-system" not found!';
-
 #### COMMONS LIB ####
 # functions are written in alphabetical order
 
@@ -183,6 +175,7 @@ rearrange_options()
         longs+="${opt},"
     done
     longs="${longs%,}"
+    set +o posix
     set +E
     getoptvers="$(getopt --test > /dev/null; echo $?)"
     if [[ "$getoptvers" -eq 4 ]]; then
@@ -192,6 +185,7 @@ rearrange_options()
         # original getopt is available
         CMD_REQ="$(getopt "shorts" "$@")"
     fi
+    set -o posix
     set -E
     CMD_CALL="$0 $CMD_REQ"
     return 0

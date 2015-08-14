@@ -70,6 +70,9 @@ declare -x ARGUMENT=''
 declare -rx UNKNOWN_OPTION_MASK="unknown option '%s'!"
 declare -rx MISSING_OPTION_ARGUMENT_MASK="option '%s' requires an argument!"
 
+## stop here on pre-loading
+if ${PRELOAD:-false}; then return 0; fi
+
 # usage: `read_from_pipe [file=/dev/stdin]`
 read_from_pipe()
 {
