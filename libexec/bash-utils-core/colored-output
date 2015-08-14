@@ -209,7 +209,7 @@ parse_color_tags()
         if [ -n "$transformed" ]; then transformed+="\n"; fi
         transformed+="$transformedline"
     done <<< "$1"
-    _echo "$transformed"
+    echo -e "$transformed" # this works on Linux (Ubuntu 14.04)
     return 0
 }
 
