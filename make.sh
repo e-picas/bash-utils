@@ -6,7 +6,7 @@
 # For the full copyright and license information, please view the LICENSE
 # file that was distributed with this source code or see <http://www.apache.org/licenses/LICENSE-2.0>.
 #
-# bash-utils maker: install / cleanup / rebuild manpages / upgrade version / create release / test
+# bash-utils make: install / cleanup / rebuild manpages / upgrade version / create release / test
 #
 set -eETu
 
@@ -45,19 +45,18 @@ usage() {
 make_cleanup()
 {
     ( [ -z "$PREFIX" ] || [ ! -d "$PREFIX" ] ) && { echo "Invalid prefix '$PREFIX'. Aborting." >&2; exit 1; }
-    rm -rf "$PREFIX"/{bin,share/man/{man1,man7}}/bash-utils*
+    rm -rf "$PREFIX"/{bin,libexec,share/man/{man1,man7}}/bash-utils*
     return $?
 }
 
 make_install()
 {
     ( [ -z "$PREFIX" ] || [ ! -d "$PREFIX" ] ) && { echo "Invalid prefix '$PREFIX'. Aborting." >&2; exit 1; }
-    mkdir -p "$PREFIX"/{bin,share/man/{man1,man7}}
-    cp "${ROOT_DIR}/bin/bash-utils.bash" "$PREFIX"/bin/
-    chmod a+x "$PREFIX"/bin/
-    cp "${ROOT_DIR}/bin/bash-utils-model.bash" "$PREFIX"/bin/
-    cp "${ROOT_DIR}/man/bash-utils.1.man" "$PREFIX"/share/man/man1/
-    cp "${ROOT_DIR}/man/bash-utils.7.man" "$PREFIX"/share/man/man7/
+    mkdir -p "$PREFIX"/{bin,libexec,share/man/{man1,man7}}
+    cp -R "$ROOT_DIR"/bin/* "$PREFIX"/bin/
+    cp -R "$ROOT_DIR"/libexec/* "$PREFIX"/libexec/
+    cp "$ROOT_DIR"/man/bash-utils.1.man "$PREFIX"/share/man/man1/
+    cp "$ROOT_DIR"/man/bash-utils.7.man "$PREFIX"/share/man/man7/
     return $?
 }
 
@@ -72,7 +71,7 @@ make_manpages()
 make_version()
 {
     [ -z "$VERSION" ] && { echo "Invalid version number '$VERSION'. Aborting." >&2; exit 1; }
-    sed -i -e "s| BASH_UTILS_VERSION='.*'| BASH_UTILS_VERSION='${VERSION}'|" "${ROOT_DIR}/bin/bash-utils.bash" \
+    sed -i -e "s| BASH_UTILS_VERSION='.*'| BASH_UTILS_VERSION='${VERSION}'|" "${ROOT_DIR}/libexec/bash-utils-core/bash-utils-core" \
         && sed -i -e "s|^Version: .*$|Version: ${VERSION}|;s|^Date: .*$|Date: ${DATE}|" "${ROOT_DIR}/man/MANPAGE.1.md" \
         && sed -i -e "s|^Version: .*$|Version: ${VERSION}|;s|^Date: .*$|Date: ${DATE}|" "${ROOT_DIR}/man/MANPAGE.7.md" \
         || { echo "An error occurred." >&2; exit 1; };
@@ -102,7 +101,7 @@ make_tests()
 
 declare ROOT_DIR ACTUAL_VERSION DATE VERSION TAGNAME PREFIX
 ROOT_DIR="$(abs_dirname "$0")"
-ACTUAL_VERSION="$("${ROOT_DIR}/bin/bash-utils.bash" -qV)"
+ACTUAL_VERSION="$("${ROOT_DIR}/bin/bash-utils" -qV)"
 if [ -d "${ROOT_DIR}/.git" ]; then
     DATE=$(git log -1 --format="%ci" --date=short | cut -s -f 1 -d ' ')
 else
@@ -139,3 +138,6 @@ case "$1" in
     test) make_tests;;
     *) usage;;
 esac
+
+exit 0
+# vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

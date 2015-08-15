@@ -4,38 +4,33 @@
 # <http://gitlab.com/piwi/bash-utils>
 # Copyright (c) 2015 Pierre Cassat & contributors
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache Software Foundation license, Version 2.0;
+# you may not use this file except in compliance with the License.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 # For sources & updates, see <http://gitlab.com/piwi/bash-utils>.
 #
 # To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
 #
 # For the full copyright and license information, please view the LICENSE
-# file that was distributed with this source code or see <http://www.gnu.org/licenses/>.
+# file that was distributed with this source code or see
+# <http://www.apache.org/licenses/LICENSE-2.0>.
 #
+set -e
+
+[ -z "$BASH_UTILS_VERSION" ] && { \
+    source "$(dirname "${BASH_SOURCE[0]}")/bash-utils-core" || \
+        { echo "> bash-utils-core not found!" >&2; exit 1; }; \
+};
+
 ##@!@##
 
 #### COMMAND INFO ####
-
-# Available options:
-#     --dry-run       process a dry-run
-#     -f|--force      do not prompt for choices if a default choice exists
-#     -q|--quiet      decrease script's verbosity
-#     -v|--verbose    increase script's verbosity
-#     -x|--debug      see some debugging information
-#
-# Use arguments 'usage', 'about' or 'version' for application information.
 
 declare -x CMD_NAME='overwrite the CMD_NAME variable to customize this information'
 declare -x CMD_VERSION='overwrite the CMD_VERSION variable to customize this information'
@@ -44,13 +39,17 @@ declare -x CMD_LICENSE='overwrite the CMD_LICENSE variable to customize this inf
 declare -x CMD_SOURCES='overwrite the CMD_SOURCES variable to customize this information'
 declare -x CMD_DESCRIPTION='overwrite the CMD_DESCRIPTION variable to customize this information'
 declare -x CMD_HELP='overwrite the CMD_HELP variable to customize this information'
-declare -xa CMD_OPTS_SHORT=( f q v x )
-declare -xa CMD_OPTS_LONG=( debug dry-run force quiet verbose )
 declare -x CMD_LOGFILE='/var/log/bash-utils.log'
+declare -xa CMD_OPTS_SHORT=( f q v x V h )
+declare -xa CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
 declare -xa TO_DEBUG=(
     CMD_PROG CMD_ROOT CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_OS
     CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN
 )
+set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
+set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+set_env_array TO_DEBUG TO_DEBUG[@]
+
 # the synopsis should be left empty as it will be automatically generated with options declarations
 declare -x CMD_SYNOPSIS=''
 #declare -x CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
@@ -62,21 +61,12 @@ declare -x DEBUG=false          # write in debug mode:      $DEBUG && echo '...'
 declare -x FORCE=false          # write in force mode:      $FORCE && echo '...';
 declare -x DRY_RUN=false        # exec in not dry-run mode: $DRY_RUN || ...;
 
+# list of Linux-like OSs
+declare -xa LINUX_OS=(Linux FreeBSD OpenBSD SunOS)
+set_env_array LINUX_OS LINUX_OS[@]
+
 #### COMMONS LIB ####
 # functions are written in alphabetical order
-
-# about string on STDOUT & exit
-# usage: `about_info`
-about_info()
-{
-    cat <<MSG
-$CMD_NAME $CMD_VERSION
-$CMD_COPYRIGHT
-$CMD_LICENSE
-$CMD_SOURCES
-MSG
-    exit 0
-}
 
 # write a comment string on STDOUT
 # usage: `comment <string>`
@@ -86,33 +76,20 @@ comment()
     return 0
 }
 
-# treat common arguments
-# usage: `common_arguments "$@"`
-common_arguments()
-{
-    for arg in "$@"; do
-        case "$arg" in
-            'about')    about_info   && exit 0;;
-            'debug')    debug        && exit 0;;
-            'help')     help_info    && exit 0;;
-            'usage')    usage_info   && exit 0;;
-            'version')  version_info && exit 0;;
-        esac
-    done
-    return 0
-}
-
 # treat common options
 # this will throw an error for unknown option if the `$CMD_OPTS_SHORT` is not prefixed by a colon `:`
 # usage: `common_options "$@"`
 common_options()
 {
+    local _todo=''
     while [ $# -gt 0 ]; do
         case "$1" in
             -f | --force )  FORCE=true;;
             -q | --quiet )  QUIET=true; VERBOSE=false;;
             -v | --verbose ) VERBOSE=true; QUIET=false;;
             -x | --debug )  DEBUG=true;;
+            -V | --version) _todo='version_info && exit 0;';;
+            -h | --help)    _todo='help_info && exit 0;';;
             --dry-run )     DRY_RUN=true;;
             -- )            shift; break;;
             * )             if ! is_known_option "$1" && [ "${CMD_OPTS_SHORT[0]}" != ":" ]
@@ -120,6 +97,7 @@ common_options()
         esac
         shift
     done
+    [ -n "$_todo" ] && eval "$_todo";
     return 0
 }
 
@@ -127,7 +105,7 @@ common_options()
 # usage: `help_info`
 help_info()
 {
-    {   version_info
+    {   version_info true
         echo
         echo "$CMD_DESCRIPTION"
         echo
@@ -230,10 +208,14 @@ usage_info()
 # usage: `version_info`
 version_info()
 {
-    if $QUIET; then
-        echo "$CMD_VERSION"
-    else
-        echo "$CMD_NAME $CMD_VERSION"
+    local short="${1:-${QUIET:-false}}"
+    echo "$CMD_NAME $CMD_VERSION"
+    if ! $short; then
+        cat <<MSG
+$CMD_COPYRIGHT
+$CMD_LICENSE
+$CMD_SOURCES
+MSG
     fi
     return 0
 }

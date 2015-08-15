@@ -4,25 +4,22 @@
 # <http://gitlab.com/piwi/bash-utils>
 # Copyright (c) 2015 Pierre Cassat & contributors
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache Software Foundation license, Version 2.0;
+# you may not use this file except in compliance with the License.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 # For sources & updates, see <http://gitlab.com/piwi/bash-utils>.
 #
 # To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
 #
 # For the full copyright and license information, please view the LICENSE
-# file that was distributed with this source code or see <http://www.gnu.org/licenses/>.
+# file that was distributed with this source code or see
+# <http://www.apache.org/licenses/LICENSE-2.0>.
 #
 ##@!@##
 
@@ -58,6 +55,7 @@ set -o nounset
 
 #### ID ####
 
+declare -xr BASH_UTILS_NAME='Bash-Utils'
 declare -xr BASH_UTILS_KEY='bash-utils'
 declare -xr BASH_UTILS_VERSION='0.0.1@dev'
 
@@ -118,15 +116,15 @@ error()
     exit "${2:-1}"
 }
 
-# find an app's subcommand
-# usage: `find_subcommand <command_name>`
-find_subcommand()
+# find an app's module
+# usage: `find_module <module_name>`
+find_module()
 {
-    [ $# -lt 1 ] && die 'usage: `find_subcommand <command_name>`';
-    local subcommand="$1" cmdfile=''
-    [ "$subcommand" = 'core' ] && return 1;
-    [ -f "${BASH_UTILS_ROOT}/bash-utils-${subcommand}" ] && cmdfile="${BASH_UTILS_ROOT}/bash-utils-${subcommand}";
-    [ -f "${BASH_UTILS_ROOT}/${subcommand}" ] && cmdfile="${BASH_UTILS_ROOT}/${subcommand}";
+    [ $# -lt 1 ] && die 'usage: `find_module <module_name>`';
+    local module_name="$1" cmdfile=''
+    [ "$module_name" = 'core' ] && return 1;
+    [ -f "${BASH_UTILS_ROOT}/bash-utils-${module_name}" ] && cmdfile="${BASH_UTILS_ROOT}/bash-utils-${module_name}";
+    [ -f "${BASH_UTILS_MODULES}/${module_name}" ] && cmdfile="${BASH_UTILS_MODULES}/${module_name}";
     if [ -n "$cmdfile" ] && [ -f "$cmdfile" ]; then
         echo "$cmdfile" && return 0
     else
@@ -151,6 +149,16 @@ log()
     return 0
 }
 
+# test if an app's module exists
+# usage: `module_exists <module_name>`
+module_exists()
+{
+    [ $# -lt 1 ] && return 1;
+    local module_name="$1" cmd=''
+    cmd=$(find_module "$module_name")
+    return $?
+}
+
 # cleanup after the script exits
 # this one should never be called directly as it is trapped on EXIT
 # usage: `shutdown_handler`
@@ -171,16 +179,6 @@ stack_trace()
         done
     fi
     return 0
-}
-
-# test if an app's subcommand exists
-# usage: `subcommand_exists <command_name>`
-subcommand_exists()
-{
-    [ $# -lt 1 ] && return 1;
-    local subcommand="$1" cmd=''
-    cmd=$(find_subcommand "$subcommand")
-    return $?
 }
 
 # test Bash version required
@@ -218,15 +216,16 @@ try()
     return "$retval"
 }
 
-# run an app's subcommand
-# usage: `run <command_name> [args ...]`
+# run an app's module
+# usage: `run <module_name> [args ...]`
 run()
 {
-    [ $# -lt 1 ] && die 'usage: `run <command_name> [args ...]`';
-    local subcommand="$1" cmdfile=''
+    [ $# -lt 1 ] && die 'usage: `run <module_name> [args ...]`';
+    local module_name="$1" cmdfile=''
     shift
-    declare -a args=("$*")
-    cmdfile="$(find_subcommand "$subcommand")"
+    declare -a args=()
+    [ $# -gt 0 ] && args=("$*");
+    cmdfile="$(find_module "$module_name")"
     if [ -n "$cmdfile" ] && [ -f "$cmdfile" ]; then
         set +o history
         "$cmdfile" "${args[*]}"
@@ -234,18 +233,19 @@ run()
         set -o history
         return $status
     fi
-    warning "subcommand '$subcommand' not found"
+    warning "module '$module_name' not found"
     return 1
 }
 
 # load an app's library
 # @see <http://stackoverflow.com/a/3524860/3592658>
-# usage: `use <command_name>`
+# usage: `use <module_name>`
 use()
 {
-    [ $# -lt 1 ] && die 'usage: use <command_name>';
-    local subcommand="$1" cmdfile
-    cmdfile="$(find_subcommand "$subcommand")"
+    [ $# -lt 1 ] && die 'usage: use <module_name>';
+    local module_name="$1" cmdfile
+    shift
+    cmdfile="$(find_module "$module_name")"
     if [ -n "$cmdfile" ] && [ -f "$cmdfile" ]; then
         $DEBUG && echo "> sourcing '$cmdfile'"
         source "$cmdfile" || error "sourcing '$cmdfile' failed";
@@ -275,9 +275,11 @@ abs_dirname() {
     cd "$cwd"
 }
 sourcename="$(basename "${BASH_SOURCE[0]}")"
-declare -xr BASH_UTILS="$(abs_dirname "${BASH_SOURCE[0]}")/${sourcename}"
-declare -xr BASH_UTILS_MODEL="$(abs_dirname "${BASH_SOURCE[0]}")/${sourcename/.bash/-model.bash}"
-declare -xr BASH_UTILS_ROOT="$(abs_dirname "${BASH_SOURCE[0]}")"
+libexecdir="$(dirname "$(abs_dirname "${BASH_SOURCE[0]}")")"
+declare -xr BASH_UTILS="${libexecdir}/bash-utils"
+declare -xr BASH_UTILS_MODEL="${libexecdir}/${sourcename/-core/-model.bash}"
+declare -xr BASH_UTILS_ROOT="${libexecdir}/bash-utils-core/"
+declare -xr BASH_UTILS_MODULES="${libexecdir}/bash-utils-modules/"
 
 declare -xr CMD_PROG="$(basename "$0")"
 declare -xr CMD_ROOT="$(abs_dirname "$0")"
@@ -289,14 +291,14 @@ declare -xr CMD_PID="$$"
 declare -xr CMD_CALL_ORIGINAL="$0 $*"
 declare -x CMD_CALL=''
 
-##@ LINUX_OS = ( Linux FreeBSD OpenBSD SunOS ) (read-only)
-## List of Linux-like OSs.
-declare -rxa LINUX_OS=(Linux FreeBSD OpenBSD SunOS)
-
 # load defaults
+source "$BASH_UTILS_ROOT"/arrays
+source "$BASH_UTILS_ROOT"/strings
+source "$BASH_UTILS_ROOT"/file-system
+source "$BASH_UTILS_ROOT"/bash-utils-commons
 export PRELOAD=true
-for f in "$BASH_UTILS_ROOT"/*; do
-    [ "$(basename "$f")" != "$(basename "${BASH_SOURCE[0]}")" ] && source "$f";
+for f in "$BASH_UTILS_MODULES"/*; do
+    [ "$(basename "$f")" != "$(basename "${BASH_SOURCE[0]}")" ] && [ -x "$f" ] && source "$f";
 done
 export PRELOAD=false
 

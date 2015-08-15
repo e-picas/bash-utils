@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-# Sample usage of the 'bash-utils.bash' library
+# Sample usage of the 'bash-utils' library
 #
 set -eETu
 set -o pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/../bin/bash-utils" || { echo "> bash-utils not found!" >&2; exit 1; };
+source "$(dirname "${BASH_SOURCE[0]}")/../bin/bash-utils" || { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils not found!" >&2; exit 1; };
 
 CMD_NAME='script-model-sample'
 CMD_VERSION='0.0.0'
@@ -37,8 +37,8 @@ Available options:
     --dry-run           process a dry-run
 
 Use arguments 'usage', 'about' or 'version' for application information.";
-CMD_OPTS_SHORT=(':' f q v x 'a:' 'b::')
-CMD_OPTS_LONG=(debug dry-run force quiet verbose 'test1:' 'test2::')
+CMD_OPTS_SHORT=(':' f q v x V h 'a:' 'b::')
+CMD_OPTS_LONG=(debug dry-run force quiet verbose version help 'test1:' 'test2::')
 TO_DEBUG=(
     CMD_PROG CMD_ROOT CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_OS
     CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN TEST1 TEST2
@@ -88,7 +88,7 @@ rearrange_options "$@"
 common_options "$@"
 while [ $# -gt 0 ]; do
     case "$1" in
-        -f | -q | -v | -x | --force | --quiet | --verbose | --debug | --dry-run ) true;;
+        -f | -q | -v | -x | -h | -V | --version | --help | --force | --quiet | --verbose | --debug | --dry-run ) true;;
         -a | --test1 ) OPTARG="$(echo "$2" | cut -d'=' -f2)"; TEST1="${OPTARG}"; shift;;
         -b | --test2 ) OPTARG="$(echo "$2" | cut -d'=' -f2)"; TEST2="${OPTARG:-default}"; shift;;
         -- ) shift; break;;
@@ -96,7 +96,6 @@ while [ $# -gt 0 ]; do
     esac
     shift
 done
-[ $# -gt 0 ] && common_arguments "$*";
 $DEBUG && debug;
 
 comment "original request was rebuilt as: $CMD_CALL"
@@ -108,6 +107,12 @@ $DRY_RUN && comment "dry-run mode is enabled";
 
 # test cases
 case "${1:-}" in
+
+    about)    about_info   && exit 0;;
+    debug)    debug        && exit 0;;
+    help)     help_info    && exit 0;;
+    usage)    usage_info   && exit 0;;
+    version)  version_info && exit 0;;
 
     # debug arguments
     args)
@@ -177,8 +182,8 @@ case "${1:-}" in
         printf "%*.*s | %s %*.*s\n" 0 16 "$padder" "$title" 0 $((80 - ${#title})) "$padder"
         for i in "${TEXTCOLORS[@]}"; do
             [ "$i" = 'normal' ] && continue;
-            text="<bg${i}>${loremipsum}</bg${i}>"
-            printf "%16s | %20s | %s\n" "bg${i}" "$(parse_color_tags "$text")" "$text"
+            text="<${i}_bg>${loremipsum}</${i}_bg>"
+            printf "%16s | %20s | %s\n" "${i}_bg" "$(parse_color_tags "$text")" "$text"
         done
 
         printf "%*.*s | %*.*s\n" 0 16 "$padder" 0 80 "$padder"
@@ -187,17 +192,34 @@ case "${1:-}" in
         parse_color_tags "$(cat <<MSG
 <bold>mlkj</bold>
 <magenta>qsdfqsf qsdfqsdfc </magenta>
-<bgmagenta>qsdfqsf qsdfqsdfc </bgmagenta>
-Lorem ipsum <bold>dolor</bold> sit amet <cyan>Lorem ipsum dolor sit amet</cyan> Lorem <underline>ipsum</underline> <bgred>dolor</bgred> sit amet .
-Lorem ipsum <bold>dolor</bold> sit amet <cyan>Lorem ipsum <bold>dolor</bold> sit amet</cyan> Lorem ipsum <bgred>dolor</bgred> sit amet .
-a string with <bold>tags</bold> to <red>set</red> <bgred>styles</bgred>
+<magenta_bg>qsdfqsf qsdfqsdfc </magenta_bg>
+Lorem ipsum <bold>dolor</bold> sit amet <cyan>Lorem ipsum dolor sit amet</cyan> Lorem <underline>ipsum</underline> <red_bg>dolor</red_bg> sit amet .
+Lorem ipsum <bold>dolor</bold> sit amet <cyan>Lorem ipsum <bold>dolor</bold> sit amet</cyan> Lorem ipsum <red_bg>dolor</red_bg> sit amet .
+a string with <bold>tags</bold> to <red>set</red> <red_bg>styles</red_bg>
 <unknown>mlkj</unknown>
 MSG
 )";
 
         ;;
 
+    # test colored-output
+    colored-output)
+        echo "## run colored-output ...:"
+        run colored-output "$(cat <<MSG
+<bold>mlkj</bold>
+<magenta>qsdfqsf qsdfqsdfc </magenta>
+<magenta_bg>qsdfqsf qsdfqsdfc </magenta_bg>
+Lorem ipsum <bold>dolor</bold> sit amet <cyan>Lorem ipsum dolor sit amet</cyan> Lorem <underline>ipsum</underline> <red_bg>dolor</red_bg> sit amet .
+Lorem ipsum <bold>dolor</bold> sit amet <cyan>Lorem ipsum <bold>dolor</bold> sit amet</cyan> Lorem ipsum <red_bg>dolor</red_bg> sit amet .
+a string with <bold>tags</bold> to <red>set</red> <red_bg>styles</red_bg>
+<unknown>mlkj</unknown>
+MSG
+)";
+        ;;
+
     arrays)
+        use print-table
+        use print-list
 
         echo
         echo '###########################'

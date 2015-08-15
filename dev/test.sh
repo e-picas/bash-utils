@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Sample usage of the 'bash-utils.bash' library
+# Sample usage of the 'bash-utils' library
 #
 set -eETu
 set -o pipefail

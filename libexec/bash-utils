@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 #
-# bash-util.bash - A short *bash* library for better scripting
+# bash-utils - A *bash* library for better scripting
+# <http://gitlab.com/piwi/bash-utils>
+# Copyright (c) 2015 Pierre Cassat & contributors
 #
-# Copyright 2015 Pierre Cassat (me at e-piwi dot fr) & contributors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache Software Foundation license, Version 2.0;
 # you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>.
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,151 +13,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# For sources & updates, see <http://gitlab.com/piwi/bash-utils>.
+#
+# To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
+#
 # For the full copyright and license information, please view the LICENSE
-# file that was distributed with this source code or see <http://www.apache.org/licenses/LICENSE-2.0>.
+# file that was distributed with this source code or see
+# <http://www.apache.org/licenses/LICENSE-2.0>.
 #
-# Sources & updates at <http://gitlab.com/piwi/bash-utils.git>.
-#
+set -e
 
-# export all modified vars
-#set -a
-set -o allexport
-# match the POSIX 1003.2 standard
-set -o posix
-# exit if a command has a non-zero status
-#set -e
-set -o errexit
-# do not mask pipeline's errors
-set -o pipefail
-# trap on ERR are inherited by shell functions
-#set -E
-set -o errtrace
-# trap on DEBUG and RETURN are inherited by shell functions
-#set -T
-set -o functrace
-## throw error on unset variable usage
-#set -u
-set -o nounset
-## for dev usage: debug commands before to execute them
-##set -x
-#set -o xtrace
-## for dev usage: print shell input lines as they are read
-##set -v
-#set -o verbose
-
-########## common block ##########
-# include required lib
+# include required lib & load bash-utils env
 getapplibexec() {
     local cwd="$(pwd)"
     local path="$1"
     while [ -n "$path" ]; do
-        cd "${path%/*}"; local name="${path##*/}"; path="$($(type -p greadlink readlink | head -1) "$name" || true)";
+        cd "${path%/*}" 2>/dev/null; local name="${path##*/}"; path="$($(type -p greadlink readlink | head -1) "$name" || true)";
     done
     pwd
     cd "$cwd"
 }
-appfile="$(getapplibexec "$(dirname "$0")")/libexec/bash-utils-core/bash-utils-core"
-if [ ! -f "$appfile" ]; then echo "> required file '$appfile' not found!" >&2; exit 1; fi
+appfile="$(getapplibexec "${BASH_SOURCE[0]}")/bash-utils-core/bash-utils-core"
+if [ ! -f "$appfile" ]; then echo "> ${BASH_SOURCE[0]}:${LINENO}: required file '$appfile' not found!" >&2; exit 1; fi
 source "$appfile"
-########## common block ##########
 
-#echo "${CMD_LOGFILE}"
-#echo "$TESTVAR_CORE"
-#echo "$TESTVAR_COMMONS"
-#echo "$TESTVAR_ARRAYS"
-#echo "$TESTVAR_STRINGS"
-#echo "${TO_DEBUG[@]}"
-#for i in ${TO_DEBUG[*]}; do echo "$i"; done
-#echo 'end'
-#exit 0
-
-# if the lib is NOT called directly, distribute the work
-if [ "$(basename "$0")" != "$(basename "${BASH_SOURCE[0]}")" ]; then
-
-    return 0
-
+# transmit the process to called script
+defaultcmd="${BASH_UTILS_ROOT}/bash-utils-cmd"
+cmd=''
+if [ $# -gt 0 ] && [ -f "$1" ]; then
+    cmd="$1"
+    shift
+elif [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ]; then
+    cmd="$defaultcmd"
 fi
+[ -n "$cmd" ] && [ -f "$cmd" ] && source "$cmd" "$@";
 
-## bash utils as command ##
-
-CMD_NAME="$BASH_UTILS_KEY"
-CMD_VERSION="$BASH_UTILS_VERSION"
-CMD_COPYRIGHT='Copyright (c) 2015 Pierre Cassat & contributors'
-CMD_LICENSE='Apache License version 2.0 <http://www.apache.org/licenses/LICENSE-2.0>'
-CMD_SOURCES='Sources & updates: <http://gitlab.com/piwi/bash-utils.git>'
-CMD_DESCRIPTION='A short *bash* library for better scripting.'
-#CMD_SYNOPSIS="$0 [-fqvVx] [--debug|--dry-run|--force|--quiet|--verbose|--version] [-e|--exec[=<arg>]] <arguments> --"
-CMD_SYNOPSIS=''
-CMD_HELP="arguments:
-    about               get library information (license, version etc)
-    help                see this help string
-    model [file_path]   see the 'bash-utils-model.bash' model or copy it in 'file_path'
-    usage               get the library synopsis
-    version             get the library version (use option 'quiet' to get the version number only)
-
-options:
-    --dry-run           process a dry-run
-    -e|--exec=<arg>     execute the argument in the library's environment:
-                            # bash-utils --exec='e_color \"<bold>test</bold>\"'
-    -e|--exec           without argument, any piped content will be evaluated:
-                            # echo 'e_color \"<bold>test</bold>\"' | bash-utils --exec
-    -f|--force          do not prompt for choices if a default choice exists
-    -q|--quiet          decrease script's verbosity
-    -v|--verbose        increase script's verbosity
-    -x|--debug          see some debugging information
-    -V|--version        alias for the 'version' argument above
-
-paths:
-    $BASH_UTILS
-    $BASH_UTILS_MODEL
-";
-CMD_OPTS_SHORT=( ':' 'e::' f q v V x )
-CMD_OPTS_LONG=( 'exec::' debug dry-run force quiet verbose version )
-#TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_KEY
-#TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS
-#TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_MODEL
-#TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_VERSION
-[ $# -eq 0 ] && usage_info && exit 1;
-rearrange_options "$@"
-[ -n "$CMD_REQ" ] && eval set -- "$CMD_REQ";
-common_options "$@"
-#read_from_pipe
-$DEBUG && debug;
-while [ $# -gt 0 ]; do
-    case "$1" in
-        -V | --version ) version_info && exit 0;;
-        -e | --exec* )
-            OPTARG="$(echo "$2" | cut -d'=' -f2)"
-            arg="${OPTARG}"
-            [ -z "$arg" ] && arg="$_PIPED_INPUT";
-            eval "$arg"
-            exit $?
-            ;;
-        -- ) shift; break;;
-        * )  ! is_known_option "$1" && error "unknown option '$1'";;
-    esac
-    shift
-done
-[ $# -gt 0 ] && common_arguments "$*";
-while [ $# -gt 0 ]; do
-    case "$1" in
-        model )
-            [ ! -f "$BASH_UTILS_MODEL" ] && error "model '$BASH_UTILS_MODEL' not found";
-            shift
-            arg="${1:-}"
-            if [ -n "$arg" ]; then
-                cp "$BASH_UTILS_MODEL" "$arg"
-                chmod a+x "$arg"
-                ! $QUIET && echo "$arg";
-            else
-                cat "$BASH_UTILS_MODEL"
-            fi
-            exit 0
-            ;;
-    esac
-    shift
-done
-
-exit 0
-# Endfile
+[ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

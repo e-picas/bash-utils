@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Sample usage of the 'bash-utils.bash' library
+# Sample usage of the 'bash-utils' library
 #
 set -eETu
 set -o pipefail
@@ -8,7 +8,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/../bin/bash-utils" || { echo "> bash-util
 rearrange_options "$@"
 eval set -- "$CMD_REQ";
 common_options "$@"
-common_arguments "$@"
 $DEBUG && debug;
 use print-table
 use print-list

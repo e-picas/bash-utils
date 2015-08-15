@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+#
+# bash-utils - A *bash* library for better scripting
+# <http://gitlab.com/piwi/bash-utils>
+# Copyright (c) 2015 Pierre Cassat & contributors
+#
+# Licensed under the Apache Software Foundation license, Version 2.0;
+# you may not use this file except in compliance with the License.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# For sources & updates, see <http://gitlab.com/piwi/bash-utils>.
+#
+# To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
+#
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code or see
+# <http://www.apache.org/licenses/LICENSE-2.0>.
+#
+set -e
+
+[ -z "$BASH_UTILS_VERSION" ] && { \
+    source "$(dirname "${BASH_SOURCE[0]}")/bash-utils-core" || \
+        { echo "> bash-utils-core not found!" >&2; exit 1; }; \
+};
+
+##@!@##
+#### Bash-Utils command ####
+
+CMD_NAME="$BASH_UTILS_NAME"
+CMD_VERSION="$BASH_UTILS_VERSION"
+CMD_COPYRIGHT='Copyright (c) 2015 Pierre Cassat & contributors'
+CMD_LICENSE='Apache Software Foundation license 2.0 <http://www.apache.org/licenses/LICENSE-2.0>'
+CMD_SOURCES='Sources & updates: <http://gitlab.com/piwi/bash-utils.git>'
+CMD_DESCRIPTION='A short *bash* library for better scripting.'
+#CMD_SYNOPSIS="$0 [-fqvVx] [--debug|--dry-run|--force|--quiet|--verbose|--version] [-e|--exec[=<arg>]] <arguments> --"
+CMD_SYNOPSIS=''
+CMD_HELP="arguments:
+    about               alias of '--version'
+    help                alias of '--help'
+    model[=file_path]   see the 'bash-utils-model.bash' model contents or copy it in 'file_path'
+    usage               get the library synopsis
+    version             alias of '--version --quiet'
+
+options:
+    --dry-run           process a dry-run
+    -e|--exec=<arg>     execute the argument in the library's environment:
+                            # bash-utils --exec='e_color \"<bold>test</bold>\"'
+    -e|--exec           without argument, any piped content will be evaluated:
+                            # echo 'e_color \"<bold>test</bold>\"' | bash-utils --exec
+    -f|--force          do not prompt for choices if a default choice exists
+    -h|--help           get this help info
+    -q|--quiet          decrease script's verbosity
+    -v|--verbose        increase script's verbosity
+    -V|--version        get library information (license, version etc)
+                        use option '--quiet' to get version number only
+    -x|--debug          see some debugging information
+
+paths:
+    $BASH_UTILS
+    $BASH_UTILS_ROOT
+    $BASH_UTILS_MODULES
+    $BASH_UTILS_MODEL
+";
+CMD_OPTS_SHORT=( ':' 'e::' f h q v V x )
+CMD_OPTS_LONG=( 'exec::' debug dry-run force help quiet verbose version )
+TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_KEY
+TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS
+TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_VERSION
+TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_MODEL
+TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_ROOT
+TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_MODULES
+[ $# -eq 0 ] && usage_info && exit 1;
+rearrange_options "$@"
+[ -n "$CMD_REQ" ] && eval set -- "$CMD_REQ";
+common_options "$@"
+read_from_pipe
+$DEBUG && debug;
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -e | --exec* )
+            OPTARG="$(echo "$2" | cut -d'=' -f2)"
+            arg="${OPTARG}"
+            [ -z "$arg" ] && arg="$_PIPED_INPUT";
+            eval "$arg"
+            exit $?
+            ;;
+        -- ) shift; break;;
+        * )  ! is_known_option "$1" && error "unknown option '$1'";;
+    esac
+    shift
+done
+while [ $# -gt 0 ]; do
+    case "$1" in
+        'about')    version_info && exit 0;;
+        'debug')    debug        && exit 0;;
+        'help')     help_info    && exit 0;;
+        'usage')    usage_info   && exit 0;;
+        'version')  version_info true && exit 0;;
+        'model')
+            [ ! -f "$BASH_UTILS_MODEL" ] && error "model '$BASH_UTILS_MODEL' not found";
+            shift
+            arg="${1:-}"
+            if [ -n "$arg" ]; then
+                cp "$BASH_UTILS_MODEL" "$arg"
+                chmod a+x "$arg"
+                ! $QUIET && echo "$arg";
+            else
+                cat "$BASH_UTILS_MODEL"
+            fi
+            exit 0
+            ;;
+    esac
+    shift
+done
+
+exit 0
+# Endfile
+# vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

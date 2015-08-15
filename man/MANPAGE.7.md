@@ -2,7 +2,7 @@ Man:        Bash-Utils Documentation
 Man-name:   bash-utils
 Author:     Pierre Cassat
 Section:    7
-Date: 2015-08-07
+Date: 2015-08-14
 Version: 0.0.1@dev
 
 
@@ -11,12 +11,18 @@ Version: 0.0.1@dev
 To create a script using the library, you can call the *model* argument of the library itself, which
 will create a starter template script:
 
-    bash-utils.bash model /path/to/your/script.sh
+    bash-utils model /path/to/your/script.sh
 
 Actually, the only requirement to use the library is to source it in your script:
 
-    source bash-utils.bash
+    source bash-utils
 
+You can also use it as your script's *interpreter* defining it in your 
+[*hash bang* (*shebang*)](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) line:
+
+    #!/usr/bin/env bash-utils
+
+    # write your script here
 
 ### Notes about *bash* scripting and usage
 
@@ -51,7 +57,7 @@ The rules are the followings:
 ### Starter template
 
     #!/usr/bin/env bash
-    source ~/bin/bash-utils.bash
+    source ~/bin/bash-utils
     
     # write your scripts logic here
     # ...
@@ -105,7 +111,7 @@ for default options and arguments. To use this, add in your script:
 
 You can **overwrite any method** by re-defining it after having sourced the library:
 
-    source .../bash-utils.bash
+    source .../bash-utils
     
     error() {
         # your custom error handler
@@ -113,7 +119,7 @@ You can **overwrite any method** by re-defining it after having sourced the libr
 
 The best practice is to create user methods instead of overwrite native ones and call them:
 
-    source .../bash-utils.bash
+    source .../bash-utils
     
     user_error() {
         # your custom error handler
@@ -146,6 +152,14 @@ Default options handled by the library are:
     (verbosity should be one level more than in `$VERBOSE` mode)
 -   **--dry-run**: enables the `$DRY_RUN` environment variable ; this should not de sensible stuff but inform user about
     what should be done
+
+The library also handles those informational options:
+
+-   **-V** | **--version** to get the name and version number of the script
+-   **-h** | **--help** to get the full help information of script's usage
+
+The output of the informational arguments listed above are constructed using the `CMD_...` environment
+variables you may define for each script.
 
 These options are handled by the *getopt* program. You can add your own options by overriding the following variables:
 
@@ -182,26 +196,6 @@ Due to known limitations of the *getopt* program, you should always use an equal
 an option (short or long) and its argument: `-o=arg` or `--option=arg`.
 
 
-### Script's arguments
-
-The library handles by default the following arguments:
-
--   **version** to get the name and version number of the script
--   **about** to get a long information string about the script (license, sources ...)
--   **help** to get the full help information of script's usage
--   **usage** to get the short help information of script's usage (its *synopsis*).
-
-The output of the informational arguments listed above are constructed using the `CMD_...` environment
-variables you may define for each script.
-
-You can define your own arguments by overriding the `common_arguments()` method or build a new loop
-over script's arguments:
-
-    case "$1" in
-        arg) ... ;;
-    esac
-
-
 ### Technical points
 
 The library uses the following *Bash* options by default:
@@ -224,7 +218,9 @@ Online *bash* scripting guides and tools:
 
 -   the *Bash Guide for Beginners*: <http://tldp.org/LDP/Bash-Beginners-Guide/html/index.html> (recommended) 
 -   the *Advanced Bash-Scripting Guide*: <http://tldp.org/LDP/abs/html/index.html> (recommended) 
--   the *Bash Reference Manual* at gnu.org: <http://www.gnu.org/software/bash/manual/html_node/index.html>
+-   the *Bash Reference Manual*: <http://www.gnu.org/software/bash/manual/html_node/index.html>
+-   the *GNU Coding Standards*: <http://www.gnu.org/prep/standards/standards.html>
 -   *BATS*, a test suite for Bash scripts: <http://github.com/sstephenson/bats>
+-   *ShellCheck*, an online Bash validator: <http://www.shellcheck.net/>
 
 bash(1), bash-utils(1), getopt(1)

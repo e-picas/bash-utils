@@ -2,7 +2,7 @@ Man:        Bash-Utils Manual
 Man-name:   bash-utils
 Author:     Pierre Cassat
 Section:    1
-Date: 2015-08-07
+Date: 2015-08-14
 Version: 0.0.1@dev
 
 
@@ -14,20 +14,20 @@ Bash-Utils - A short *bash* library for better scripting.
 
 Usage of the library in a script:
 
-    source bash-utils.bash || { echo "> bash-utils not found!" >&2; exit 1; };
+    source bash-utils || { echo "> bash-utils not found!" >&2; exit 1; };
 
 Usage of the library as a command:
 
-**bash-utils.bash** [**-fqvVx**]
-    [**--debug**|**--dry-run**|**--force**|**--quiet**|**--verbose**|**--version**]
+**bash-utils** [**-fhqvVx**]
+    [**--debug**|**--dry-run**|**--force**|**--help**|**--quiet**|**--verbose**|**--version**]
     [**-e**|**--exec**[=*arg*]] <arguments> --
 
 ## DESCRIPTION
 
-The *bash-utils* shell script is a short library of utilities to use to quickly build robust *bash* scripts.
+The *Bash-Utils* shell script is a short library of utilities to use to quickly build robust *Bash* scripts.
 It proposes a set of useful functions and pre-defined environment variables to let you build a script with
 options and arguments, generate some informational output about the script's usage, handle errors and more
-features (see bash-utils(7) for a full documentation).
+features (see bash-utils(7) for a full documentation). It is organized in a *core* and some *modules*.
 
 ## OPTIONS
 
@@ -41,25 +41,21 @@ The following options are supported by default for any script using the library:
 *-f*, *--force*
 :   Force some commands to not prompt confirmation. 
 
+*-h*, *--help*
+:   See the help information about the script.
+
 *-q*, *--quiet*
 :   Decrease script's verbosity. 
 
 *-v*, *--verbose*
 :   Increase script's verbosity. 
 
+*-V*, *--version*
+:   See script's version and copyright information ; use option `quiet` to get version number only.
+
 *-x*, *--debug*
 :   See debug info.
 
-The following internal actions are available:
-
-*about*
-:   See script's information
-
-*help / usage*
-:   See the help information about the script.
-
-*version*
-:   See script's version
 
 ### Using the library as a command
 
@@ -71,9 +67,6 @@ content will be evaluated:
 
         bash-utils --exec='e_color "<bold>test</bold>"'
         echo 'e_color "<bold>test</bold>"' | bash-utils --exec
-
-*-V*, *--version*
-:   Get current version of the library (alias of the 'version' argument).
 
 The following additional arguments are available when you call the library itself:
 
@@ -88,16 +81,15 @@ using the library. A starter template is available in bash-utils(7).
 
 To copy the model as a base for your own scripts, you may use the `model` argument:
 
-    bash-utils.bash model /path/to/script
+    bash-utils model /path/to/script
 
 
 ## LICENSE
 
-Copyright (c) 2015, Pierre Cassat <me@e-piwi.fr> & contributors
+Copyright (c) 2015, Pierre Cassat & contributors
 
-Licensed under the Apache License, Version 2.0 (the "License");
+Licensed under the Apache Software Foundation license, Version 2.0;
 you may not use this file except in compliance with the License.
-You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>.
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -106,10 +98,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 For the full copyright and license information, please view the LICENSE
-file that was distributed with this source code.
+file that was distributed with this source code or see 
+<http://www.apache.org/licenses/LICENSE-2.0>.
 
 For documentation, sources & updates, see <http://gitlab.com/piwi/bash-utils.git>. 
-To read Apache-2.0 license conditions, see <http://www.apache.org/licenses/LICENSE-2.0>>.
 
 ## BUGS
 

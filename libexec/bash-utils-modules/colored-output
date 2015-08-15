@@ -1,34 +1,28 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash-utils
+#
+# This script is a module for Bash-Utils
 #
 # bash-utils - A *bash* library for better scripting
 # <http://gitlab.com/piwi/bash-utils>
 # Copyright (c) 2015 Pierre Cassat & contributors
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache Software Foundation license, Version 2.0;
+# you may not use this file except in compliance with the License.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 # For sources & updates, see <http://gitlab.com/piwi/bash-utils>.
 #
 # To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
 #
 # For the full copyright and license information, please view the LICENSE
-# file that was distributed with this source code or see <http://www.gnu.org/licenses/>.
+# file that was distributed with this source code or see
+# <http://www.apache.org/licenses/LICENSE-2.0>.
 #
-
-[ -z "$BASH_UTILS_VERSION" ] && { \
-    source "$(dirname "${BASH_SOURCE[0]}")/bash-utils-core" || \
-        { echo "> bash-utils-core not found!" >&2; exit 1; }; \
-};
 
 ##@!@##
 #### COLORIZED CONTENTS #############################################################################
@@ -190,9 +184,9 @@ parse_color_tags()
                 code="$(get_color_code "$opt")"
                 tag="$(get_color_tag "$opt")"
                 normaltag="$(get_color_tag default)"
-            elif in_array "${opt/bg/}" "${TEXTCOLORS[@]}"; then
-                code="$(get_color_code "${opt/bg/}" true)"
-                tag="$(get_color_tag "${opt/bg/}" true)"
+            elif in_array "${opt/_bg/}" "${TEXTCOLORS[@]}"; then
+                code="$(get_color_code "${opt/_bg/}" true)"
+                tag="$(get_color_tag "${opt/_bg/}" true)"
                 normaltag="$(get_color_tag default true)"
             else
                 continue
@@ -209,7 +203,7 @@ parse_color_tags()
         if [ -n "$transformed" ]; then transformed+="\n"; fi
         transformed+="$transformedline"
     done <<< "$1"
-    echo -e "$transformed" # this works on Linux (Ubuntu 14.04)
+    _echo "$transformed"
     return 0
 }
 
@@ -232,6 +226,12 @@ strip_colors()
     return 0
 }
 
+# treat direct params
+if [ $# -gt 0 ]; then
+    [ -z "$LINUX_OS" ] && declare -a LINUX_OS=("$(get_env_array_LINUX_OS)")
+    parse_color_tags "$@"
+    exit $?
+fi
 
 ##@!@##
 [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;

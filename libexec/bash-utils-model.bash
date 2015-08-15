@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 #
-# Demonstration usage of the 'bash-utils.bash' library
-# Sources & updates at <http://gitlab.com/piwi/bash-utils.git>
+# <http://gitlab.com/piwi/bash-utils>
+# Copyright (c) 2015 Pierre Cassat & contributors
+# License Apache 2.0 - This program comes with ABSOLUTELY NO WARRANTY.
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code or see <http://www.apache.org/licenses/LICENSE-2.0>.
+#
+# Demonstration usage of the 'bash-utils' library
 # Default options are: -f | -q | -v | -x | --dry-run
 #
 
@@ -17,7 +22,7 @@ set -u      # throw error on unset variable usage
 
 #######################
 ## include utilities
-source bash-utils.bash || { echo "> bash-utils not found!" >&2; exit 1; };
+source bash-utils || { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils not found!" >&2; exit 1; };
 
 #######################
 ## command info
@@ -35,13 +40,15 @@ My command help string ...
 Available options:
     --dry-run       process a dry-run
     -f|--force      do not prompt for choices if a default choice exists
+    -h|--help       get this help info
     -q|--quiet      decrease script's verbosity
     -v|--verbose    increase script's verbosity
+    -V|--version    get library information (license, version etc)
+                    use option '--quiet' to get version number only
     -x|--debug      see some debugging information
-
-Use arguments 'usage', 'about' or 'version' for application information.";
-CMD_OPTS_SHORT=(f q v x)
-CMD_OPTS_LONG=(debug dry-run force quiet verbose)
+";
+CMD_OPTS_SHORT=(f h q v V x)
+CMD_OPTS_LONG=(debug dry-run force help quiet verbose version)
 
 #######################
 ## command options & arguments
@@ -76,9 +83,6 @@ done
 
 # usage info if no argument
 [ $# -eq 0 ] && usage_info && exit 1;
-
-# common arguments treatment (help, usage, version, about)
-[ $# -gt 0 ] && common_arguments "$*";
 
 # debug environment in debug mode
 $DEBUG && debug;
