@@ -25,10 +25,181 @@ set -e
 
 [ -z "$BASH_UTILS_VERSION" ] && { \
     source "$(dirname "${BASH_SOURCE[0]}")/bash-utils-core" || \
-        { echo "> bash-utils-core not found!" >&2; exit 1; }; \
+        { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils-core not found!" >&2; exit 1; }; \
 };
 
 ##@!@##
+
+#### ARRAYS ####
+
+# set an environment (global) array
+# to get back the array values, call `get_env_array_ARRAY_NAME`
+# usage: `set_env_array <name> <values = array[@]>`
+set_env_array()
+{
+    local index="$1"
+    declare -a values=("${!2}")
+    eval "get_env_array_${index}(){ echo \"${values[@]}\"; };";
+    return 0
+}
+
+# get the index of a value in an array
+# usage: `array_search <item> <$array[@]>`
+array_search ()
+{
+    [ $# -lt 2 ] && die 'usage: `array_search <item> <$array[@]>`';
+    local i=-1 j
+    local search="$1"
+    shift
+    declare -a args
+    if [ $# -gt 1 ]; then
+        args=("$@")
+    else
+        [ -n "${!1:-}" ] && args=("${!1}") || return 1;
+    fi
+    for ((j=0; j<"${#args[@]}"; j++)); do
+        [ "$search" = "${args[$j]}" ] && i="$j";
+    done
+    [[ $i -ne -1 ]] && echo "$i" && return 0
+    return 1
+}
+
+# test if a value is in an array ; returns 0 if it is found
+# usage: `in_array <item> <$array[@]>`
+in_array()
+{
+    [ $# -lt 2 ] && die 'usage: `in_array <item> <$array[@]>`';
+    local needle="$1"
+    shift
+    declare -a args
+    if [ $# -gt 1 ]; then
+        args=("$@")
+    else
+        [ -n "${!1:-}" ] && args=("${!1}") || return 1;
+    fi
+    for item in "${args[@]}"; do
+        [ "$needle" = "$item" ] && return 0
+    done
+    return 1
+}
+
+#### FILE SYSTEM ####
+
+# get the number of the line matching a mask in a file (empty result if not found)
+# usage: `get_line_number_matching <file_path> <mask>`
+get_line_number_matching()
+{
+    [ $# -lt 1 ] && die 'usage: `get_line_number_matching <file_path> <mask>`';
+    local path="$1"
+    [ ! -e "$path" ] && die "file '${path}' not found";
+    local match="$2"
+    grep -n "$match" "$path" | cut -f1 -d:
+    return 0
+}
+
+# create a temporary file named like '$$...'
+# usage: `make_tmp_file [suffix]`
+make_tmp_file()
+{
+    local suffix='' tmpfile
+    [ $# -gt 0 ] && suffix=".$1"
+    tmpfile="$(mktemp -t "$$${suffix}.XXXXXX")"
+    echo "$tmpfile"
+    return 0
+}
+
+# get absolute path of a dir
+# inspired by <https://github.com/sstephenson/bats>
+# usage: `real_path_dirname <path>`
+real_path_dirname()
+{
+    [ $# -lt 1 ] && die 'usage: `real_path_dirname <path>`';
+    local cwd="$(pwd)"
+    local path="$1"
+    while [ -n "$path" ]; do
+        cd "${path%/*}" 2>/dev/null
+        local name="${path##*/}"
+        path="$(resolve_link "$name" || true)"
+    done
+    pwd
+    cd "$cwd"
+    return 0
+}
+
+# resolve symbolic link
+# inspired by <https://github.com/sstephenson/bats>
+# usage: `resolve_link <path>`
+resolve_link()
+{
+    [ $# -lt 1 ] && die 'usage: `resolve_link <path>`';
+    $(type -p greadlink readlink | head -1) "$1"
+    return 0
+}
+
+# delete eventual trailing slash
+# usage: `strip_trailing_slash <path>`
+strip_trailing_slash()
+{
+    [ $# -lt 1 ] && die 'usage: `strip_trailing_slash <path>`';
+    local path="$1"
+    echo "${1%/}"
+    return 0
+}
+
+#### STRINGS ####
+
+##@ ECHOCMD (read-only: 'builtin' or 'gnu')
+## Test if 'echo' is shell builtin or program
+if [ "$($(which echo) --version)" = '--version' ]
+then declare -rx ECHOCMD='builtin' 2>/dev/null;
+else declare -rx ECHOCMD='gnu' 2>/dev/null;
+fi
+
+#### _echo ( string )
+## echoes the string with the true 'echo -e' command
+## use this for colorization
+_echo () {
+    echo -e "$*" # this works on Linux (Ubuntu 14.04) & Darwin (Mac OSX with GNU-coreutils)
+    return 0
+#    tput sgr0
+    case "$ECHOCMD" in
+        gnu) $(which echo) -e "$*";;
+        builtin) echo "$*";;
+    esac
+    return 0
+}
+
+#### _necho ( string )
+## echoes the string with the true 'echo -en' command
+## use this for colorization and no new line
+_necho () {
+    echo -ne "$*" # this works on Linux (Ubuntu 14.04) & Darwin (Mac OSX with GNU-coreutils)
+    return 0
+#    tput sgr0
+    case "$ECHOCMD" in
+        gnu) $(which echo) -en "$*";;
+        builtin) echo -n "$*" >&2;;
+    esac
+    return 0
+}
+
+# transform a string in upper case
+# usage: `string_to_upper <string>`
+string_to_upper()
+{
+    [ $# -lt 1 ] && die 'usage: `string_to_upper <string>`';
+    echo "$@" | tr '[:lower:]' '[:upper:]';
+    return 0
+}
+
+# transform a string in lower case
+# usage: `string_to_lower <string>`
+string_to_lower()
+{
+    [ $# -lt 1 ] && die 'usage: `string_to_lower <string>`';
+    echo "$@" | tr '[:upper:]' '[:lower:]';
+    return 0
+}
 
 #### COMMAND INFO ####
 

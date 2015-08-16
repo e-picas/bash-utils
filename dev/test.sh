@@ -1,11 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash-utils
 #
 # Sample usage of the 'bash-utils' library
 #
-set -eETu
-set -o pipefail
-
-source "$(dirname "${BASH_SOURCE[0]}")/../bin/bash-utils" || { echo "> bash-utils not found!" >&2; exit 1; };
 
 debug_env()
 {

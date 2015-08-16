@@ -33,11 +33,16 @@ if [ -z "${TEXTCOLORS:-}" ]; then
     declare -rxa TEXTCOLORS=(default black red green yellow blue magenta cyan grey white lightred lightgreen lightyellow lightblue lightmagenta lightcyan lightgrey)
     declare -rxa TEXTCOLORS_CODES_FOREGROUND=(39 30 31 32 33 34 35 36 90 97 91 92 93 94 95 96 37)
     declare -rxa TEXTCOLORS_CODES_BACKGROUND=(49 40 41 42 43 44 45 46 100 107 101 102 103 104 105 106 47)
+    set_env_array TEXTCOLORS TEXTCOLORS[@]
+    set_env_array TEXTCOLORS_CODES_FOREGROUND TEXTCOLORS_CODES_FOREGROUND[@]
+    set_env_array TEXTCOLORS_CODES_BACKGROUND TEXTCOLORS_CODES_BACKGROUND[@]
 
     ##@ TEXTOPTIONS = ( normal bold small underline blink reverse hidden ) (read-only)
     ## Terminal text options table
     declare -rxa TEXTOPTIONS=(normal bold small underline blink reverse hidden)
     declare -rxa TEXTOPTIONS_CODES=(0 1 2 4 5 7 8)
+    set_env_array TEXTOPTIONS TEXTOPTIONS[@]
+    set_env_array TEXTOPTIONS_CODES TEXTOPTIONS_CODES[@]
 fi
 
 ## stop here on pre-loading
@@ -229,6 +234,8 @@ strip_colors()
 # treat direct params
 if [ $# -gt 0 ]; then
     [ -z "$LINUX_OS" ] && declare -a LINUX_OS=("$(get_env_array_LINUX_OS)")
+    [ -z "$TEXTOPTIONS" ] && declare -a TEXTOPTIONS=("$(get_env_array_TEXTOPTIONS)")
+    [ -z "$TEXTCOLORS" ] && declare -a TEXTCOLORS=("$(get_env_array_TEXTCOLORS)")
     parse_color_tags "$@"
     exit $?
 fi

@@ -25,7 +25,7 @@ set -e
 
 [ -z "$BASH_UTILS_VERSION" ] && { \
     source "$(dirname "${BASH_SOURCE[0]}")/bash-utils-core" || \
-        { echo "> bash-utils-core not found!" >&2; exit 1; }; \
+        { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils-core not found!" >&2; exit 1; }; \
 };
 
 ##@!@##
@@ -61,8 +61,6 @@ options:
     -x|--debug          see some debugging information
 
 paths:
-    $BASH_UTILS
-    $BASH_UTILS_ROOT
     $BASH_UTILS_MODULES
     $BASH_UTILS_MODEL
 ";

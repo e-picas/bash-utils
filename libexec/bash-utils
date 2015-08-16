@@ -33,7 +33,7 @@ getapplibexec() {
     pwd
     cd "$cwd"
 }
-appfile="$(getapplibexec "${BASH_SOURCE[0]}")/bash-utils-core/bash-utils-core"
+appfile="$(getapplibexec "${BASH_SOURCE[0]}")/bash-utils-core"
 if [ ! -f "$appfile" ]; then echo "> ${BASH_SOURCE[0]}:${LINENO}: required file '$appfile' not found!" >&2; exit 1; fi
 source "$appfile"
 
@@ -42,6 +42,9 @@ defaultcmd="${BASH_UTILS_ROOT}/bash-utils-cmd"
 cmd=''
 if [ $# -gt 0 ] && [ -f "$1" ]; then
     cmd="$1"
+    shift
+elif [ $# -gt 0 ] && (module_exists "$1" 2>/dev/null || false); then
+    cmd="$(find_module "$1")"
     shift
 elif [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ]; then
     cmd="$defaultcmd"

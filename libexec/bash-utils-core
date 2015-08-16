@@ -122,8 +122,6 @@ find_module()
 {
     [ $# -lt 1 ] && die 'usage: `find_module <module_name>`';
     local module_name="$1" cmdfile=''
-    [ "$module_name" = 'core' ] && return 1;
-    [ -f "${BASH_UTILS_ROOT}/bash-utils-${module_name}" ] && cmdfile="${BASH_UTILS_ROOT}/bash-utils-${module_name}";
     [ -f "${BASH_UTILS_MODULES}/${module_name}" ] && cmdfile="${BASH_UTILS_MODULES}/${module_name}";
     if [ -n "$cmdfile" ] && [ -f "$cmdfile" ]; then
         echo "$cmdfile" && return 0
@@ -155,7 +153,7 @@ module_exists()
 {
     [ $# -lt 1 ] && return 1;
     local module_name="$1" cmd=''
-    cmd=$(find_module "$module_name")
+    cmd="$(find_module "$module_name")"
     return $?
 }
 
@@ -275,10 +273,10 @@ abs_dirname() {
     cd "$cwd"
 }
 sourcename="$(basename "${BASH_SOURCE[0]}")"
-libexecdir="$(dirname "$(abs_dirname "${BASH_SOURCE[0]}")")"
+libexecdir="$(abs_dirname "${BASH_SOURCE[0]}")"
 declare -xr BASH_UTILS="${libexecdir}/bash-utils"
 declare -xr BASH_UTILS_MODEL="${libexecdir}/${sourcename/-core/-model.bash}"
-declare -xr BASH_UTILS_ROOT="${libexecdir}/bash-utils-core/"
+declare -xr BASH_UTILS_ROOT="${libexecdir}/"
 declare -xr BASH_UTILS_MODULES="${libexecdir}/bash-utils-modules/"
 
 declare -xr CMD_PROG="$(basename "$0")"
@@ -291,14 +289,24 @@ declare -xr CMD_PID="$$"
 declare -xr CMD_CALL_ORIGINAL="$0 $*"
 declare -x CMD_CALL=''
 
+# lib error codes
+##@ E_ERROR=90
+##@ E_OPTS=81
+##@ E_CMD=82
+##@ E_PATH=83
+## Error codes in Bash must return an exit code between 0 and 255.
+## In the library, to be conform with C/C++ programs, we will try to use codes from 80 to 120
+## (error codes in C/C++ begin at 64 but the recent evolutions of Bash reserved codes 64 to 78).
+declare -x E_ERROR=90
+declare -x E_OPTS=81
+declare -x E_CMD=82
+declare -x E_PATH=83
+
 # load defaults
-source "$BASH_UTILS_ROOT"/arrays
-source "$BASH_UTILS_ROOT"/strings
-source "$BASH_UTILS_ROOT"/file-system
-source "$BASH_UTILS_ROOT"/bash-utils-commons
+source "$BASH_UTILS_ROOT"/bash-utils-lib
 export PRELOAD=true
 for f in "$BASH_UTILS_MODULES"/*; do
-    [ "$(basename "$f")" != "$(basename "${BASH_SOURCE[0]}")" ] && [ -x "$f" ] && source "$f";
+    [ -x "$f" ] && source "$f";
 done
 export PRELOAD=false
 
