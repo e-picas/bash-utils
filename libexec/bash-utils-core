@@ -275,7 +275,7 @@ abs_dirname() {
 sourcename="$(basename "${BASH_SOURCE[0]}")"
 libexecdir="$(abs_dirname "${BASH_SOURCE[0]}")"
 declare -xr BASH_UTILS="${libexecdir}/bash-utils"
-declare -xr BASH_UTILS_MODEL="${libexecdir}/${sourcename/-core/-model.bash}"
+declare -xr BASH_UTILS_MODEL="${libexecdir}/${sourcename/-core/-model}"
 declare -xr BASH_UTILS_ROOT="${libexecdir}/"
 declare -xr BASH_UTILS_MODULES="${libexecdir}/bash-utils-modules/"
 

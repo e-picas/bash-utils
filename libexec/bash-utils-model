@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash-utils
 #
 # <http://gitlab.com/piwi/bash-utils>
 # Copyright (c) 2015 Pierre Cassat & contributors
@@ -11,7 +11,7 @@
 #
 
 #######################
-## Bash options
+## Bash options enabled by default
 set -e      # exit if a command has a non-zero status
 set -E      # trap on ERR are inherited by shell functions
 set -T      # trap on DEBUG and RETURN are inherited by shell functions
@@ -19,10 +19,6 @@ set -o pipefail # do not mask pipeline's errors
 set -u      # throw error on unset variable usage
 #set -x      # for dev usage: debug commands before to execute them
 #set -v      # for dev usage: print shell input lines as they are read
-
-#######################
-## include utilities
-source bash-utils || { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils not found!" >&2; exit 1; };
 
 #######################
 ## command info
@@ -34,8 +30,7 @@ CMD_SOURCES='My command sources'
 CMD_DESCRIPTION='A model for *bash* scripts using the *bash-utils* library.'
 # the synopsis should not be overwritten as it is automatically built with `CMD_OPTS_...`
 # CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
-CMD_HELP="
-My command help string ...
+CMD_HELP="My command help string ...
 
 Available options:
     --dry-run       process a dry-run
