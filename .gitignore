@@ -1,0 +1,7 @@
+*tmp*
+user/*
+*.log
+*.conf
+
+# specific to the "dev" branch for dev
+#dev/*
