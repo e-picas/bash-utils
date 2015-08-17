@@ -18,7 +18,6 @@ CMD_HELP="Example of usage:
     ./sample.sh help
     ./sample.sh version
     ./sample.sh version --quiet
-    ./sample.sh about
     ./sample.sh -v -a arg1 -b=arg2 args --force argument2
     ./sample.sh --test1=...* globb # argument must be a globbing pattern
     ./sample.sh --test1 ...* globb # this one will fail as globbing pattern is substituted from terminal
@@ -108,7 +107,6 @@ $DRY_RUN && comment "dry-run mode is enabled";
 # test cases
 case "${1:-}" in
 
-    about)    about_info   && exit 0;;
     debug)    debug        && exit 0;;
     help)     help_info    && exit 0;;
     usage)    usage_info   && exit 0;;
