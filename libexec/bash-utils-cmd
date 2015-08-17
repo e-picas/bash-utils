@@ -83,8 +83,12 @@ while [ $# -gt 0 ]; do
         -e | --exec* )
             OPTARG="$(echo "$2" | cut -d'=' -f2)"
             arg="${OPTARG}"
-            [ -z "$arg" ] && arg="$_PIPED_INPUT";
-            eval "$arg"
+            [ -z "$arg" ] && arg="$PIPED_INPUT";
+            if [ -f "$arg" ]; then
+                source "$arg"
+            else
+                eval "$arg"
+            fi
             exit $?
             ;;
         -- ) shift; break;;
