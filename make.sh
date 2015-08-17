@@ -6,7 +6,7 @@
 # For the full copyright and license information, please view the LICENSE
 # file that was distributed with this source code or see <http://www.apache.org/licenses/LICENSE-2.0>.
 #
-# bash-utils make: install / cleanup / rebuild manpages / upgrade version / create release / test
+# bash-utils make: install / cleanup / rebuild manpages / upgrade version / create release / test / validate
 #
 set -eETu
 
@@ -35,6 +35,7 @@ usage() {
         echo "       $0 version <version>"
         echo "       $0 release <version>"
         echo "       $0 test"
+        echo "       $0 validate"
         echo
         echo "  e.g. $0 install /usr/local"
         echo "       $0 cleanup /usr/local"
@@ -95,7 +96,16 @@ make_release()
 make_tests()
 {
     command -v bats >/dev/null 2>&1 || { echo "BATS command not found. Aborting." >&2; exit 1; }
-    bats ${ROOT_DIR}/test/*.bats
+    bats "$ROOT_DIR"/test/*.bats
+    return $?
+}
+
+make_check()
+{
+    command -v shellcheck >/dev/null 2>&1 || { echo "ShellCheck command not found. Aborting." >&2; exit 1; }
+    for f in $(find "$ROOT_DIR"/libexec/ -type f); do
+        shellcheck --shell=bash --exclude=SC2034,SC2016 "$f" || true;
+    done
     return $?
 }
 
@@ -136,6 +146,7 @@ case "$1" in
         make_release && echo "Released tag v${VERSION} - nothing pushed to remote(s)";
         ;;
     test) make_tests;;
+    validate) make_check;;
     *) usage;;
 esac
 
