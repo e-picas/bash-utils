@@ -55,7 +55,7 @@ array_search ()
     if [ $# -gt 1 ]; then
         args=("$@")
     else
-        [ -n "${!1:-}" ] && args=("${!1}") || return 1;
+        [[ -n "${!1:-}" ]] && args=("${!1}") || return 1;
     fi
     for ((j=0; j<"${#args[@]}"; j++)); do
         [ "$search" = "${args[$j]}" ] && i="$j";
@@ -75,7 +75,7 @@ in_array()
     if [ $# -gt 1 ]; then
         args=("$@")
     else
-        [ -n "${!1:-}" ] && args=("${!1}") || return 1;
+        [[ -n "${!1:-}" ]] && args=("${!1}") || return 1;
     fi
     for item in "${args[@]}"; do
         [ "$needle" = "$item" ] && return 0
