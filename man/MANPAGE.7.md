@@ -18,7 +18,8 @@ Actually, the only requirement to use the library is to source it in your script
     source bash-utils
 
 You can also use it as your script's *interpreter* defining it in your 
-[*hash bang* (*shebang*)](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) line:
+[*hash bang* (*shebang*)](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) line (this is the case
+of the model):
 
     #!/usr/bin/env bash-utils
 
@@ -41,6 +42,8 @@ at all with no difference.
 A command-line program (such as a shell script) often accepts to set some options and arguments calling it in a terminal
 or another script. A global synopsis of command line call can be:
 
+    path/to/script [-o | --options (=argument)] [--] [<parameter> ...]
+    # i.e.:
     program-to-run -o --option='my value' --option-2 'my value' argument1 argument2
 
 The rules are the followings:
@@ -52,12 +55,15 @@ The rules are the followings:
     and a long option is composed by a word prefixed by two dashes, i.e. `--option` ; when an option accepts an argument, 
     it must be separated from the option name by an equal sign, i.e. `--option=argument` and `-o=argument` ; i.e. 
     `./script -o --option-with-no-arg --option-with-arg=argument_value`
+-   a double dashes ` -- ` can be used to identify the end of options ; the rest of the call will be considered as arguments
+    only
 
 
 ### Starter template
 
-    #!/usr/bin/env bash
-    source ~/bin/bash-utils
+    #!/usr/bin/env bash-utils
+    # reset bash options here if needed
+    # set +E
     
     # write your scripts logic here
     # ...
@@ -221,6 +227,6 @@ Online *bash* scripting guides and tools:
 -   the *Bash Reference Manual*: <http://www.gnu.org/software/bash/manual/html_node/index.html>
 -   the *GNU Coding Standards*: <http://www.gnu.org/prep/standards/standards.html>
 -   *BATS*, a test suite for Bash scripts: <http://github.com/sstephenson/bats>
--   *ShellCheck*, an online Bash validator: <http://www.shellcheck.net/>
+-   *ShellCheck*, a Bash validator: <http://www.shellcheck.net/>
 
 bash(1), bash-utils(1), getopt(1)

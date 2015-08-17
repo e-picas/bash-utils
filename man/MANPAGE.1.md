@@ -76,7 +76,7 @@ The following additional arguments are available when you call the library itsel
 
 ## EXAMPLES
 
-Have a look at the `bash-utils-model.bash` script for a full base template of a script
+Have a look at the `bash-utils-model` script for a full base template of a script
 using the library. A starter template is available in bash-utils(7).
 
 To copy the model as a base for your own scripts, you may use the `model` argument:
