@@ -23,7 +23,7 @@ load test-commons
 
 setup()
 {
-    load_bash_utils
+    : # nothing
 }
 
 teardown()
@@ -31,20 +31,69 @@ teardown()
     : # nothing
 }
 
-@test "[env 0] internal BASH_UTILS* variables available" {
-    [ -n "$BASH_UTILS_NAME" ]
-    [ -n "$BASH_UTILS_KEY" ]
-    [ -n "$BASH_UTILS_VERSION" ]
-    [ -n "$BASH_UTILS" ] && [ -f "$BASH_UTILS" ] && [ -e "$BASH_UTILS" ]
-    [ -n "$BASH_UTILS_MODEL" ] && [ -f "$BASH_UTILS_MODEL" ] && [ -e "$BASH_UTILS_MODEL" ]
-    [ -n "$BASH_UTILS_ROOT" ] && [ -d "$BASH_UTILS_ROOT" ]
-    [ -n "$BASH_UTILS_MODULES" ] && [ -d "$BASH_UTILS_MODULES" ]
+# arrays
+TESTARRAY=( 'one' 'two' 'four' )
+
+@test "[lib arrays-1] in_array" {
+    # with full array and valid item
+    run in_array two "${TESTARRAY[@]}"
+    $TEST_DEBUG && {
+        echo "running: in_array two '${TESTARRAY[@]}'"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    # with referenced array and valid item
+    run in_array two TESTARRAY[@]
+    $TEST_DEBUG && {
+        echo "running: in_array two TESTARRAY[@]"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    # with full array and invalid item
+    run in_array three "${TESTARRAY[@]}"
+    $TEST_DEBUG && {
+        echo "running: in_array three '${TESTARRAY[@]}'"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 1 ]
+    # with referenced array and invalid item
+    run in_array three TESTARRAY[@]
+    $TEST_DEBUG && {
+        echo "running: in_array three TESTARRAY[@]"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 1 ]
 }
 
-@test "resolve_link" {
+@test "[lib arrays-2] array_search" {
+    # with full array and valid item
+    run array_search two "${TESTARRAY[@]}"
+    [ "$status" -eq 0 ]
+    [ "$output" -eq 1 ]
+    # with referenced array and valid item
+    run array_search two TESTARRAY[@]
+    [ "$status" -eq 0 ]
+    [ "$output" -eq 1 ]
+    # with full array and invalid item
+    run array_search three "${TESTARRAY[@]}"
+    [ "$status" -eq 1 ]
+    [ -z "$output" ]
+    # with referenced array and invalid item
+    run array_search three TESTARRAY[@]
+    [ "$status" -eq 1 ]
+    [ -z "$output" ]
+}
+
+# file-system
+
+@test "[lib file-system-1] resolve_link" {
     # no arg error
     run resolve_link
-    $OST_DEBUG && {
+    $TEST_DEBUG && {
         echo "running: resolve_link"
         echo "output: $output"
         echo "status: $status"
@@ -53,7 +102,7 @@ teardown()
     # classic
     binpath="$(pwd)/test/bash-utils"
     run resolve_link "$binpath"
-    $OST_DEBUG && {
+    $TEST_DEBUG && {
         echo "running: resolve_link $binpath"
         echo "output: $output"
         echo "status: $status"
@@ -62,10 +111,10 @@ teardown()
     [ "$output" = "../bin/bash-utils" ]
 }
 
-@test "real_path_dirname" {
+@test "[lib file-system-2] real_path_dirname" {
     # no arg error
     run real_path_dirname
-    $OST_DEBUG && {
+    $TEST_DEBUG && {
         echo "running: real_path_dirname"
         echo "output: $output"
         echo "status: $status"
@@ -74,19 +123,19 @@ teardown()
     # classic
     binpath="$(pwd)/test/bash-utils"
     run abs_dirname "$binpath"
-    $OST_DEBUG && {
+    $TEST_DEBUG && {
         echo "running: real_path_dirname $binpath"
         echo "output: $output"
         echo "status: $status"
     } >&1
     [ "$status" -eq 0 ]
-    [ "$output" = "$(pwd)/bin" ]
+    [ "$output" = "$(pwd)/libexec" ]
 }
 
-@test "strip_trailing_slash" {
+@test "[lib file-system-3] strip_trailing_slash" {
     # no arg error
     run strip_trailing_slash
-    $OST_DEBUG && {
+    $TEST_DEBUG && {
         echo "running: strip_trailing_slash"
         echo "output: $output"
         echo "status: $status"
@@ -95,7 +144,7 @@ teardown()
     # classic
     binpath="$(pwd)/"
     run strip_trailing_slash "$binpath"
-    $OST_DEBUG && {
+    $TEST_DEBUG && {
         echo "running: strip_trailing_slash $binpath"
         echo "output: $output"
         echo "status: $status"
@@ -104,10 +153,10 @@ teardown()
     [ "$output" = "$(pwd)" ]
 }
 
-@test "get_line_number_matching" {
+@test "[lib file-system-4] get_line_number_matching" {
     # no arg error
     run get_line_number_matching
-    $OST_DEBUG && {
+    $TEST_DEBUG && {
         echo "running: get_line_number_matching"
         echo "output: $output"
         echo "status: $status"
@@ -115,17 +164,17 @@ teardown()
     [ "$status" -ne 0 ]
     # path error
     run get_line_number_matching "$(pwd)/abcdefg" "$mask"
-    $OST_DEBUG && {
+    $TEST_DEBUG && {
         echo "running: get_line_number_matching $(pwd)/abcdefg $mask"
         echo "output: $output"
         echo "status: $status"
     } >&1
     [ "$status" -ne 0 ]
     # classic / line exists
-    binpath="$(pwd)/bin/bash-utils.bash"
+    binpath="$TESTBASHUTILS_BIN"
     mask='/usr/bin/env'
     run get_line_number_matching "$binpath" "$mask"
-    $OST_DEBUG && {
+    $TEST_DEBUG && {
         echo "running: get_line_number_matching $binpath $mask"
         echo "output: $output"
         echo "status: $status"
@@ -135,7 +184,7 @@ teardown()
     # classic / line not exists
     mask='/usr/bin/enva'
     run get_line_number_matching "$binpath" "$mask"
-    $OST_DEBUG && {
+    $TEST_DEBUG && {
         echo "running: get_line_number_matching $binpath $mask"
         echo "output: $output"
         echo "status: $status"
@@ -144,10 +193,39 @@ teardown()
     [ -z "$output" ]
 }
 
-@test "string_to_upper" {
+@test "[lib file-system-5] log" {
+    # var exists
+    $TEST_DEBUG && {
+        echo "running: logfile is $CMD_LOGFILE"
+    } >&1
+    [ -n "$CMD_LOGFILE" ]
     # no arg error
-    run str_to_upper
-    $OST_DEBUG && {
+    run log
+    $TEST_DEBUG && {
+        echo "running: log"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ -z "$output" ]
+    # args
+    run log 'log string'
+    $TEST_DEBUG && {
+        echo "running: log 'log string'"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ -z "$output" ]
+    tail -n1 "$CMD_LOGFILE" | grep 'log string$'
+}
+
+# strings
+
+@test "[lib strings-1] string_to_upper" {
+    # no arg error
+    run string_to_upper
+    $TEST_DEBUG && {
         echo "running: string_to_upper"
         echo "output: $output"
         echo "status: $status"
@@ -155,7 +233,7 @@ teardown()
     [ "$status" -ne 0 ]
     # classic
     run string_to_upper "abcdefgHIJkLM"
-    $OST_DEBUG && {
+    $TEST_DEBUG && {
         echo "running: string_to_upper abcdefgHIJkLM"
         echo "output: $output"
         echo "status: $status"
@@ -164,41 +242,22 @@ teardown()
     [ "$output" = 'ABCDEFGHIJKLM' ]
 }
 
-@test "string_to_lower" {
+@test "[lib strings-2] string_to_lower" {
     # no arg error
-    run str_to_lower
-    $OST_DEBUG && {
+    run string_to_lower
+    $TEST_DEBUG && {
         echo "running: string_to_lower"
         echo "output: $output"
         echo "status: $status"
     } >&1
     [ "$status" -ne 0 ]
     # classic
-    run str_to_lower "abcdefgHIJkLM"
-    $OST_DEBUG && {
+    run string_to_lower "abcdefgHIJkLM"
+    $TEST_DEBUG && {
         echo "running: string_to_lower abcdefgHIJkLM"
         echo "output: $output"
         echo "status: $status"
     } >&1
     [ "$status" -eq 0 ]
     [ "$output" = 'abcdefghijklm' ]
-}
-
-@test "function_exists" {
-    # classic / func exist
-    run function_exists function_exists
-    $OST_DEBUG && {
-        echo "running: function_exists function_exists"
-        echo "output: $output"
-        echo "status: $status"
-    } >&1
-    [ "$status" -eq 0 ]
-    # classic / func not exist
-    run function_exists abcdefghijklmnopqrstuvw
-    $OST_DEBUG && {
-        echo "running: function_exists abcdefghijklmnopqrstuvw"
-        echo "output: $output"
-        echo "status: $status"
-    } >&1
-    [ "$status" -ne 0 ]
 }

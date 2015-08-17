@@ -46,6 +46,7 @@ set -o functrace
 ## throw error on unset variable usage
 #set -u
 set -o nounset
+
 ## for dev usage: debug commands before to execute them
 ##set -x
 #set -o xtrace
@@ -53,19 +54,19 @@ set -o nounset
 ##set -v
 #set -o verbose
 
-#### ID ####
-
-declare -xr BASH_UTILS_NAME='Bash-Utils'
-declare -xr BASH_UTILS_KEY='bash-utils'
-declare -xr BASH_UTILS_VERSION='0.0.1@dev'
-
-#### CORE ####
-# functions are written in alphabetical order
-
 # trap errors to 'die'
 trap 'die "trapped error at ${BASH_SOURCE}:${BASH_LINENO:-}:${FUNCNAME:-}()"' 1 2 3 15 ERR
 # trap exit to 'shutdown_handler'
 trap 'shutdown_handler' EXIT
+
+#### ID ####
+
+readonly BASH_UTILS_NAME='Bash-Utils'
+readonly BASH_UTILS_KEY='bash-utils'
+readonly BASH_UTILS_VERSION='0.0.1@dev'
+
+#### CORE ####
+# functions are written in alphabetical order
 
 # debug environment variables from the `$TO_DEBUG` array
 # usage: `debug`
@@ -88,6 +89,7 @@ debug()
 die()
 {
     local err=$?
+    [ "$err" -eq 0 ] && err=1;
     if ${QUIET:-false}; then
         echo "${1:-unknown error}" >&2
     else
@@ -138,15 +140,6 @@ function_exists()
     [ "$(type -t "$1")" == 'function' ]
 }
 
-# add an entry in `$CMD_LOGFILE`
-# usage: `log <message>`
-log()
-{
-    [ $# -eq 0 ] && return 0;
-    echo "$(date +'%x %R') ${CMD_USER}@${CMD_HOST} [$$]: $*" >> "$CMD_LOGFILE";
-    return 0
-}
-
 # test if an app's module exists
 # usage: `module_exists <module_name>`
 module_exists()
@@ -155,6 +148,19 @@ module_exists()
     local module_name="$1" cmd=''
     cmd="$(find_module "$module_name")"
     return $?
+}
+
+# load any piped content into `PIPED_INPUT`
+# usage: `read_from_pipe [file=/dev/stdin]`
+read_from_pipe()
+{
+    local fpipe fpipedir
+    fpipe="${1:-/dev/stdin}"
+    fpipedir="$(dirname "$fpipe")"
+    if [ -e "$fpipe" ] && [ -p "$fpipe" ]; then
+        PIPED_INPUT="$(cat "$fpipe")"
+    fi
+    export PIPED_INPUT
 }
 
 # cleanup after the script exits
@@ -274,10 +280,10 @@ abs_dirname() {
 }
 sourcename="$(basename "${BASH_SOURCE[0]}")"
 libexecdir="$(abs_dirname "${BASH_SOURCE[0]}")"
-declare -xr BASH_UTILS="${libexecdir}/bash-utils"
-declare -xr BASH_UTILS_MODEL="${libexecdir}/${sourcename/-core/-model}"
-declare -xr BASH_UTILS_ROOT="${libexecdir}/"
-declare -xr BASH_UTILS_MODULES="${libexecdir}/bash-utils-modules/"
+readonly BASH_UTILS="${libexecdir}/bash-utils"
+readonly BASH_UTILS_MODEL="${libexecdir}/${sourcename/-core/-model}"
+readonly BASH_UTILS_ROOT="${libexecdir}/"
+readonly BASH_UTILS_MODULES="${libexecdir}/bash-utils-modules/"
 
 CMD_PROG="$(basename "$0")"
 CMD_ROOT="$(abs_dirname "$0")"
@@ -287,17 +293,18 @@ CMD_USER="$(id -un)"
 CMD_CWD="$(pwd)"
 CMD_PID="$$"
 CMD_CALL_ORIGINAL="$0 $*"
-declare -xr CMD_PROG CMD_ROOT CMD_OS CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_CALL_ORIGINAL
-declare -x CMD_CALL=''
+readonly  CMD_PROG CMD_ROOT CMD_OS CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_CALL_ORIGINAL
+export CMD_CALL=''
+export PIPED_INPUT=''
 
 # lib error codes
 # Error codes in Bash must return an exit code between 0 and 255.
 # In the library, to be conform with C/C++ programs, we will try to use codes from 80 to 120
 # (error codes in C/C++ begin at 64 but the recent evolutions of Bash reserved codes 64 to 78).
-declare -x E_ERROR=90
-declare -x E_OPTS=81
-declare -x E_CMD=82
-declare -x E_PATH=83
+readonly E_ERROR=90
+readonly E_OPTS=81
+readonly E_CMD=82
+readonly E_PATH=83
 
 # load defaults
 source "$BASH_UTILS_ROOT"/bash-utils-lib
