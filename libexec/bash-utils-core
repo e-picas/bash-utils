@@ -150,6 +150,19 @@ module_exists()
     return $?
 }
 
+# load any piped content into `PIPED_INPUT`
+# usage: `read_from_pipe [file=/dev/stdin]`
+read_from_pipe()
+{
+    local fpipe fpipedir
+    fpipe="${1:-/dev/stdin}"
+    fpipedir="$(dirname "$fpipe")"
+    if [ -e "$fpipe" ] && [ -p "$fpipe" ]; then
+        PIPED_INPUT="$(cat "$fpipe")"
+    fi
+    export PIPED_INPUT
+}
+
 # cleanup after the script exits
 # this one should never be called directly as it is trapped on EXIT
 # usage: `shutdown_handler`
