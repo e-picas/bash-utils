@@ -140,6 +140,14 @@ function_exists()
     [ "$(type -t "$1")" == 'function' ]
 }
 
+# read current `$PATH` values as human readable string
+# usage: `get_path`
+get_path()
+{
+    echo -e "$PATH" | tr ':' "\n";
+    return 0
+}
+
 # test if an app's module exists
 # usage: `module_exists <module_name>`
 module_exists()
