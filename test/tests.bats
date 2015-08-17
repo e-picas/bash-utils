@@ -31,9 +31,14 @@ teardown()
     : # nothing
 }
 
-@test "internal BASH_UTILS & BASH_UTILS_VERSION variables" {
-    [ -n "$BASH_UTILS" ]
+@test "[env 0] internal BASH_UTILS* variables available" {
+    [ -n "$BASH_UTILS_NAME" ]
+    [ -n "$BASH_UTILS_KEY" ]
     [ -n "$BASH_UTILS_VERSION" ]
+    [ -n "$BASH_UTILS" ] && [ -f "$BASH_UTILS" ] && [ -e "$BASH_UTILS" ]
+    [ -n "$BASH_UTILS_MODEL" ] && [ -f "$BASH_UTILS_MODEL" ] && [ -e "$BASH_UTILS_MODEL" ]
+    [ -n "$BASH_UTILS_ROOT" ] && [ -d "$BASH_UTILS_ROOT" ]
+    [ -n "$BASH_UTILS_MODULES" ] && [ -d "$BASH_UTILS_MODULES" ]
 }
 
 @test "resolve_link" {
@@ -54,7 +59,7 @@ teardown()
         echo "status: $status"
     } >&1
     [ "$status" -eq 0 ]
-    [ "$output" = "../bin/bash-utils.bash" ]
+    [ "$output" = "../bin/bash-utils" ]
 }
 
 @test "real_path_dirname" {
