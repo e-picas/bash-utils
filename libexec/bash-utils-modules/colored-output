@@ -233,9 +233,9 @@ strip_colors()
 
 # treat direct params
 if [ $# -gt 0 ]; then
-    [ -z "$LINUX_OS" ] && declare -a LINUX_OS=("$(get_env_array_LINUX_OS)")
-    [ -z "$TEXTOPTIONS" ] && declare -a TEXTOPTIONS=("$(get_env_array_TEXTOPTIONS)")
-    [ -z "$TEXTCOLORS" ] && declare -a TEXTCOLORS=("$(get_env_array_TEXTCOLORS)")
+    [ -z "$LINUX_OS" ]      && declare -a LINUX_OS=("$(get_env_array_LINUX_OS)")
+    [ -z "$TEXTOPTIONS" ]   && declare -a TEXTOPTIONS=("$(get_env_array_TEXTOPTIONS)")
+    [ -z "$TEXTCOLORS" ]    && declare -a TEXTCOLORS=("$(get_env_array_TEXTCOLORS)")
     parse_color_tags "$@"
     exit $?
 fi
