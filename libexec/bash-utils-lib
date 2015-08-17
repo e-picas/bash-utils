@@ -203,14 +203,15 @@ string_to_lower()
 
 #### COMMAND INFO ####
 
-declare -x CMD_NAME='overwrite the CMD_NAME variable to customize this information'
-declare -x CMD_VERSION='overwrite the CMD_VERSION variable to customize this information'
-declare -x CMD_COPYRIGHT='overwrite the CMD_COPYRIGHT variable to customize this information'
-declare -x CMD_LICENSE='overwrite the CMD_LICENSE variable to customize this information'
-declare -x CMD_SOURCES='overwrite the CMD_SOURCES variable to customize this information'
-declare -x CMD_DESCRIPTION='overwrite the CMD_DESCRIPTION variable to customize this information'
-declare -x CMD_HELP='overwrite the CMD_HELP variable to customize this information'
-declare -x CMD_LOGFILE='/var/log/bash-utils.log'
+export CMD_NAME='overwrite the CMD_NAME variable to customize this information'
+export CMD_VERSION='overwrite the CMD_VERSION variable to customize this information'
+export CMD_COPYRIGHT='overwrite the CMD_COPYRIGHT variable to customize this information'
+export CMD_LICENSE='overwrite the CMD_LICENSE variable to customize this information'
+export CMD_SOURCES='overwrite the CMD_SOURCES variable to customize this information'
+export CMD_DESCRIPTION='overwrite the CMD_DESCRIPTION variable to customize this information'
+export CMD_HELP='overwrite the CMD_HELP variable to customize this information'
+CMD_LOGFILE="$(make_tmp_file "$BASH_UTILS_KEY")"
+export CMD_LOGFILE
 declare -xa CMD_OPTS_SHORT=( f q v x V h )
 declare -xa CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
 declare -xa TO_DEBUG=(
@@ -222,15 +223,15 @@ set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
 set_env_array TO_DEBUG TO_DEBUG[@]
 
 # the synopsis should be left empty as it will be automatically generated with options declarations
-declare -x CMD_SYNOPSIS=''
+export CMD_SYNOPSIS=''
 #declare -x CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
 
 # script flags used as booleans
-declare -x VERBOSE=false        # write in verbose mode:    $VERBOSE && echo '...';
-declare -x QUIET=false          # write in not quiet mode:  $QUIET || echo '...';
-declare -x DEBUG=false          # write in debug mode:      $DEBUG && echo '...';
-declare -x FORCE=false          # write in force mode:      $FORCE && echo '...';
-declare -x DRY_RUN=false        # exec in not dry-run mode: $DRY_RUN || ...;
+export VERBOSE=false        # write in verbose mode:    $VERBOSE && echo '...';
+export QUIET=false          # write in not quiet mode:  $QUIET || echo '...';
+export DEBUG=false          # write in debug mode:      $DEBUG && echo '...';
+export FORCE=false          # write in force mode:      $FORCE && echo '...';
+export DRY_RUN=false        # exec in not dry-run mode: $DRY_RUN || ...;
 
 # list of Linux-like OSs
 declare -xa LINUX_OS=(Linux FreeBSD OpenBSD SunOS)

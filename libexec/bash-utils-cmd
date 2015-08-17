@@ -42,7 +42,7 @@ CMD_SYNOPSIS=''
 CMD_HELP="arguments:
     about               alias of '--version'
     help                alias of '--help'
-    model[=file_path]   see the 'bash-utils-model.bash' model contents or copy it in 'file_path'
+    model[=file_path]   see the 'bash-utils-model' model contents or copy it in 'file_path'
     usage               get the library synopsis
     version             alias of '--version --quiet'
 
