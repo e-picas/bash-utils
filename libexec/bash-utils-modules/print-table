@@ -128,7 +128,7 @@ print_table_line()
         line+="$(printf '%*.*s%s%*.*s%s' \
             0 "${_TABLE_PADDINGS[1]}" "${_TABLE_PADDERS[1]}" \
             "$value" \
-            0 $((${_TABLE_LENGTHS[$j]} + ${_TABLE_PADDINGS[1]} - ${#_TABLE_ITEM[$j]})) "${_TABLE_PADDERS[1]}" \
+            0 $((_TABLE_LENGTHS[j] + _TABLE_PADDINGS[1] - ${#_TABLE_ITEM[$j]})) "${_TABLE_PADDERS[1]}" \
             "${_TABLE_SEPARATORS[1]}" \
         )";
     done
@@ -144,9 +144,9 @@ print_table_separator_line()
     local line=''
     for ((j=0; j<"${#_TABLE_LENGTHS[@]}"; j++)); do
         line+="$(printf '%*.*s%*.*s%*.*s%s' \
-            0 ${_TABLE_PADDINGS[0]} "${_TABLE_PADDERS[1]}" \
-            0 $((${_TABLE_LENGTHS[$j]} + (2 * ${_TABLE_PADDINGS[1]}) - (2 * ${_TABLE_PADDINGS[0]}) )) "${_TABLE_PADDERS[0]}" \
-            0 ${_TABLE_PADDINGS[0]} "${_TABLE_PADDERS[1]}" \
+            0 "${_TABLE_PADDINGS[0]}" "${_TABLE_PADDERS[1]}" \
+            0 $((_TABLE_LENGTHS[j] + (2 * _TABLE_PADDINGS[1]) - (2 * _TABLE_PADDINGS[0]) )) "${_TABLE_PADDERS[0]}" \
+            0 "${_TABLE_PADDINGS[0]}" "${_TABLE_PADDERS[1]}" \
             "${_TABLE_SEPARATORS[0]}" \
         )";
     done

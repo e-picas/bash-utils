@@ -203,7 +203,7 @@ try()
     # redirects to standard output
     exec 3>&1
     set +e
-    error="$($@ 2>&1 >&3)"
+    error="$("$@" 2>&1 >&3)"
     retval=$?
     [ -z "$e" ] || set -e
     # if the command failed (returned a non-zero exit code)
@@ -279,24 +279,21 @@ declare -xr BASH_UTILS_MODEL="${libexecdir}/${sourcename/-core/-model}"
 declare -xr BASH_UTILS_ROOT="${libexecdir}/"
 declare -xr BASH_UTILS_MODULES="${libexecdir}/bash-utils-modules/"
 
-declare -xr CMD_PROG="$(basename "$0")"
-declare -xr CMD_ROOT="$(abs_dirname "$0")"
-declare -xr CMD_OS="$(uname)"
-declare -xr CMD_HOST="$(hostname -f)"
-declare -xr CMD_USER="$(id -un)"
-declare -xr CMD_CWD="$(pwd)"
-declare -xr CMD_PID="$$"
-declare -xr CMD_CALL_ORIGINAL="$0 $*"
+CMD_PROG="$(basename "$0")"
+CMD_ROOT="$(abs_dirname "$0")"
+CMD_OS="$(uname)"
+CMD_HOST="$(hostname -f)"
+CMD_USER="$(id -un)"
+CMD_CWD="$(pwd)"
+CMD_PID="$$"
+CMD_CALL_ORIGINAL="$0 $*"
+declare -xr CMD_PROG CMD_ROOT CMD_OS CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_CALL_ORIGINAL
 declare -x CMD_CALL=''
 
 # lib error codes
-##@ E_ERROR=90
-##@ E_OPTS=81
-##@ E_CMD=82
-##@ E_PATH=83
-## Error codes in Bash must return an exit code between 0 and 255.
-## In the library, to be conform with C/C++ programs, we will try to use codes from 80 to 120
-## (error codes in C/C++ begin at 64 but the recent evolutions of Bash reserved codes 64 to 78).
+# Error codes in Bash must return an exit code between 0 and 255.
+# In the library, to be conform with C/C++ programs, we will try to use codes from 80 to 120
+# (error codes in C/C++ begin at 64 but the recent evolutions of Bash reserved codes 64 to 78).
 declare -x E_ERROR=90
 declare -x E_OPTS=81
 declare -x E_CMD=82

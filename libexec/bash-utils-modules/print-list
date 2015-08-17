@@ -102,7 +102,7 @@ print_list()
     fi
     # print each line
     for ((j=0; j<"${#_LIST_NAMES[@]}"; j++)); do
-        print_list_line "${LIST_NAMES[$j]}" "${LIST_VALUES[$j]}"
+        print_list_line "${_LIST_NAMES[$j]}" "${_LIST_VALUES[$j]}"
     done
     return 0
 }
@@ -116,13 +116,13 @@ print_list_line()
     _ITEM_NAME="${1}"
     _ITEM_VALUE="${2}"
     line="$(printf "%*.*s%s%*.*s%s%*.*s%s%*.*s" \
-        0 $((${_LIST_LENGTHS[0]} - ${#_ITEM_NAME})) "${_LIST_PADDERS[1]}" \
+        0 $((_LIST_LENGTHS[0] - ${#_ITEM_NAME})) "${_LIST_PADDERS[1]}" \
         "${_ITEM_NAME}" \
         0 "${_LIST_PADDINGS[1]}" "${_LIST_PADDERS[1]}" \
         "${_LIST_SEPARATORS[1]}" \
         0 "${_LIST_PADDINGS[1]}" "${_LIST_PADDERS[1]}" \
         "${_ITEM_VALUE}" \
-        0 $((${_LIST_LENGTHS[1]} - ${#_ITEM_NAME})) "${_LIST_PADDERS[1]}" \
+        0 $((_LIST_LENGTHS[1] - ${#_ITEM_NAME})) "${_LIST_PADDERS[1]}" \
     )";
     echo "$line"
     return 0
@@ -135,11 +135,11 @@ print_list_separator_line()
 {
     local line
     line="$(printf "%*.*s%*.*s%s%*.*s%*.*s" \
-        0 $((${_LIST_LENGTHS[0]} + ${_LIST_PADDINGS[1]} - ${_LIST_PADDINGS[0]})) "${_LIST_PADDERS[0]}" \
+        0 $((_LIST_LENGTHS[0] + _LIST_PADDINGS[1] - _LIST_PADDINGS[0])) "${_LIST_PADDERS[0]}" \
         0 "${_LIST_PADDINGS[0]}" "${_LIST_PADDERS[1]}" \
         "${_LIST_SEPARATORS[0]}" \
         0 "${_LIST_PADDINGS[0]}" "${_LIST_PADDERS[1]}" \
-        0 $((${_LIST_LENGTHS[1]} + ${_LIST_PADDINGS[1]} - ${_LIST_PADDINGS[0]})) "${_LIST_PADDERS[0]}" \
+        0 $((_LIST_LENGTHS[1] + _LIST_PADDINGS[1] - _LIST_PADDINGS[0])) "${_LIST_PADDERS[0]}" \
     )";
     echo "$line"
     return 0
