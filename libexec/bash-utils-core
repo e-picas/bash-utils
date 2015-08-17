@@ -89,6 +89,7 @@ debug()
 die()
 {
     local err=$?
+    [ "$err" -eq 0 ] && err=1;
     if ${QUIET:-false}; then
         echo "${1:-unknown error}" >&2
     else
