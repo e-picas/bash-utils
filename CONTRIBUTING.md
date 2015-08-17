@@ -119,7 +119,10 @@ be to develop on a "test-driven-programming" concept:
 -   the test of a feature is first written and should fail
 -   the feature is developed to pass the tests
 
-A module is integrated on "master" ONLY IF IT IS WELL CODED AND PASSED ITS TESTS.
+Once your module is done, ask a pull-request to the "dev-modules" branch. It is at least up-to-date with
+last "master" release.
+
+A module is finally integrated on "master" ONLY IF IT IS WELL CODED AND PASSED ITS TESTS.
 
 How-tos
 -------
