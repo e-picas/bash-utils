@@ -1,0 +1,8 @@
+* text=auto
+
+*.sh    text eol=lf trailing-space space-before-tab -indent-with-non-tab
+*.bash  text eol=lf trailing-space space-before-tab -indent-with-non-tab
+*.bats  text eol=lf trailing-space space-before-tab -indent-with-non-tab
+
+.git*   text export-ignore
+dev/    export-ignore
