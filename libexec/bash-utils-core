@@ -140,15 +140,6 @@ function_exists()
     [ "$(type -t "$1")" == 'function' ]
 }
 
-# add an entry in `$CMD_LOGFILE`
-# usage: `log <message>`
-log()
-{
-    [ $# -eq 0 ] && return 0;
-    echo "$(date +'%x %R') ${CMD_USER}@${CMD_HOST} [$$]: $*" >> "$CMD_LOGFILE";
-    return 0
-}
-
 # test if an app's module exists
 # usage: `module_exists <module_name>`
 module_exists()

@@ -97,6 +97,15 @@ get_line_number_matching()
     return 0
 }
 
+# add an entry in `$CMD_LOGFILE`
+# usage: `log <message>`
+log()
+{
+    [ $# -eq 0 ] && return 0;
+    echo "$(date +'%x %R') ${CMD_USER}@${CMD_HOST} [$$]: $*" >> "$CMD_LOGFILE";
+    return 0
+}
+
 # create a temporary file named like '$$...'
 # usage: `make_tmp_file [suffix]`
 make_tmp_file()
