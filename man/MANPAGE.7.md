@@ -29,6 +29,8 @@ of the model):
 
 ### Notes about *bash* scripting and usage
 
+#### Use your binaries easily
+
 To enable "per-user" binaries (let the system look in any `$HOME/bin/` directory when searching scripts), 
 be sure to add that directory to the `$PATH` environment variable (in your `$HOME/.bashrc` for instance):
 
@@ -40,6 +42,8 @@ The file extension has no incidence upon the script's type (*bash* in our case) 
 [**shebang** directive](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) ; you could name your script with an 
 `.sh`, a `.bash` and even a `.py` extension (which would have no real sense here) or let it without extension 
 at all with no difference.
+
+#### Scripts terminal usage
 
 A command-line program (such as a shell script) often accepts to set some options and arguments calling it in a terminal
 or another script. A global synopsis of a command line call can be:
@@ -60,6 +64,21 @@ The rules are the followings:
 -   an *argument* is a setting passed to the script when calling it ; the arguments are not the same as the options as 
     they are not named but identified by their positions ; i.e. `./script --option argument1 argument2`
 
+#### Commands vs. builtins
+
+*Bash* proposes a large set of **builtins** "commands", which must be differentiated from *external commands*. The bash 
+builtins are always available in any bash environment while external commands must be installed on the system to work.
+If you have a doubt about a command, you can verify running `help <command-name>`, which will respond `... is a shell builtin`
+for builtins. If you have the choice, you should always prefer a builtin rather than an external command, unless you
+are absolutely sure it is present on all UNIX installations.
+
+To get the help about an external command, you can read its *manpage*:
+
+    man <command-name>
+
+To get the help about a builtin, you may use `help`:
+
+    help <builtin>
 
 ### Starter template
 
@@ -78,7 +97,6 @@ Below is a very simple starter template of a script using the library:
 You should use the *model* module for a more complex template:
 
     bash-utils model bash-utils
-
 
 ### Customize your script
 
@@ -99,7 +117,6 @@ To build your own command, you may first override informational variables:
 
 Then you can customize script's options (see below) to fit your needs and write your script's logic in the last
 part of the model.
-
 
 ## DOCUMENTATION
 
@@ -141,7 +158,6 @@ The best practice is to create user methods instead of overwrite native ones and
     }
     
     [ -f filename ] || user_error 'file not found';
-
 
 ### Script's options
 
@@ -202,7 +218,6 @@ In your script, you can use a flag like:
 Due to known limitations of the *getopt* program, you should always use an equal sign between 
 an option (short or long) and its argument: `-o=arg` or `--option=arg`, even if that argument is required.
 
-
 ### Technical points
 
 The library enables the following *Bash* options by default:
@@ -215,6 +230,8 @@ The library enables the following *Bash* options by default:
 -   `-o pipefail`: do not mask pipeline's errors
 -   `-u`: throw error on unset variable usage
 -   `-T`: trap on DEBUG and RETURN are inherited by shell functions
+
+Run `help set` for a full list of bash *set* built-in available options. 
 
 To make robust scripts, here are some reminders:
 
