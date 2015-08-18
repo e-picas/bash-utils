@@ -30,18 +30,72 @@ set -e
 
 ##@!@##
 
-#### ARRAYS ####
+#### CODING ####
 
-# set an environment (global) array
-# to get back the array values, call `get_env_array_ARRAY_NAME`
-# usage: `set_env_array <name> <values = array[@]>`
-set_env_array()
+# test if a function exists - returns a boolean
+# usage: `function_exists <func_name>`
+function_exists()
 {
-    local index="$1"
-    declare -a values=("${!2}")
-    eval "get_env_array_${index}(){ echo \"${values[@]}\"; };";
+    [ $# -eq 0 ] && return 1;
+    [ "$(type -t "$1")" == 'function' ]
+}
+
+#### BOOLEANS ####
+
+# echoes 'on' if bool=true, 'off' if it is false
+# usage: `onoff_bit <bool>`
+onoff_bit ()
+{
+    [ $# -lt 1 ] && return 0;
+    [ "$1" = 'true' ] &&  echo 'on' || echo 'off';
     return 0
 }
+
+# echoes 'true' if bool=true, 'false' if it is false
+# usage: `onoff_bit <bool>`
+truefalse_bit ()
+{
+    [ $# -lt 1 ] && return 0;
+    [ "$1" = 'true' ] && echo 'true' || echo 'false';
+    return 0
+}
+
+#### INTEGERS ####
+
+# test if an integer is an odd number
+# usage: `is_odd <int>`
+is_odd()
+{
+    [ $# -lt 1 ] && return 0;
+    local var="$1"
+    [ $((var%2)) -eq 0 ] && return 1 || return 0;
+}
+
+# test if an integer is an even number
+# usage: `is_even <int>`
+is_even()
+{
+    [ $# -lt 1 ] && return 0;
+    local var="$1"
+    [ $((var%2)) -eq 0 ] && return 0 || return 1;
+}
+
+# test if an integer is a prime number
+# usage: `is_prime <int>`
+is_prime()
+{
+    [ $# -lt 1 ] && return 0;
+    local j=2 nb
+    nb="$1"
+    [ "$nb" -lt 2 ] && return 1;
+    while [ $(($nb%j)) -ne 0 ]
+    do
+        ((j++))
+    done
+    [ "$j" -ne "$1" ] && return 1 || return 0;
+}
+
+#### ARRAYS ####
 
 # get the index of a value in an array
 # usage: `array_search <item> <$array[@]>`
