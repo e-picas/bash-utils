@@ -217,6 +217,25 @@ To make robust scripts, here are some reminders:
 -   to use a variable eventually unset: `echo ${VARIABLE:-default}`
 -   to make a silent sub-command call: `val=$(sub-command 2>/dev/null)`
 
+## FILES
+
+*bin/bash-utils* | **libexec/bash-utils**
+:   This is the "entry point" of *Bash-Utils* ; it should be available in one of the `$PATH` paths for all users ;
+it acts like a loader of the library and a script's interpreter you can use in a script's *shebang*.
+
+**libexec/bash-utils-core**
+:   This is the core of *Bash-Utils* ; it mostly defines required functions and environment variables for the library
+to work by itself and to handle its modules.
+
+**libexec/bash-utils-lib**
+:   This is the library of functions ; it embeds various functions commonly used in *bash* scripts.
+
+**libexec/bash-utils-cmd**
+:   This is the script that handles default parameters and actions of *Bash-Utils* when you call it directly.
+
+**libexec/bash-utils-modules/**
+:   This is the directory where modules are stored ; each module is a single script in that directory ; a module is
+identified by its filename.
 
 ## SEE ALSO
 
