@@ -28,10 +28,11 @@ Usage of the library as a command:
 
 ## DESCRIPTION
 
-The *Bash-Utils* command is a short library of utilities to quickly build robust *Bash* scripts.
-It proposes a set of useful functions and pre-defined environment variables and system options to let you 
-build a script with options and arguments handling, automatic generation of some informational output about 
-the script's usage, handle errors and debugging, and more features (see bash-utils(7) for a full documentation).
+The *Bash-Utils* command is a small library of utilities to quickly write robust and complete *Bash* scripts.
+It proposes a set of useful functions and environment variables in an enhanced environment with some system 
+options enabled by default, to let you build a script with user options and arguments, an automatic generation 
+of some informational output about the script's usage, a special handling of errors, stack trace and debugging, 
+and some more features (see bash-utils(7) for a full documentation).
 
 It also embeds a various set of *modules* constructed as stand-alone bash-utils scripts you can use "as-is",
 calling them directly, or in a script using the library with the help of the `run()` or `use()` functions.

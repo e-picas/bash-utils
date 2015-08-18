@@ -11,7 +11,7 @@ Version: 0.0.1@dev
 To create a script using the library, you can call the *model* argument of the library itself, which
 will create a starter template script:
 
-    bash-utils model bsh-utils /path/to/your/script.sh
+    bash-utils model bash-utils /path/to/your/script.sh
 
 Actually, the only requirement to use the library is to source it in your script:
 
@@ -42,7 +42,7 @@ at all with no difference.
 A command-line program (such as a shell script) often accepts to set some options and arguments calling it in a terminal
 or another script. A global synopsis of a command line call can be:
 
-    path/to/script [-o | --options (=argument)] [--] [<parameter> ...]
+    path/to/script [-o | --options (=argument)] [--] [<parameter> ...]
     # i.e.:
     program-to-run -o --option='my value' --option-2 'my value' argument1 argument2
 

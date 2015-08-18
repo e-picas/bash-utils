@@ -42,32 +42,34 @@ If you want to ask for a new feature, please follow these guidelines:
 Actually change the code
 ------------------------
 
-First of all, you may do the following two things:
+First of all, you may do the following three things:
 
 -   read the *How to contribute* section below to learn about forking, working and pulling,
--   from your fork of the repository, switch to the `dev` branch: this is where the dev things are done.
+-   from your fork of the repository, switch to the `dev` branch: this is where the dev things are done,
+-   if you plan to create a module, switch to the `dev-modules` branch and read the *Create a new module* section below.
 
 ### How to contribute ?
 
 If you want to correct a typo or update a feature of Bash-Utils, the first thing to do is
 [create your own fork of the repository](http://help.github.com/articles/fork-a-repo).
 You will need a (free) GitHub account to do this and your copy will appear in your forks list.
-This is on THIS repository (your own fork) that you will work (you have no right to make 
+Your work belongs to THIS repository (your own fork - you have no right to make 
 direct `push` on the original repository).
 
 Once your work seems finished, you'll have to commit it and push it on your fork (you may 
 finally see your modifications on the sources view on GitHub). Then you'll have to make a 
 "pull-request" to the original repository, commenting it with a description of your correction or
-update, or anything you want me to know about ... Then, if your work seems ok for me 
-(and it certainly will :) and when I'll have the time (!), your work will finally be 
+update, or anything you want me to know about ... Then, if your work seems ok and can be tested,
+and when I'll have the time to do so (!), your work will finally be 
 "merged" in the original repository and you will be able to (eventually) close your fork. 
 Note that the "merge" of a pull-request keeps your name and profile as the "commiter" 
 (the one who made the stuff).
 
 **BEFORE** you start a work on the code, please check that this has NOT been done yet, or part
-of it, by giving a look at <http://github.com/piwi/markdown-extended/pulls>. If you 
+of it, by giving a look at <http://gitlab.com/piwi/bash-utils/pulls>. If you 
 find a pull-request that seems to be like the modification you were going to do, you can 
-comment the request with your vision of the thing or your experience.
+comment the request with your vision of the thing or your experience and participate to that
+work.
 
 ### Full installation of a fork
 
@@ -100,20 +102,13 @@ and pulling new commits:
     git checkout dev
     git pull upstream dev
 
-### Development life-cycle
-
 As said above, all development MUST be done on the `dev` branch of the repository. Doing so we
 can commit our development features to let users using a clone test and improve them.
-
-When the work gets a stable stage, it seems to be time to build and publish a new release. This
-is done by creating a tag named like `vX.Y.Z[-status]` from the "master" branch after having
-merged the "dev" one in. Please see the [Semantic Versioning](http://semver.org/) work by 
-Tom Preston-Werner for more info about the release version name construction rules.
 
 ### Create a new module
 
 If you want to create a new module, put your fork on a new `module-NAME` branch and develop your
-module in the `libexec/bash-utils-modules/` directory using the Bash-Utils internal *model*:
+module in the `libexec/bash-utils-modules/` directory using the Bash-Utils internal *model* module:
 
     bash-utils model module <module-name>
 
@@ -123,7 +118,7 @@ A good practice should be to develop on a "test-driven-programming" concept:
 -   the test of a feature is first written and should fail
 -   the feature is developed to pass the tests
 
-Once your module is done, ask a pull-request to the "dev-modules" branch. It is at least up-to-date with
+Once your module is done, ask for a pull-request to the "dev-modules" branch. It is at least up-to-date with
 last "master" release.
 
 A module is finally integrated on "master" ONLY IF IT IS WELL CODED AND PASSED ITS TESTS.
@@ -139,16 +134,18 @@ the package.
 
 ### Generate the man-pages
 
+The manpages of the app are built with [Markdown-Extended](http://github.com/piwi/markdown-extended).
+
 To automatically re-generate the manpages of the package, you can use:
 
-    $ ./make.sh manpages
+    ./make.sh manpages
 
 To generate them manually, you can run:
 
-    $ bin/markdown-extended -f man -o man/bash-utils.1.man man/MANPAGE.1.md
-    $ man man/bash-utils.1.man
-    $ bin/markdown-extended -f man -o man/bash-utils.1.man man/MANPAGE.7.md
-    $ man man/bash-utils.7.man
+    bin/markdown-extended -f man -o man/bash-utils.1.man man/MANPAGE.1.md
+    man man/bash-utils.1.man
+    bin/markdown-extended -f man -o man/bash-utils.1.man man/MANPAGE.7.md
+    man man/bash-utils.7.man
 
 ### Launch unit-tests
 
@@ -156,7 +153,7 @@ The unit-testing of the app is handled with [BATS](http://github.com/sstephenson
 
 You can verify that your package passes all tests running:
 
-    $ ./make.sh test
+    ./make.sh test
 
 All tests are stored in the `test/` directory of the package and
 are *Bats* scripts. See the documentation of Bats for more info.
@@ -170,7 +167,7 @@ To test the lib manually, you can run:
 You can check the code common errors using [ShellCheck](http://github.com/koalaman/shellcheck)
 by running:
 
-    $ ./make.sh validate
+    ./make.sh validate
 
 The default behavior of such a validation will ignore the following rules:
 
@@ -182,6 +179,11 @@ You can check the lib manually running:
     shellcheck --shell=bash --exclude=SC2034,SC2016 libexec/*
 
 ### Make a new release
+
+When the work gets a stable stage, it seems to be time to build and publish a new release. This
+is done by creating a tag named like `vX.Y.Z[-status]` from the "master" branch after having
+merged the "dev" one in. Please see the [Semantic Versioning](http://semver.org/) work by 
+Tom Preston-Werner for more info about the release version name construction rules.
 
 To make a new release of the package, you must follow these steps:
 
@@ -210,7 +212,7 @@ To make a new release of the package, you must follow these steps:
         git push origin vX.Y.Z-STATE
 
 Finally, don't forget to push all changes to `origin` and to make a release page
-on GitHub's repository. The best practice is to attach the PHAR archive to the release.
+on GitHub's repository. The best practice is to attach the archive and a checksum to the release.
 
 Coding rules
 ------------

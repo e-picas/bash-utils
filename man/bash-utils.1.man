@@ -2,13 +2,21 @@
 .\" man-name: bash-utils
 .\" author: Pierre Cassat
 .\" section: 1
-.\" date: 2015-08-07
+.\" date: 2015-08-14
 .\" version: 0.0.1@dev
-.TH  "bash-utils" "1" "2015-08-07" "Version 0.0.1@dev" "Bash-Utils Manual"
+.TH  "bash-utils" "1" "2015-08-14" "Version 0.0.1@dev" "Bash-Utils Manual"
 .SH NAME
 .PP
 Bash-Utils - A short \fIbash\fP library for better scripting.
 .SH SYNOPSIS
+.PP
+Usage of the library as a script's interpreter:
+.RS
+
+.EX
+#!/usr/bin/env bash-utils
+.EE
+.RE
 .PP
 Usage of the library in a script:
 .RS
@@ -22,13 +30,17 @@ Usage of the library as a command:
 .PP
 \fBbash-utils\fP [\fB-fhqvVx\fP]
     [\fB--debug\fP|\fB--dry-run\fP|\fB--force\fP|\fB--help\fP|\fB--quiet\fP|\fB--verbose\fP|\fB--version\fP]
-    [\fB-e\fP|\fB--exec\fP[=\fIarg\fP]] <arguments> --
+    [\fB-e\fP|\fB--exec\fP[=\fIarg\fP]] <arguments>
 .SH DESCRIPTION
 .PP
-The \fIBash-Utils\fP shell script is a short library of utilities to use to quickly build robust \fIBash\fP scripts.
-It proposes a set of useful functions and pre-defined environment variables to let you build a script with
-options and arguments, generate some informational output about the script's usage, handle errors and more
-features (see bash-utils(7) for a full documentation). It is organized in a \fIcore\fP and some \fImodules\fP.
+The \fIBash-Utils\fP command is a small library of utilities to quickly write robust and complete \fIBash\fP scripts.
+It proposes a set of useful functions and environment variables in an enhanced environment with some system 
+options enabled by default, to let you build a script with user options and arguments, an automatic generation 
+of some informational output about the script's usage, a special handling of errors, stack trace and debugging, 
+and some more features (see bash-utils(7) for a full documentation).
+.PP
+It also embeds a various set of \fImodules\fP constructed as stand-alone bash-utils scripts you can use "as-is",
+calling them directly, or in a script using the library with the help of the `\fSrun()\fP` or `\fSuse()\fP` functions.
 .SH OPTIONS
 .SS Scripts using the library
 .PP
@@ -41,7 +53,7 @@ Process a dry-run.
 Force some commands to not prompt confirmation.
 .TP
 \fI-h\fP, \fI--help\fP
-See the help information about the script.
+See the help information about the script, a module or the library itself.
 .TP
 \fI-q\fP, \fI--quiet\fP
 Decrease script's verbosity.
@@ -50,39 +62,65 @@ Decrease script's verbosity.
 Increase script's verbosity.
 .TP
 \fI-V\fP, \fI--version\fP
-See script's version and copyright information ; use option `\fSquiet\fP` to get version number only.
+See the script, module or library version and copyright information ; 
+use option `\fS--quiet\fP` to get version number only.
 .TP
 \fI-x\fP, \fI--debug\fP
-See debug info.
+See some debugging information.
+.PP
+Please note that these options are available but not necessarily used in scripts or modules.
 .SS Using the library as a command
 .PP
 The following additional options are available when you call the library itself:
 .TP
 \fI-e\fP, \fI--exec\fP [\fB=<arg>\fP]
-Execute the argument in the library's environment ; without argument, any piped
-content will be evaluated:
+Execute the argument in the library's environment ; as the argument is optional, the equal sign
+is REQUIRED ; without argument, any piped content will be evaluated:
 .br
-bash-utils --exec='e_color "<bold>test</bold>"'
+bash-utils --exec='colored-output "<bold>test</bold>"'
 .br
-echo 'e_color "<bold>test</bold>"' | bash-utils --exec
+echo 'colored-output "<bold>test</bold>"' | bash-utils --exec
 .br
 .PP
 The following additional arguments are available when you call the library itself:
 .TP
-\fImodel\fP [\fB<file_path>\fP]
-See the 'bash-utils-model.bash' model content or copy it in 'file_path'.
+\fIabout\fP
+alias of '--version'
+.TP
+\fIabout <module_name>\fP
+alias of '<module-name> --version'
+.TP
+\fIhelp\fP
+alias of '--help'
+.TP
+\fIhelp <module_name>\fP
+get the help about a module
+.TP
+\fImodules\fP
+get the list of available modules
+.TP
+\fIusage\fP
+get the library synopsis
+.TP
+\fIusage <module_name>\fP
+get a module synopsis
+.TP
+\fIversion\fP
+alias of '--version --quiet'
+.TP
+\fIversion <module_name>\fP
+alias of '<module_name> --version --quiet'
 .SH EXAMPLES
 .PP
-Have a look at the `\fSbash-utils-model.bash\fP` script for a full base template of a script
-using the library. A starter template is available in bash-utils(7).
-.PP
-To copy the model as a base for your own scripts, you may use the `\fSmodel\fP` argument:
+You can use the \fImodel\fP module to get a full example of a script using the library.
 .RS
 
 .EX
-bash-utils model /path/to/script
+bash-utils model bash-utils
 .EE
 .RE
+.PP
+A starter template is available in bash-utils(7).
 .SH LICENSE
 .PP
 Copyright (c) 2015, Pierre Cassat & contributors
