@@ -2,8 +2,8 @@ Man:        Bash-Utils Documentation
 Man-name:   bash-utils
 Author:     Pierre Cassat
 Section:    7
-Date: 2015-08-14
-Version: 0.0.1@dev
+Date: 2015-08-18
+Version: 0.0.1
 
 
 ## USAGE

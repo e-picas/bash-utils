@@ -62,7 +62,7 @@ trap 'shutdown_handler' EXIT
 
 readonly BASH_UTILS_NAME='Bash-Utils'
 readonly BASH_UTILS_KEY='bash-utils'
-readonly BASH_UTILS_VERSION='0.0.1@dev'
+readonly BASH_UTILS_VERSION='0.0.1'
 readonly BASH_UTILS_COPYRIGHT='Copyright (c) 2015 Pierre Cassat & contributors'
 readonly BASH_UTILS_LICENSE='Apache Software Foundation license 2.0 <http://www.apache.org/licenses/LICENSE-2.0>'
 readonly BASH_UTILS_SOURCES='Sources & updates: <http://gitlab.com/piwi/bash-utils.git>'
