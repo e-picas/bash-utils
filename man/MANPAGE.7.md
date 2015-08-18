@@ -11,7 +11,7 @@ Version: 0.0.1@dev
 To create a script using the library, you can call the *model* argument of the library itself, which
 will create a starter template script:
 
-    bash-utils model /path/to/your/script.sh
+    bash-utils model bash-utils /path/to/your/script.sh
 
 Actually, the only requirement to use the library is to source it in your script:
 
@@ -40,16 +40,14 @@ The file extension has no incidence upon the script's type (*bash* in our case) 
 at all with no difference.
 
 A command-line program (such as a shell script) often accepts to set some options and arguments calling it in a terminal
-or another script. A global synopsis of command line call can be:
+or another script. A global synopsis of a command line call can be:
 
-    path/to/script [-o | --options (=argument)] [--] [<parameter> ...]
+    path/to/script [-o | --options (=argument)] [--] [<parameter> ...]
     # i.e.:
     program-to-run -o --option='my value' --option-2 'my value' argument1 argument2
 
 The rules are the followings:
 
--   an *argument* is a setting passed to the script when calling it ; the arguments are not the same as the options as 
-    they are not named but identified by their position ; i.e. `./script --option argument1 argument2`
 -   *options* are various settings passed to the script when calling it ; each option is prefixed by one or more dash `-` 
     and can have an argument ; by convention, a short option is composed by one single letter prefixed by one dash, i.e. `-o`, 
     and a long option is composed by a word prefixed by two dashes, i.e. `--option` ; when an option accepts an argument, 
@@ -57,9 +55,13 @@ The rules are the followings:
     `./script -o --option-with-no-arg --option-with-arg=argument_value`
 -   a double dashes ` -- ` can be used to identify the end of options ; the rest of the call will be considered as arguments
     only
+-   an *argument* is a setting passed to the script when calling it ; the arguments are not the same as the options as 
+    they are not named but identified by their positions ; i.e. `./script --option argument1 argument2`
 
 
 ### Starter template
+
+Below is a very simple starter template of a script using the library:
 
     #!/usr/bin/env bash-utils
     # reset bash options here if needed
@@ -70,6 +72,10 @@ The rules are the followings:
     
     # a script should always return a status
     exit 0
+
+You should use the *model* module for a more complex template:
+
+    bash-utils model bash-utils
 
 
 ### Customize your script
@@ -84,8 +90,10 @@ To build your own command, you may first override informational variables:
     CMD_DESCRIPTION=...
     CMD_SYNOPSIS=...
     CMD_HELP=...
-    CMD_OPTS_SHORT=...
-    CMD_OPTS_LONG=...
+    CMD_OPTS_SHORT=(...)
+    CMD_OPTS_LONG=(...)
+    #CMD_SYNOPSIS=...
+    CMD_USAGE=...
 
 Then you can customize script's options (see below) to fit your needs and write your script's logic in the last
 part of the model.
@@ -113,7 +121,6 @@ for default options and arguments. To use this, add in your script:
     rearrange_options "$@"
     [ -n "$CMD_REQ" ] && eval set -- "$CMD_REQ";
     common_options "$@"
-    common_arguments "$*";
 
 You can **overwrite any method** by re-defining it after having sourced the library:
 
@@ -132,16 +139,6 @@ The best practice is to create user methods instead of overwrite native ones and
     }
     
     [ -f filename ] || user_error 'file not found';
-
-
-### Colorized output
-
-The library embeds a `e_color()` method you can use to output some colorized contents. It allows you
-to construct you content with XML-like tags. For instance:
-
-    CTT="this is a content with <bold>tags</bold> to <red>play with</red> <cyan_bg>output</cyan_bg>"
-
-The lists of available text styles and colors are stored in the `TEXTOPTIONS` and `TEXTCOLORS` environment variables.
 
 
 ### Script's options
@@ -169,11 +166,13 @@ variables you may define for each script.
 
 These options are handled by the *getopt* program. You can add your own options by overriding the following variables:
 
-    CMD_OPTS_SHORT='fqvx'
-    CMD_OPTS_LONG='debug,dry-run,force,quiet,verbose'
+    CMD_OPTS_SHORT=(f h q v V x)
+    CMD_OPTS_LONG=(debug dry-run force help quiet verbose version)
 
 By default, the `common_options()` method will throw en error if an unknown option is met. You can avoid this behavior
-by prefixing the `CMD_OPTS_SHORT` by a colon `:`.
+by prefixing the `CMD_OPTS_SHORT` by a colon `:`:
+
+    CMD_OPTS_SHORT=(':' f h q v V x)
 
 For each option added, you MUST define your own treatment for it in a parsing loop:
 
@@ -182,7 +181,7 @@ For each option added, you MUST define your own treatment for it in a parsing lo
     while [ $# -gt 0 ]; do
         case "$1" in
             # do not throw error for common options
-            -f | -q | -v | -x | --force | --quiet | --verbose | --debug | --dry-run ) true;;
+            -f | -h | -q | -v | -V | -x | --force | --help | --quiet | --verbose | --version | --debug | --dry-run ) true;;
             # user option
             -o | --my-option )
                 OPTARG="$(echo "$2" | cut -d'=' -f2)"
@@ -199,13 +198,16 @@ In your script, you can use a flag like:
     $FLAG || ...; # do something when FLAG is DISABLED
 
 Due to known limitations of the *getopt* program, you should always use an equal sign between 
-an option (short or long) and its argument: `-o=arg` or `--option=arg`.
+an option (short or long) and its argument: `-o=arg` or `--option=arg`, even if that argument is required.
 
 
 ### Technical points
 
-The library uses the following *Bash* options by default:
+The library enables the following *Bash* options by default:
 
+-   `posix`: match the POSIX 1003.2 standard
+-   `expand_aliases`: allow to use aliases in scripts
+-   `-a`: export all modified variables
 -   `-e`: exit if a command has a non-zero status
 -   `-E`: trap on ERR are inherited by shell functions
 -   `-o pipefail`: do not mask pipeline's errors
@@ -217,6 +219,25 @@ To make robust scripts, here are some reminders:
 -   to use a variable eventually unset: `echo ${VARIABLE:-default}`
 -   to make a silent sub-command call: `val=$(sub-command 2>/dev/null)`
 
+## FILES
+
+*bin/bash-utils* | **libexec/bash-utils**
+:   This is the "entry point" of *Bash-Utils* ; it should be available in one of the `$PATH` paths for all users ;
+it acts like a loader of the library and a script's interpreter you can use in a script's *shebang*.
+
+**libexec/bash-utils-core**
+:   This is the core of *Bash-Utils* ; it mostly defines required functions and environment variables for the library
+to work by itself and to handle its modules.
+
+**libexec/bash-utils-lib**
+:   This is the library of functions ; it embeds various functions commonly used in *bash* scripts.
+
+**libexec/bash-utils-cmd**
+:   This is the script that handles default parameters and actions of *Bash-Utils* when you call it directly.
+
+**libexec/bash-utils-modules/**
+:   This is the directory where modules are stored ; each module is a single script in that directory ; a module is
+identified by its filename.
 
 ## SEE ALSO
 

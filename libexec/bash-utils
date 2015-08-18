@@ -37,18 +37,23 @@ appfile="$(getapplibexec "${BASH_SOURCE[0]}")/bash-utils-core"
 if [ ! -f "$appfile" ]; then echo "> ${BASH_SOURCE[0]}:${LINENO}: required file '$appfile' not found!" >&2; exit 1; fi
 source "$appfile"
 
-# transmit the process to called script
+# transmit the process to called script or module
 defaultcmd="${BASH_UTILS_ROOT}/bash-utils-cmd"
 cmd=''
 if [ $# -gt 0 ] && [ -f "$1" ]; then
     cmd="$1"
     shift
+    if (module_exists "$(basename "$cmd")" 2>/dev/null || false); then
+        CMD_MODULE="$(basename "$cmd")"
+    fi
 elif [ $# -gt 0 ] && (module_exists "$1" 2>/dev/null || false); then
     cmd="$(find_module "$1")"
+    CMD_MODULE="$1"
     shift
 elif [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ]; then
     cmd="$defaultcmd"
 fi
+[ -n "$CMD_MODULE" ] && load_module_info "$CMD_MODULE";
 [ -n "$cmd" ] && [ -f "$cmd" ] && source "$cmd" "$@";
 
 [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;

@@ -2,9 +2,9 @@
 .\" man-name: bash-utils
 .\" author: Pierre Cassat
 .\" section: 7
-.\" date: 2015-08-07
+.\" date: 2015-08-14
 .\" version: 0.0.1@dev
-.TH  "bash-utils" "7" "2015-08-07" "Version 0.0.1@dev" "Bash-Utils Documentation"
+.TH  "bash-utils" "7" "2015-08-14" "Version 0.0.1@dev" "Bash-Utils Documentation"
 .SH USAGE
 .PP
 To create a script using the library, you can call the \fImodel\fP argument of the library itself, which
@@ -12,7 +12,7 @@ will create a starter template script:
 .RS
 
 .EX
-bash-utils model /path/to/your/script.sh
+bash-utils model bash-utils /path/to/your/script.sh
 .EE
 .RE
 .PP
@@ -25,7 +25,8 @@ source bash-utils
 .RE
 .PP
 You can also use it as your script's \fIinterpreter\fP defining it in your 
-\fIhash bang\fP (\fIshebang\fP) <https://en.wikipedia.org/wiki/Shebang_%28Unix%29> line:
+\fIhash bang\fP (\fIshebang\fP) <https://en.wikipedia.org/wiki/Shebang_%28Unix%29> line (this is the case
+of the model):
 .RS
 
 .EX
@@ -56,10 +57,14 @@ The file extension has no incidence upon the script's type (\fIbash\fP in our ca
 at all with no difference.
 .PP
 A command-line program (such as a shell script) often accepts to set some options and arguments calling it in a terminal
-or another script. A global synopsis of command line call can be:
+or another script. A global synopsis of a command line call can be:
 .RS
 
 .EX
+path/to/script [-o | --options (=argument)] [--] [<parameter> ...]
+.br
+# i.e.:
+.br
 program-to-run -o --option='my value' --option-2 'my value' argument1 argument2
 .EE
 .RE
@@ -67,22 +72,29 @@ program-to-run -o --option='my value' --option-2 'my value' argument1 argument2
 The rules are the followings:
 .RS
 .IP \(bu 
-an \fIargument\fP is a setting passed to the script when calling it ; the arguments are not the same as the options as 
-they are not named but identified by their position ; i.e. `\fS./script --option argument1 argument2\fP`
-.IP \(bu 
 \fIoptions\fP are various settings passed to the script when calling it ; each option is prefixed by one or more dash `\fS-\fP` 
 and can have an argument ; by convention, a short option is composed by one single letter prefixed by one dash, i.e. `\fS-o\fP`, 
 and a long option is composed by a word prefixed by two dashes, i.e. `\fS--option\fP` ; when an option accepts an argument, 
 it must be separated from the option name by an equal sign, i.e. `\fS--option=argument\fP` and `\fS-o=argument\fP` ; i.e. 
 `\fS./script -o --option-with-no-arg --option-with-arg=argument_value\fP`
+.IP \(bu 
+a double dashes `\fS--\fP` can be used to identify the end of options ; the rest of the call will be considered as arguments
+only
+.IP \(bu 
+an \fIargument\fP is a setting passed to the script when calling it ; the arguments are not the same as the options as 
+they are not named but identified by their positions ; i.e. `\fS./script --option argument1 argument2\fP`
 .RE
 .SS Starter template
+.PP
+Below is a very simple starter template of a script using the library:
 .RS
 
 .EX
-#!/usr/bin/env bash
+#!/usr/bin/env bash-utils
 .br
-source ~/bin/bash-utils
+# reset bash options here if needed
+.br
+# set +E
 .br
 
 .br
@@ -95,6 +107,14 @@ source ~/bin/bash-utils
 # a script should always return a status
 .br
 exit 0
+.EE
+.RE
+.PP
+You should use the \fImodel\fP module for a more complex template:
+.RS
+
+.EX
+bash-utils model bash-utils
 .EE
 .RE
 .SS Customize your script
@@ -119,9 +139,13 @@ CMD_SYNOPSIS=...
 .br
 CMD_HELP=...
 .br
-CMD_OPTS_SHORT=...
+CMD_OPTS_SHORT=(...)
 .br
-CMD_OPTS_LONG=...
+CMD_OPTS_LONG=(...)
+.br
+#CMD_SYNOPSIS=...
+.br
+CMD_USAGE=...
 .EE
 .RE
 .PP
@@ -157,8 +181,6 @@ rearrange_options "$@"
 [ -n "$CMD_REQ" ] && eval set -- "$CMD_REQ";
 .br
 common_options "$@"
-.br
-common_arguments "$*";
 .EE
 .RE
 .PP
@@ -197,18 +219,6 @@ user_error() {
 [ -f filename ] || user_error 'file not found';
 .EE
 .RE
-.SS Colorized output
-.PP
-The library embeds a `\fSe_color()\fP` method you can use to output some colorized contents. It allows you
-to construct you content with XML-like tags. For instance:
-.RS
-
-.EX
-CTT="this is a content with <bold>tags</bold> to <red>play with</red> <cyan_bg>output</cyan_bg>"
-.EE
-.RE
-.PP
-The lists of available text styles and colors are stored in the `\fSTEXTOPTIONS\fP` and `\fSTEXTCOLORS\fP` environment variables.
 .SS Script's options
 .PP
 Default options handled by the library are:
@@ -245,14 +255,20 @@ These options are handled by the \fIgetopt\fP program. You can add your own opti
 .RS
 
 .EX
-CMD_OPTS_SHORT='fqvx'
+CMD_OPTS_SHORT=(f h q v V x)
 .br
-CMD_OPTS_LONG='debug,dry-run,force,quiet,verbose'
+CMD_OPTS_LONG=(debug dry-run force help quiet verbose version)
 .EE
 .RE
 .PP
 By default, the `\fScommon_options()\fP` method will throw en error if an unknown option is met. You can avoid this behavior
-by prefixing the `\fSCMD_OPTS_SHORT\fP` by a colon `\fS:\fP`.
+by prefixing the `\fSCMD_OPTS_SHORT\fP` by a colon `\fS:\fP`:
+.RS
+
+.EX
+CMD_OPTS_SHORT=(':' f h q v V x)
+.EE
+.RE
 .PP
 For each option added, you MUST define your own treatment for it in a parsing loop:
 .RS
@@ -268,7 +284,7 @@ while [ $# -gt 0 ]; do
 .br
         # do not throw error for common options
 .br
-        -f | -q | -v | -x | --force | --quiet | --verbose | --debug | --dry-run ) true;;
+        -f | -h | -q | -v | -V | -x | --force | --help | --quiet | --verbose | --version | --debug | --dry-run ) true;;
 .br
         # user option
 .br
@@ -301,11 +317,17 @@ $FLAG || ...; # do something when FLAG is DISABLED
 .RE
 .PP
 Due to known limitations of the \fIgetopt\fP program, you should always use an equal sign between 
-an option (short or long) and its argument: `\fS-o=arg\fP` or `\fS--option=arg\fP`.
+an option (short or long) and its argument: `\fS-o=arg\fP` or `\fS--option=arg\fP`, even if that argument is required.
 .SS Technical points
 .PP
-The library uses the following \fIBash\fP options by default:
+The library enables the following \fIBash\fP options by default:
 .RS
+.IP \(bu 
+`\fSposix\fP`: match the POSIX 1003.2 standard
+.IP \(bu 
+`\fSexpand_aliases\fP`: allow to use aliases in scripts
+.IP \(bu 
+`\fS-a\fP`: export all modified variables
 .IP \(bu 
 `\fS-e\fP`: exit if a command has a non-zero status
 .IP \(bu 
@@ -325,6 +347,25 @@ to use a variable eventually unset: `\fSecho ${VARIABLE:-default}\fP`
 .IP \(bu 
 to make a silent sub-command call: `\fSval=$(sub-command 2>/dev/null)\fP`
 .RE
+.SH FILES
+.TP
+\fIbin/bash-utils\fP | \fBlibexec/bash-utils\fP
+This is the "entry point" of \fIBash-Utils\fP ; it should be available in one of the `\fS$PATH\fP` paths for all users ;
+it acts like a loader of the library and a script's interpreter you can use in a script's \fIshebang\fP.
+.TP
+\fBlibexec/bash-utils-core\fP
+This is the core of \fIBash-Utils\fP ; it mostly defines required functions and environment variables for the library
+to work by itself and to handle its modules.
+.TP
+\fBlibexec/bash-utils-lib\fP
+This is the library of functions ; it embeds various functions commonly used in \fIbash\fP scripts.
+.TP
+\fBlibexec/bash-utils-cmd\fP
+This is the script that handles default parameters and actions of \fIBash-Utils\fP when you call it directly.
+.TP
+\fBlibexec/bash-utils-modules/\fP
+This is the directory where modules are stored ; each module is a single script in that directory ; a module is
+identified by its filename.
 .SH SEE ALSO
 .PP
 Online \fIbash\fP scripting guides and tools:
@@ -340,7 +381,7 @@ the \fIGNU Coding Standards\fP: <http://www.gnu.org/prep/standards/standards.htm
 .IP \(bu 
 \fIBATS\fP, a test suite for Bash scripts: <http://github.com/sstephenson/bats>
 .IP \(bu 
-\fIShellCheck\fP, an online Bash validator: <http://www.shellcheck.net/>
+\fIShellCheck\fP, a Bash validator: <http://www.shellcheck.net/>
 .RE
 .PP
 bash(1), bash-utils(1), getopt(1)

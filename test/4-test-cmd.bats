@@ -28,10 +28,10 @@ setup()
 
 teardown()
 {
-    [ -f "$TESTBASHUTILS_TEST_TMPSCRIPT" ] && rm -f "$TESTBASHUTILS_TEST_TMPSCRIPT" || true;
+    : # nothing
 }
 
-@test "[cmd 1] no argument|usage: usage string" {
+@test "[cmd 1] no argument / usage: usage string" {
     # no arg
     run "$TESTBASHUTILS_BIN"
     $TEST_DEBUG && {
@@ -54,7 +54,7 @@ teardown()
     [ "$output" = "$noargoutput" ]
 }
 
-@test "[cmd 2] --help|-h|help: help string (multi-lines)" {
+@test "[cmd 2] --help / -h / help: help string (multi-lines)" {
     # --help
     run "$TESTBASHUTILS_BIN" --help
     $TEST_DEBUG && {
@@ -89,7 +89,7 @@ teardown()
     [ "$output" = "$hopt" ]
 }
 
-@test "[cmd 3] --version|-V|about: version string (multi-lines)" {
+@test "[cmd 3] --version / -V / about: version string (multi-lines)" {
     # --version
     run "$TESTBASHUTILS_BIN" --version
     $TEST_DEBUG && {
@@ -124,7 +124,17 @@ teardown()
     [ "$output" = "$Vopt" ]
 }
 
-@test "[cmd 4] --version --quiet|-Vq|version: version string (single line)" {
+@test "[cmd 4] --version --quiet / -Vq / version: version string (single line)" {
+    # --version --quiet
+    run "$TESTBASHUTILS_BIN" --version --quiet
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --version --quiet"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    vquietopt="$output"
+    [ "${#lines[@]}" -eq 1 ]
     # -Vq
     run "$TESTBASHUTILS_BIN" -Vq
     $TEST_DEBUG && {
@@ -135,6 +145,7 @@ teardown()
     [ "$status" -eq 0 ]
     quietopt="$output"
     [ "${#lines[@]}" -eq 1 ]
+    [ "$output" = "$vquietopt" ]
     # version
     run "$TESTBASHUTILS_BIN" version
     $TEST_DEBUG && {
@@ -144,32 +155,11 @@ teardown()
     } >&1
     [ "$status" -eq 0 ]
     [ "${#lines[@]}" -eq 1 ]
+    [ "$output" = "$vquietopt" ]
     [ "$output" = "$quietopt" ]
 }
 
-@test "[cmd 5] model" {
-    # model
-    run "$TESTBASHUTILS_BIN" model
-    $TEST_DEBUG && {
-        echo "running: $TESTBASHUTILS_BIN model"
-        echo "output: $output"
-        echo "status: $status"
-    } >&1
-    [ "$status" -eq 0 ]
-    [ "$output" = "$(cat "$TESTBASHUTILS_MODEL")" ]
-    # model <filename>
-    run "$TESTBASHUTILS_BIN" model "$TESTBASHUTILS_TEST_TMPSCRIPT"
-    $TEST_DEBUG && {
-        echo "running: $TESTBASHUTILS_BIN model $TESTBASHUTILS_TEST_TMPSCRIPT"
-        echo "output: $output"
-        echo "status: $status"
-    } >&1
-    [ "$status" -eq 0 ]
-    [ -f "$TESTBASHUTILS_TEST_TMPSCRIPT" ]
-    [ "$(cat "$TESTBASHUTILS_TEST_TMPSCRIPT")" = "$(cat "$TESTBASHUTILS_MODEL")" ]
-}
-
-@test "[cmd 6] exec" {
+@test "[cmd 5] -e / --exec / piped input with --exec" {
     # --exec ...
     run "$TESTBASHUTILS_BIN" --exec='string_to_upper "test"'
     $TEST_DEBUG && {
@@ -215,4 +205,16 @@ teardown()
     } >&1
     [ "$status" -eq 0 ]
     [ "$output" = 'TEST' ]
+}
+
+@test "[cmd 6] modules: list of modules" {
+    # modules
+    run "$TESTBASHUTILS_BIN" modules
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN modules"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    echo "$output" | grep 'model'
 }

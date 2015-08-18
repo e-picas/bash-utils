@@ -6,7 +6,8 @@
 # For the full copyright and license information, please view the LICENSE
 # file that was distributed with this source code or see <http://www.apache.org/licenses/LICENSE-2.0>.
 #
-# bash-utils make: install / cleanup / rebuild manpages / upgrade version / create release / test / validate
+# bash-utils make:  install / cleanup / test
+# on git clones:    rebuild manpages / upgrade version / create release / validate
 #
 set -eETu
 
@@ -29,17 +30,27 @@ abs_dirname() {
 }
 
 usage() {
-    {   echo "usage: $0 install <prefix>"
-        echo "       $0 cleanup <prefix>"
-        echo "       $0 manpages"
-        echo "       $0 version <version>"
-        echo "       $0 release <version>"
-        echo "       $0 test"
-        echo "       $0 validate"
-        echo
-        echo "  e.g. $0 install /usr/local"
-        echo "       $0 cleanup /usr/local"
-    } >&2
+    if $ISGITCLONE; then
+        {   echo "usage: $0 install <prefix>"
+            echo "       $0 cleanup <prefix>"
+            echo "       $0 manpages"
+            echo "       $0 version <version>"
+            echo "       $0 release <version>"
+            echo "       $0 test"
+            echo "       $0 validate"
+            echo
+            echo "  e.g. $0 install /usr/local"
+            echo "       $0 cleanup /usr/local"
+        } >&2
+    else
+        {   echo "usage: $0 install <prefix>"
+            echo "       $0 cleanup <prefix>"
+            echo "       $0 test"
+            echo
+            echo "  e.g. $0 install /usr/local"
+            echo "       $0 cleanup /usr/local"
+        } >&2
+    fi
     exit 1
 }
 
@@ -109,10 +120,11 @@ make_check()
     return $?
 }
 
-declare ROOT_DIR ACTUAL_VERSION DATE VERSION TAGNAME PREFIX
+declare ROOT_DIR ACTUAL_VERSION DATE VERSION TAGNAME PREFIX ISGITCLONE
 ROOT_DIR="$(abs_dirname "$0")"
 ACTUAL_VERSION="$("${ROOT_DIR}/bin/bash-utils" -qV)"
-if [ -d "${ROOT_DIR}/.git" ]; then
+[ -d "${ROOT_DIR}/.git" ] && ISGITCLONE=true || ISGITCLONE=false;
+if $ISGITCLONE; then
     DATE=$(git log -1 --format="%ci" --date=short | cut -s -f 1 -d ' ')
 else
     DATE="$(date +'%Y-%m-%d')"
@@ -131,22 +143,30 @@ case "$1" in
         make_cleanup && echo "Removed Bash-Utils from $PREFIX/bin/";
         ;;
     manpages)
+        ! $ISGITCLONE && usage;
         make_manpages && echo "Manpages regenerated in $ROOT_DIR/man/";
         ;;
     version)
+        ! $ISGITCLONE && usage;
         echo "current version is: ${ACTUAL_VERSION}"
         [ $# -lt 2 ] && usage;
         VERSION="$2"
         make_version && echo "Version number updated in library and manpages";
         ;;
     release)
+        ! $ISGITCLONE && usage;
         echo "current version is: ${ACTUAL_VERSION}"
         [ $# -lt 2 ] && usage;
         VERSION="$2"
         make_release && echo "Released tag v${VERSION} - nothing pushed to remote(s)";
         ;;
-    test) make_tests;;
-    validate) make_check;;
+    test)
+        make_tests
+        ;;
+    validate)
+        ! $ISGITCLONE && usage;
+        make_check
+        ;;
     *) usage;;
 esac
 

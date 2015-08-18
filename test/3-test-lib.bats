@@ -31,6 +31,200 @@ teardown()
     : # nothing
 }
 
+# booleans
+@test "[lib booleans-1] onoff_bit" {
+    # no arg
+    run onoff_bit
+    $TEST_DEBUG && {
+        echo "running: onoff_bit"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    # on
+    run onoff_bit true
+    $TEST_DEBUG && {
+        echo "running: onoff_bit true"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ "$output" = 'on' ]
+    # off
+    run onoff_bit false
+    $TEST_DEBUG && {
+        echo "running: onoff_bit false"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ "$output" = 'off' ]
+    # on
+    TESTBOOL=true
+    run onoff_bit "$TESTBOOL"
+    $TEST_DEBUG && {
+        echo "running: onoff_bit $TESTBOOL"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ "$output" = 'on' ]
+    # off
+    TESTBOOL=false
+    run onoff_bit "$TESTBOOL"
+    $TEST_DEBUG && {
+        echo "running: onoff_bit $TESTBOOL"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ "$output" = 'off' ]
+}
+
+@test "[lib booleans-2] truefalse_bit" {
+    # no arg
+    run truefalse_bit
+    $TEST_DEBUG && {
+        echo "running: truefalse_bit"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    # on
+    run truefalse_bit true
+    $TEST_DEBUG && {
+        echo "running: truefalse_bit true"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ "$output" = 'true' ]
+    # off
+    run truefalse_bit false
+    $TEST_DEBUG && {
+        echo "running: truefalse_bit false"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ "$output" = 'false' ]
+    # on
+    TESTBOOL=true
+    run truefalse_bit "$TESTBOOL"
+    $TEST_DEBUG && {
+        echo "running: truefalse_bit $TESTBOOL"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ "$output" = 'true' ]
+    # off
+    TESTBOOL=false
+    run truefalse_bit "$TESTBOOL"
+    $TEST_DEBUG && {
+        echo "running: truefalse_bit $TESTBOOL"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ "$output" = 'false' ]
+}
+
+# integers
+
+@test "[lib integers-1] is_odd" {
+    # no arg
+    run is_odd
+    $TEST_DEBUG && {
+        echo "running: is_odd"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    # true
+    for i in 1 3 5 13 19 99 137 18643; do
+        run is_odd "$i"
+        $TEST_DEBUG && {
+            echo "running: is_odd $i"
+            echo "output: $output"
+            echo "status: $status"
+        } >&1
+        [ "$status" -eq 0 ]
+    done
+    # false
+    for i in 2 4 8 14 88 162 19536; do
+        run is_odd "$i"
+        $TEST_DEBUG && {
+            echo "running: is_odd $i"
+            echo "output: $output"
+            echo "status: $status"
+        } >&1
+        [ "$status" -ne 0 ]
+    done
+}
+
+@test "[lib integers-2] is_even" {
+    # no arg
+    run is_even
+    $TEST_DEBUG && {
+        echo "running: is_even"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    # true
+    for i in 2 4 8 14 88 162 19536; do
+        run is_even "$i"
+        $TEST_DEBUG && {
+            echo "running: is_even $i"
+            echo "output: $output"
+            echo "status: $status"
+        } >&1
+        [ "$status" -eq 0 ]
+    done
+    # false
+    for i in 1 3 5 13 19 99 137 18643; do
+        run is_even "$i"
+        $TEST_DEBUG && {
+            echo "running: is_even $i"
+            echo "output: $output"
+            echo "status: $status"
+        } >&1
+        [ "$status" -ne 0 ]
+    done
+}
+
+@test "[lib integers-3] is_prime" {
+    # no arg
+    run is_prime
+    $TEST_DEBUG && {
+        echo "running: is_prime"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    # true
+    for i in 2 5 7 61 139 337 991; do
+        run is_prime "$i"
+        $TEST_DEBUG && {
+            echo "running: is_prime $i"
+            echo "output: $output"
+            echo "status: $status"
+        } >&1
+        [ "$status" -eq 0 ]
+    done
+    # false
+    for i in 1 4 18 84 115 390 885; do
+        run is_prime "$i"
+        $TEST_DEBUG && {
+            echo "running: is_prime $i"
+            echo "output: $output"
+            echo "status: $status"
+        } >&1
+        [ "$status" -ne 0 ]
+    done
+}
+
 # arrays
 TESTARRAY=( 'one' 'two' 'four' )
 

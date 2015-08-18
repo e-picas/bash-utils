@@ -33,18 +33,23 @@ set -e
 
 CMD_NAME="$BASH_UTILS_NAME"
 CMD_VERSION="$BASH_UTILS_VERSION"
-CMD_COPYRIGHT='Copyright (c) 2015 Pierre Cassat & contributors'
-CMD_LICENSE='Apache Software Foundation license 2.0 <http://www.apache.org/licenses/LICENSE-2.0>'
-CMD_SOURCES='Sources & updates: <http://gitlab.com/piwi/bash-utils.git>'
-CMD_DESCRIPTION='A short *bash* library for better scripting.'
-#CMD_SYNOPSIS="$0 [-fqvVx] [--debug|--dry-run|--force|--quiet|--verbose|--version] [-e|--exec[=<arg>]] <arguments> --"
+CMD_COPYRIGHT="$BASH_UTILS_COPYRIGHT"
+CMD_LICENSE="$BASH_UTILS_LICENSE"
+CMD_SOURCES="$BASH_UTILS_SOURCES"
+CMD_DESCRIPTION="$BASH_UTILS_DESCRIPTION"
+#CMD_SYNOPSIS="$0 [-fqvVx] [--debug|--dry-run|--force|--quiet|--verbose|--version] [-e|--exec[=<arg>]] [--] <arguments>"
 CMD_SYNOPSIS=''
+CMD_USAGE=''
 CMD_HELP="arguments:
-    about               alias of '--version'
-    help                alias of '--help'
-    model[=file_path]   see the 'bash-utils-model' model contents or copy it in 'file_path'
-    usage               get the library synopsis
-    version             alias of '--version --quiet'
+    about                   alias of '--version'
+    about <module_name>     alias of '<module-name> --version'
+    help                    alias of '--help'
+    help <module_name>      get the help about a module
+    modules                 get the list of available modules
+    usage                   get the library synopsis
+    usage <module_name>     get a module synopsis
+    version                 alias of '--version --quiet'
+    version <module_name>   alias of '<module_name> --version --quiet'
 
 options:
     --dry-run           process a dry-run
@@ -61,15 +66,14 @@ options:
     -x|--debug          see some debugging information
 
 paths:
+    $BASH_UTILS
     $BASH_UTILS_MODULES
-    $BASH_UTILS_MODEL
 ";
 CMD_OPTS_SHORT=( ':' 'e::' f h q v V x )
 CMD_OPTS_LONG=( 'exec::' debug dry-run force help quiet verbose version )
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_KEY
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_VERSION
-TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_MODEL
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_ROOT
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_MODULES
 [ $# -eq 0 ] && usage_info && exit 1;
@@ -98,24 +102,25 @@ while [ $# -gt 0 ]; do
 done
 while [ $# -gt 0 ]; do
     case "$1" in
-        'about')    version_info && exit 0;;
-        'debug')    debug        && exit 0;;
-        'help')     help_info    && exit 0;;
-        'usage')    usage_info   && exit 0;;
-        'version')  version_info true && exit 0;;
-        'model')
-            [ ! -f "$BASH_UTILS_MODEL" ] && error "model '$BASH_UTILS_MODEL' not found";
-            shift
-            arg="${1:-}"
-            if [ -n "$arg" ]; then
-                cp "$BASH_UTILS_MODEL" "$arg"
-                chmod a+x "$arg"
-                ! $QUIET && echo "$arg";
-            else
-                cat "$BASH_UTILS_MODEL"
-            fi
-            exit 0
-            ;;
+        'about')    if [ $# -gt 1 ] && (module_exists "$2" 2>/dev/null || false); then
+                        load_module_info "$2"
+                    fi
+                    version_info && exit 0;;
+        'debug')    debug && exit 0;;
+        'help')     if [ $# -gt 1 ] && (module_exists "$2" 2>/dev/null || false); then
+                        load_module_info "$2"
+                    fi
+                    help_info && exit 0;;
+        'modules')  load_modules_list
+                    help_info && exit 0;;
+        'usage')    if [ $# -gt 1 ] && (module_exists "$2" 2>/dev/null || false); then
+                        load_module_info "$2"
+                    fi
+                    usage_info && exit 0;;
+        'version')  if [ $# -gt 1 ] && (module_exists "$2" 2>/dev/null || false); then
+                        load_module_info "$2"
+                    fi
+                    version_info true && exit 0;;
     esac
     shift
 done

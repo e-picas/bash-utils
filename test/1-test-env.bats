@@ -44,12 +44,6 @@ teardown()
                 [ -n "$BASH_UTILS" ] && echo "BASH_UTILS = $BASH_UTILS (file DOES NOT exist)"
             }
         };
-        [ -n "$BASH_UTILS_MODEL" ] && [ -f "$BASH_UTILS_MODEL" ] && [ -e "$BASH_UTILS_MODEL" ] && \
-        echo "BASH_UTILS_MODEL = $BASH_UTILS_MODEL (file exists & is executable)" || { \
-            [ -n "$BASH_UTILS_MODEL" ] && [ -f "$BASH_UTILS_MODEL" ] && echo "BASH_UTILS_MODEL = $BASH_UTILS_MODEL (file exists but is NOT executable)" || { \
-                [ -n "$BASH_UTILS_MODEL" ] && echo "BASH_UTILS_MODEL = $BASH_UTILS_MODEL (file DOES NOT exist)"
-            }
-        };
         [ -n "$BASH_UTILS_ROOT" ] && [ -d "$BASH_UTILS_ROOT" ] && echo "BASH_UTILS_ROOT = $BASH_UTILS_ROOT (directory exists)" || { \
             [ -n "$BASH_UTILS_ROOT" ] && echo "BASH_UTILS_ROOT = $BASH_UTILS_ROOT (directory DOES NOT exist)"
         };
@@ -61,7 +55,6 @@ teardown()
     [ -n "$BASH_UTILS_KEY" ]
     [ -n "$BASH_UTILS_VERSION" ]
     [ -n "$BASH_UTILS" ] && [ -f "$BASH_UTILS" ] && [ -e "$BASH_UTILS" ]
-    [ -n "$BASH_UTILS_MODEL" ] && [ -f "$BASH_UTILS_MODEL" ] && [ -e "$BASH_UTILS_MODEL" ]
     [ -n "$BASH_UTILS_ROOT" ] && [ -d "$BASH_UTILS_ROOT" ]
     [ -n "$BASH_UTILS_MODULES" ] && [ -d "$BASH_UTILS_MODULES" ]
 }

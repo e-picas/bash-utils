@@ -6,8 +6,8 @@
 # For the full copyright and license information, please view the LICENSE
 # file that was distributed with this source code or see <http://www.apache.org/licenses/LICENSE-2.0>.
 #
-# Demonstration usage of the 'bash-utils' library
-# Default options are: -f | -q | -v | -x | --dry-run
+# Starter template for script using the 'bash-utils' library
+# Default options are: -f | -h | -q | -v | -V | -x | --dry-run
 #
 
 #######################
@@ -91,9 +91,6 @@ $DEBUG && debug;
 # to throw an error for 'dev' users
 # die 'my error string'
 
-# to write colorized content
-# e_color 'my string with <red>styles</red> <bold>tags</bold>'
-
 # to write a string in verbose mode only
 # $VERBOSE && echo 'my string';
 
@@ -103,7 +100,7 @@ $DEBUG && debug;
 # to not execute a command in dry-run mode
 # if $DRY_RUN; then echo 'rm -f filename.txt'; else rm -f filename.txt; fi
 
-# see the 'bash-utils.bash' sources themselves for complete documentation
+# see the 'bash-utils.7.man' for a complete documentation
 
 # ...
 
