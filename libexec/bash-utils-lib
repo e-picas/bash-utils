@@ -290,11 +290,11 @@ help_info()
 {
     {   version_info true
         echo
-        echo "$CMD_DESCRIPTION"
+        _echo "$CMD_DESCRIPTION"
         echo
         usage_info
         echo
-        echo "$CMD_HELP"
+        _echo "$CMD_HELP"
     } >&2
     exit 0
 }
