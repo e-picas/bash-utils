@@ -148,6 +148,7 @@ teardown()
 }
 
 @test "[cmd 5] model" {
+    skip 'TO MOVE'
     # model
     run "$TESTBASHUTILS_BIN" model
     $TEST_DEBUG && {
