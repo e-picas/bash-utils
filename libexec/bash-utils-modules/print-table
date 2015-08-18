@@ -29,7 +29,7 @@
 # you can define here a string about module's usage (short synopsis), description, name and version
 CMD_NAME='Print-Table'
 CMD_VERSION='0.0.1'
-CMD_SYNOPSIS="can't be called directory ; use 'use print-tbale; print_table <arguments>' in a script"
+CMD_SYNOPSIS="can't be called directly ; use 'use print-tbale; print_table <arguments>' in a script"
 CMD_DESCRIPTION="print a 'user-friendly' table with a hand on output"
 CMD_HELP=$(cat <<'MSG'
 To use it in a script, run:
