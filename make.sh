@@ -83,7 +83,7 @@ make_manpages()
 make_version()
 {
     [ -z "$VERSION" ] && { echo "Invalid version number '$VERSION'. Aborting." >&2; exit 1; }
-    sed -i -e "s| BASH_UTILS_VERSION='.*'| BASH_UTILS_VERSION='${VERSION}'|" "${ROOT_DIR}/libexec/bash-utils-core/bash-utils-core" \
+    sed -i -e "s| BASH_UTILS_VERSION='.*'| BASH_UTILS_VERSION='${VERSION}'|" "${ROOT_DIR}/libexec/bash-utils-core" \
         && sed -i -e "s|^Version: .*$|Version: ${VERSION}|;s|^Date: .*$|Date: ${DATE}|" "${ROOT_DIR}/man/MANPAGE.1.md" \
         && sed -i -e "s|^Version: .*$|Version: ${VERSION}|;s|^Date: .*$|Date: ${DATE}|" "${ROOT_DIR}/man/MANPAGE.7.md" \
         || { echo "An error occurred." >&2; exit 1; };
