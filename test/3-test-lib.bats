@@ -456,6 +456,15 @@ TESTARRAY=( 'one' 'two' 'four' )
     } >&1
     [ "$status" -eq 0 ]
     [ "$output" = 'ABCDEFGHIJKLM' ]
+    # alphanum
+    run string_to_upper "a1b2c3d4e5f6g7H8I9J10k11L12M"
+    $TEST_DEBUG && {
+        echo "running: string_to_upper a1b2c3d4e5f6g7H8I9J10k11L12M"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ "$output" = 'A1B2C3D4E5F6G7H8I9J10K11L12M' ]
 }
 
 @test "[lib strings-2] string_to_lower" {
@@ -476,4 +485,13 @@ TESTARRAY=( 'one' 'two' 'four' )
     } >&1
     [ "$status" -eq 0 ]
     [ "$output" = 'abcdefghijklm' ]
+    # alphanum
+    run string_to_lower "a1b2c3d4e5f6g7H8I9J10k11L12M"
+    $TEST_DEBUG && {
+        echo "running: string_to_lower a1b2c3d4e5f6g7H8I9J10k11L12M"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ "$output" = 'a1b2c3d4e5f6g7h8i9j10k11l12m' ]
 }
