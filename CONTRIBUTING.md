@@ -84,6 +84,7 @@ Then you can create your own branch with the name of your feature:
 
 The development process of the package requires some external dependencies to work:
 
+-   *Markdown-Extended*, a markdown parser: <http://github.com/piwi/markdown-extended>
 -   *BATS*, a test suite for Bash scripts: <http://github.com/sstephenson/bats>
 -   *ShellCheck*, a Bash scripting validator: <http://github.com/koalaman/shellcheck>
 
