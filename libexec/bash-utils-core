@@ -64,6 +64,12 @@ trap 'shutdown_handler' EXIT
 readonly BASH_UTILS_NAME='Bash-Utils'
 readonly BASH_UTILS_KEY='bash-utils'
 readonly BASH_UTILS_VERSION='0.0.1@dev'
+readonly BASH_UTILS_COPYRIGHT='Copyright (c) 2015 Pierre Cassat & contributors'
+readonly BASH_UTILS_LICENSE='Apache Software Foundation license 2.0 <http://www.apache.org/licenses/LICENSE-2.0>'
+readonly BASH_UTILS_SOURCES='Sources & updates: <http://gitlab.com/piwi/bash-utils.git>'
+readonly BASH_UTILS_DESCRIPTION='A short *bash* library for better scripting.'
+readonly BASH_UTILS_MODULE_INFO='a module for:'
+readonly BASH_UTILS_SCRIPT_INFO='using:'
 
 #### CORE ####
 # functions are written in alphabetical order
@@ -145,6 +151,60 @@ function_exists()
 get_path()
 {
     echo -e "$PATH" | tr ':' "\n";
+    return 0
+}
+
+# load info about all available modules
+# usage: `load_modules_list`
+load_modules_list()
+{
+    local modules_info='' _add=''
+    export PRELOAD=true
+    for f in "$BASH_UTILS_MODULES"/*; do
+        if [ -f "$f" ] && [ -x "$f" ]; then
+            CMD_DESCRIPTION=''
+            source "$f"
+            modules_info+="
+    $(basename "$f")";
+            if [ -n "$CMD_DESCRIPTION" ]; then
+                modules_info+=" : ${CMD_DESCRIPTION}";
+            fi
+        fi
+    done
+    export PRELOAD=false
+    CMD_HELP="available modules: $modules_info
+
+paths:
+    $BASH_UTILS_MODULES
+";
+    CMD_USAGE=''
+    CMD_OPTS_SHORT=( f q v x V h )
+    CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
+    CMD_MODULE='<module-name>'
+    CMD_SYNOPSIS="$(synopsis_info)"
+    CMD_DESCRIPTION="List of available modules.
+Run 'help <module-name>' to get help on a specific module.";
+    CMD_NAME="$BASH_UTILS_NAME"
+    CMD_VERSION="$BASH_UTILS_VERSION"
+    return 0
+}
+
+# load info of a single module
+# usage: `load_module_info <module-name>`
+load_module_info()
+{
+    [ $# -lt 1 ] && die 'usage: `help_module <module-name>`';
+    local module_name="$1" module
+    module="$(find_module "$module_name")"
+    CMD_OPTS_SHORT=( f q v x V h )
+    CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
+    export PRELOAD=true
+    source "$module"
+    export PRELOAD=false
+    CMD_MODULE="$module_name"
+    CMD_COPYRIGHT="$BASH_UTILS_COPYRIGHT"
+    CMD_LICENSE="$BASH_UTILS_LICENSE"
+    CMD_SOURCES="$BASH_UTILS_SOURCES"
     return 0
 }
 
@@ -289,9 +349,8 @@ abs_dirname() {
 sourcename="$(basename "${BASH_SOURCE[0]}")"
 libexecdir="$(abs_dirname "${BASH_SOURCE[0]}")"
 readonly BASH_UTILS="${libexecdir}/bash-utils"
-readonly BASH_UTILS_MODEL="${libexecdir}/${sourcename/-core/-model}"
-readonly BASH_UTILS_ROOT="${libexecdir}/"
-readonly BASH_UTILS_MODULES="${libexecdir}/bash-utils-modules/"
+readonly BASH_UTILS_ROOT="${libexecdir}"
+readonly BASH_UTILS_MODULES="${libexecdir}/bash-utils-modules"
 
 CMD_PROG="$(basename "$0")"
 CMD_ROOT="$(abs_dirname "$0")"
@@ -303,6 +362,7 @@ CMD_PID="$$"
 CMD_CALL_ORIGINAL="$0 $*"
 readonly  CMD_PROG CMD_ROOT CMD_OS CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_CALL_ORIGINAL
 export CMD_CALL=''
+export CMD_MODULE=''
 export PIPED_INPUT=''
 
 # lib error codes
@@ -316,11 +376,16 @@ readonly E_PATH=83
 
 # load defaults
 source "$BASH_UTILS_ROOT"/bash-utils-lib
+declare -xa MODULES_AVAILABLE=()
 export PRELOAD=true
 for f in "$BASH_UTILS_MODULES"/*; do
-    [ -x "$f" ] && source "$f";
+    if [ -f "$f" ] && [ -x "$f" ]; then
+        MODULES_AVAILABLE[${#MODULES_AVAILABLE[@]}]="$(basename "$f")"
+        source "$f"
+    fi
 done
 export PRELOAD=false
+set_env_array MODULES_AVAILABLE MODULES_AVAILABLE[@]
 
 # the core always returns a no-error status
 ##@!@##

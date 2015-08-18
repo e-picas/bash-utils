@@ -219,8 +219,6 @@ export CMD_LICENSE='overwrite the CMD_LICENSE variable to customize this informa
 export CMD_SOURCES='overwrite the CMD_SOURCES variable to customize this information'
 export CMD_DESCRIPTION='overwrite the CMD_DESCRIPTION variable to customize this information'
 export CMD_HELP='overwrite the CMD_HELP variable to customize this information'
-CMD_LOGFILE="$(make_tmp_file "$BASH_UTILS_KEY")"
-export CMD_LOGFILE
 declare -xa CMD_OPTS_SHORT=( f q v x V h )
 declare -xa CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
 declare -xa TO_DEBUG=(
@@ -230,10 +228,14 @@ declare -xa TO_DEBUG=(
 set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
 set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
 set_env_array TO_DEBUG TO_DEBUG[@]
+CMD_LOGFILE="$(make_tmp_file "$BASH_UTILS_KEY")"
+export CMD_LOGFILE
 
 # the synopsis should be left empty as it will be automatically generated with options declarations
 export CMD_SYNOPSIS=''
-#declare -x CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
+#declare -x CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] [--] <arguments>"
+# you can use `CMD_USAGE` instead, which will be added to default options
+export CMD_USAGE=''
 
 # script flags used as booleans
 export VERBOSE=false        # write in verbose mode:    $VERBOSE && echo '...';
@@ -370,7 +372,12 @@ synopsis_info()
             longs+="--${opt}|"
         done
         longs="${longs%|}"
-        CMD_SYNOPSIS="$0 [-${shorts}${shorts_args}] [${longs}] [--] <arguments> --"
+        if [ -n "$CMD_USAGE" ]; then
+            CMD_SYNOPSIS="$0 $CMD_USAGE
+       $0 $CMD_MODULE [-${shorts}${shorts_args}] [${longs}] [--] <arguments>"
+        else
+            CMD_SYNOPSIS="$0 $CMD_MODULE [-${shorts}${shorts_args}] [${longs}] [--] <arguments>"
+        fi
     fi
     echo "$CMD_SYNOPSIS"
     return 0
@@ -390,7 +397,13 @@ usage_info()
 version_info()
 {
     local short="${1:-${QUIET:-false}}"
-    echo "$CMD_NAME $CMD_VERSION"
+    if [ -n "$CMD_MODULE" ] && [ "$CMD_NAME" != "$BASH_UTILS_NAME" ]; then
+        echo "$CMD_NAME $CMD_VERSION [$BASH_UTILS_MODULE_INFO $BASH_UTILS_NAME $BASH_UTILS_VERSION]"
+    elif [ -z "$CMD_MODULE" ] && [ -n "$CMD_PROG" ] && [ "$CMD_NAME" != "$BASH_UTILS_NAME" ]; then
+        echo "$CMD_NAME $CMD_VERSION [$BASH_UTILS_SCRIPT_INFO $BASH_UTILS_NAME $BASH_UTILS_VERSION]"
+    else
+        echo "$CMD_NAME $CMD_VERSION"
+    fi
     if ! $short; then
         cat <<MSG
 $CMD_COPYRIGHT
