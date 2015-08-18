@@ -1,10 +1,11 @@
 Bash-Utils - Utilities for Bash scripting
 =========================================
 
-The `Bash-Utils` project is a short and simple utilities library for 
+The `Bash-Utils` command is a short library of utilities to quickly build robust 
 [Bash](https://en.wikipedia.org/wiki/Bash_%28Unix_shell%29) scripts.
-You can use it as a basis to quickly build robust shell scripts for UNIX systems 
-with options and arguments, error handling and code debugging, and common usage and help strings.
+It proposes a set of useful functions and pre-defined environment variables and system options to let you 
+build a script with options and arguments handling, automatic generation of some informational output about 
+the script's usage, handle errors and debugging, and more features.
 The library is licensed under an [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
 The library is fully "unit-tested" using [BATS](http://github.com/sstephenson/bats) to keep it as robust as possible.
 

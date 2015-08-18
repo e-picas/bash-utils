@@ -12,6 +12,10 @@ Bash-Utils - A short *bash* library for better scripting.
 
 ## SYNOPSIS
 
+Usage of the library as a script's interpreter:
+
+    #!/usr/bin/env bash-utils
+
 Usage of the library in a script:
 
     source bash-utils || { echo "> bash-utils not found!" >&2; exit 1; };
@@ -20,14 +24,17 @@ Usage of the library as a command:
 
 **bash-utils** [**-fhqvVx**]
     [**--debug**|**--dry-run**|**--force**|**--help**|**--quiet**|**--verbose**|**--version**]
-    [**-e**|**--exec**[=*arg*]] <arguments> --
+    [**-e**|**--exec**[=*arg*]] <arguments>
 
 ## DESCRIPTION
 
-The *Bash-Utils* shell script is a short library of utilities to use to quickly build robust *Bash* scripts.
-It proposes a set of useful functions and pre-defined environment variables to let you build a script with
-options and arguments, generate some informational output about the script's usage, handle errors and more
-features (see bash-utils(7) for a full documentation). It is organized in a *core* and some *modules*.
+The *Bash-Utils* command is a short library of utilities to quickly build robust *Bash* scripts.
+It proposes a set of useful functions and pre-defined environment variables and system options to let you 
+build a script with options and arguments handling, automatic generation of some informational output about 
+the script's usage, handle errors and debugging, and more features (see bash-utils(7) for a full documentation).
+
+It also embeds a various set of *modules* constructed as stand-alone bash-utils scripts you can use "as-is",
+calling them directly, or in a script using the library with the help of the `run()` or `use()` functions.
 
 ## OPTIONS
 
@@ -42,7 +49,7 @@ The following options are supported by default for any script using the library:
 :   Force some commands to not prompt confirmation. 
 
 *-h*, *--help*
-:   See the help information about the script.
+:   See the help information about the script, a module or the library itself.
 
 *-q*, *--quiet*
 :   Decrease script's verbosity. 
@@ -51,38 +58,61 @@ The following options are supported by default for any script using the library:
 :   Increase script's verbosity. 
 
 *-V*, *--version*
-:   See script's version and copyright information ; use option `quiet` to get version number only.
+:   See the script, module or library version and copyright information ; 
+use option `--quiet` to get version number only.
 
 *-x*, *--debug*
-:   See debug info.
+:   See some debugging information.
 
+Please note that these options are available but not necessarily used in scripts or modules.
 
 ### Using the library as a command
 
 The following additional options are available when you call the library itself:
 
 *-e*, *--exec* [**=<arg>**]
-:   Execute the argument in the library's environment ; without argument, any piped
-content will be evaluated:
+:   Execute the argument in the library's environment ; as the argument is optional, the equal sign
+is REQUIRED ; without argument, any piped content will be evaluated:
 
-        bash-utils --exec='e_color "<bold>test</bold>"'
-        echo 'e_color "<bold>test</bold>"' | bash-utils --exec
+        bash-utils --exec='colored-output "<bold>test</bold>"'
+        echo 'colored-output "<bold>test</bold>"' | bash-utils --exec
 
 The following additional arguments are available when you call the library itself:
 
-*model* [**<file_path>**]
-:   See the 'bash-utils-model.bash' model content or copy it in 'file_path'.
+*about*
+:   alias of '--version'
 
+*about <module_name>*
+:   alias of '<module-name> --version'
+
+*help*
+:   alias of '--help'
+
+*help <module_name>*
+:   get the help about a module
+
+*modules*
+:   get the list of available modules
+
+*usage*
+:   get the library synopsis
+
+*usage <module_name>*
+:   get a module synopsis
+
+*version*
+:   alias of '--version --quiet'
+
+*version <module_name>*
+:   alias of '<module_name> --version --quiet'
 
 ## EXAMPLES
 
-Have a look at the `bash-utils-model` script for a full base template of a script
-using the library. A starter template is available in bash-utils(7).
+You can use the *model* module to get a full example of a script using the library.
 
-To copy the model as a base for your own scripts, you may use the `model` argument:
+    bash-utils model bash-utils
 
-    bash-utils model /path/to/script
-
+A starter template is available in bash-utils(7).
 
 ## LICENSE
 
