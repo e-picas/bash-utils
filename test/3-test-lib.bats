@@ -31,7 +31,29 @@ teardown()
     : # nothing
 }
 
+# coding
+
+@test "[lib coding-1] function_exists" {
+    # classic / func exist
+    run function_exists function_exists
+    $TEST_DEBUG && {
+        echo "running: function_exists function_exists"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    # classic / func not exist
+    run function_exists abcdefghijklmnopqrstuvw
+    $TEST_DEBUG && {
+        echo "running: function_exists abcdefghijklmnopqrstuvw"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -ne 0 ]
+}
+
 # booleans
+
 @test "[lib booleans-1] onoff_bit" {
     # no arg
     run onoff_bit
