@@ -59,6 +59,10 @@ available styles:
         ${TEXTCOLORS[@]}
 
 Tags can be imbricated like '<red_bg>my text with <bold>bold</bold> in red background</red_bg>'.
+
+Usage in a script:
+    use colored-output
+    parse_color_tags '<bold>string</bold>'
 ";
 
 ## !! REQUIRED !! ## stop here on pre-loading
