@@ -208,7 +208,7 @@ parse_color_tags()
         if [ -n "$transformed" ]; then transformed+="\n"; fi
         transformed+="$transformedline"
     done <<< "$1"
-    _echo "$transformed"
+    echo -e "$transformed"
     return 0
 }
 
@@ -227,7 +227,7 @@ strip_colors()
         if [ -n "${transformed}" ]; then transformed+="\n"; fi
         transformed+="${stripped_line}"
     done <<< "$1"
-    _echo "${transformed}"
+    echo -e "${transformed}"
     return 0
 }
 

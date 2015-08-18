@@ -74,6 +74,39 @@ readonly BASH_UTILS_SCRIPT_INFO='using:'
 #### CORE ####
 # functions are written in alphabetical order
 
+# write a comment string on STDOUT
+# usage: `comment <string>`
+comment()
+{
+    [ -n "$1" ] && echo "# $*" >&1
+    return 0
+}
+
+# treat common options
+# this will throw an error for unknown option if the `$CMD_OPTS_SHORT` is not prefixed by a colon `:`
+# usage: `common_options "$@"`
+common_options()
+{
+    local _todo=''
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -f | --force )  FORCE=true;;
+            -q | --quiet )  QUIET=true; VERBOSE=false;;
+            -v | --verbose ) VERBOSE=true; QUIET=false;;
+            -x | --debug )  DEBUG=true;;
+            -V | --version) _todo='version_info && exit 0;';;
+            -h | --help)    _todo='help_info && exit 0;';;
+            --dry-run )     DRY_RUN=true;;
+            -- )            shift; break;;
+            * )             if ! is_known_option "$1" && [ "${CMD_OPTS_SHORT[0]}" != ":" ]
+                                then error "unknown option '$1'"; fi;;
+        esac
+        shift
+    done
+    [ -n "$_todo" ] && eval "$_todo";
+    return 0
+}
+
 # debug environment variables from the `$TO_DEBUG` array
 # usage: `debug`
 debug()
@@ -138,19 +171,60 @@ find_module()
     fi
 }
 
-# test if a function exists - returns a boolean
-# usage: `function_exists <func_name>`
-function_exists()
+# write help string to STDERR & exit
+# usage: `help_info`
+help_info()
 {
-    [ $# -eq 0 ] && return 1;
-    [ "$(type -t "$1")" == 'function' ]
+    {   version_info true
+        echo
+        echo -e "$CMD_DESCRIPTION"
+        echo
+        usage_info
+        echo
+        echo -e "$CMD_HELP"
+    } >&2
+    exit 0
 }
 
-# read current `$PATH` values as human readable string
-# usage: `get_path`
-get_path()
+# test if an option is known by a command
+# usage: `is_known_option <option_name>`
+is_known_option()
 {
-    echo -e "$PATH" | tr ':' "\n";
+    [ $# -lt 1 ] && die 'usage: `is_known_option <option_name>`';
+    local opt="$1"
+    opt="$(echo "$opt" | cut -d'=' -f1)"
+    opt="${opt//:}"
+    opt="${opt#-}"
+    opt="${opt#-}"
+    for o in "${CMD_OPTS_SHORT[@]}"; do
+        o="${o//:}"
+        [ -z "$o" ] && continue;
+        [ "$o" = "$opt" ] && return 0;
+    done
+    for o in "${CMD_OPTS_LONG[@]}"; do
+        o="${o//:}"
+        [ -z "$o" ] && continue;
+        [ "$o" = "$opt" ] && return 0;
+    done
+    return 1
+}
+
+# load info of a single module
+# usage: `load_module_info <module-name>`
+load_module_info()
+{
+    [ $# -lt 1 ] && die 'usage: `help_module <module-name>`';
+    local module_name="$1" module
+    module="$(find_module "$module_name")"
+    CMD_OPTS_SHORT=( f q v x V h )
+    CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
+    export PRELOAD=true
+    source "$module"
+    export PRELOAD=false
+    CMD_MODULE="$module_name"
+    CMD_COPYRIGHT="$BASH_UTILS_COPYRIGHT"
+    CMD_LICENSE="$BASH_UTILS_LICENSE"
+    CMD_SOURCES="$BASH_UTILS_SOURCES"
     return 0
 }
 
@@ -189,25 +263,6 @@ Run 'help <module-name>' to get help on a specific module.";
     return 0
 }
 
-# load info of a single module
-# usage: `load_module_info <module-name>`
-load_module_info()
-{
-    [ $# -lt 1 ] && die 'usage: `help_module <module-name>`';
-    local module_name="$1" module
-    module="$(find_module "$module_name")"
-    CMD_OPTS_SHORT=( f q v x V h )
-    CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
-    export PRELOAD=true
-    source "$module"
-    export PRELOAD=false
-    CMD_MODULE="$module_name"
-    CMD_COPYRIGHT="$BASH_UTILS_COPYRIGHT"
-    CMD_LICENSE="$BASH_UTILS_LICENSE"
-    CMD_SOURCES="$BASH_UTILS_SOURCES"
-    return 0
-}
-
 # test if an app's module exists
 # usage: `module_exists <module_name>`
 module_exists()
@@ -231,6 +286,71 @@ read_from_pipe()
     export PIPED_INPUT
 }
 
+# rearrange options & arguments and load them in `$CMD_REQ`
+# howto:
+#    rearrange_options "$@"
+#    [ -n "$CMD_REQ" ] && eval set -- "$CMD_REQ";
+# usage: `rearrange_options "$@"`
+rearrange_options()
+{
+    local shorts=''
+    for opt in "${CMD_OPTS_SHORT[@]}"; do
+        shorts+="${opt}"
+    done
+    local longs=''
+    for opt in "${CMD_OPTS_LONG[@]}"; do
+        longs+="${opt},"
+    done
+    longs="${longs%,}"
+    set +o posix
+    set +E
+    getoptvers="$(getopt --test > /dev/null; echo $?)"
+    if [[ "$getoptvers" -eq 4 ]]; then
+        # GNU enhanced getopt is available
+        CMD_REQ="$(getopt --shell 'bash' --options "${shorts}-:" --longoptions "$longs" --name "$CMD_PROG" -- "$@")"
+    else
+        # original getopt is available
+        CMD_REQ="$(getopt "shorts" "$@")"
+    fi
+    set -o posix
+    set -E
+    CMD_CALL="$0 $CMD_REQ"
+    return 0
+}
+
+# run an app's module
+# usage: `run <module_name> [args ...]`
+run()
+{
+    [ $# -lt 1 ] && die 'usage: `run <module_name> [args ...]`';
+    local module_name="$1" cmdfile=''
+    shift
+    declare -a args=()
+    [ $# -gt 0 ] && args=("$*");
+    cmdfile="$(find_module "$module_name")"
+    if [ -n "$cmdfile" ] && [ -f "$cmdfile" ]; then
+        set +o history
+        "$cmdfile" "${args[*]}"
+        status=$?
+        set -o history
+        return $status
+    fi
+    warning "module '$module_name' not found"
+    return 1
+}
+
+# set an environment (global) array
+# to get back the array values, call `get_env_array_ARRAY_NAME`
+# usage: `set_env_array <name> <values = array[@]>`
+set_env_array()
+{
+    [ $# -lt 2 ] && die 'usage: `set_env_array <name> <values = array[@]>`';
+    local index="$1"
+    declare -a values=("${!2}")
+    eval "get_env_array_${index}(){ echo \"${values[@]}\"; };";
+    return 0
+}
+
 # cleanup after the script exits
 # this one should never be called directly as it is trapped on EXIT
 # usage: `shutdown_handler`
@@ -250,6 +370,37 @@ stack_trace()
             echo "  $i: ${BASH_SOURCE[$i+1]:-}:${BASH_LINENO[$i]} ${FUNCNAME[$i]}(...)"
         done
     fi
+    return 0
+}
+
+# echo synopsis info after having built it if it was empty
+# usage: `get_synopsis`
+synopsis_info()
+{
+    if [ -z "$CMD_SYNOPSIS" ]; then
+        local shorts='' shorts_args=''
+        for opt in "${CMD_OPTS_SHORT[@]}"; do
+            [ "$opt" = ':' ] && continue;
+            [ "${opt: -2}" = '::' ] && shorts_args+="|-${opt/::/}[=<arg>]" && continue;
+            [ "${opt: -1}" = ':' ] && shorts_args+="|-${opt/:/} <arg>" && continue;
+            shorts+="${opt}"
+        done
+        local longs=''
+        for opt in "${CMD_OPTS_LONG[@]}"; do
+            [ "$opt" = ':' ] && continue;
+            [ "${opt: -2}" = '::' ] && longs+="--${opt/::/}[=<arg>]|" && continue;
+            [ "${opt: -1}" = ':' ] && longs+="--${opt/:/} <arg>|" && continue;
+            longs+="--${opt}|"
+        done
+        longs="${longs%|}"
+        if [ -n "$CMD_USAGE" ]; then
+            CMD_SYNOPSIS="$0 $CMD_USAGE
+       $0 $CMD_MODULE [-${shorts}${shorts_args}] [${longs}] [--] <arguments>"
+        else
+            CMD_SYNOPSIS="$0 $CMD_MODULE [-${shorts}${shorts_args}] [${longs}] [--] <arguments>"
+        fi
+    fi
+    echo "$CMD_SYNOPSIS"
     return 0
 }
 
@@ -288,25 +439,13 @@ try()
     return "$retval"
 }
 
-# run an app's module
-# usage: `run <module_name> [args ...]`
-run()
+# echo usage string
+# usage: `usage_info`
+usage_info()
 {
-    [ $# -lt 1 ] && die 'usage: `run <module_name> [args ...]`';
-    local module_name="$1" cmdfile=''
-    shift
-    declare -a args=()
-    [ $# -gt 0 ] && args=("$*");
-    cmdfile="$(find_module "$module_name")"
-    if [ -n "$cmdfile" ] && [ -f "$cmdfile" ]; then
-        set +o history
-        "$cmdfile" "${args[*]}"
-        status=$?
-        set -o history
-        return $status
-    fi
-    warning "module '$module_name' not found"
-    return 1
+    local synopsis="$(synopsis_info)"
+    echo "usage: $synopsis"
+    return 0
 }
 
 # load an app's library
@@ -325,6 +464,28 @@ use()
     else
         return 1;
     fi
+}
+
+# version string
+# usage: `version_info`
+version_info()
+{
+    local short="${1:-${QUIET:-false}}"
+    if [ -n "$CMD_MODULE" ] && [ "$CMD_NAME" != "$BASH_UTILS_NAME" ]; then
+        echo "$CMD_NAME $CMD_VERSION [$BASH_UTILS_MODULE_INFO $BASH_UTILS_NAME $BASH_UTILS_VERSION]"
+    elif [ -z "$CMD_MODULE" ] && [ -n "$CMD_PROG" ] && [ "$CMD_NAME" != "$BASH_UTILS_NAME" ]; then
+        echo "$CMD_NAME $CMD_VERSION [$BASH_UTILS_SCRIPT_INFO $BASH_UTILS_NAME $BASH_UTILS_VERSION]"
+    else
+        echo "$CMD_NAME $CMD_VERSION"
+    fi
+    if ! $short; then
+        cat <<MSG
+$CMD_COPYRIGHT
+$CMD_LICENSE
+$CMD_SOURCES
+MSG
+    fi
+    return 0
 }
 
 # write an error string on STDERR without exiting
@@ -386,6 +547,40 @@ for f in "$BASH_UTILS_MODULES"/*; do
 done
 export PRELOAD=false
 set_env_array MODULES_AVAILABLE MODULES_AVAILABLE[@]
+
+#### COMMANDS INFO ####
+
+export CMD_NAME='overwrite the CMD_NAME variable to customize this information'
+export CMD_VERSION='overwrite the CMD_VERSION variable to customize this information'
+export CMD_COPYRIGHT='overwrite the CMD_COPYRIGHT variable to customize this information'
+export CMD_LICENSE='overwrite the CMD_LICENSE variable to customize this information'
+export CMD_SOURCES='overwrite the CMD_SOURCES variable to customize this information'
+export CMD_DESCRIPTION='overwrite the CMD_DESCRIPTION variable to customize this information'
+export CMD_HELP='overwrite the CMD_HELP variable to customize this information'
+declare -xa CMD_OPTS_SHORT=( f q v x V h )
+declare -xa CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
+declare -xa TO_DEBUG=(
+    CMD_PROG CMD_ROOT CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_OS
+    CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN
+)
+set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
+set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+set_env_array TO_DEBUG TO_DEBUG[@]
+CMD_LOGFILE="$(make_tmp_file "$BASH_UTILS_KEY")"
+export CMD_LOGFILE
+
+# the synopsis should be left empty as it will be automatically generated with options declarations
+export CMD_SYNOPSIS=''
+#declare -x CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] [--] <arguments>"
+# you can use `CMD_USAGE` instead, which will be added to default options
+export CMD_USAGE=''
+
+# script flags used as booleans
+export VERBOSE=false        # write in verbose mode:    $VERBOSE && echo '...';
+export QUIET=false          # write in not quiet mode:  $QUIET || echo '...';
+export DEBUG=false          # write in debug mode:      $DEBUG && echo '...';
+export FORCE=false          # write in force mode:      $FORCE && echo '...';
+export DRY_RUN=false        # exec in not dry-run mode: $DRY_RUN || ...;
 
 # the core always returns a no-error status
 ##@!@##
