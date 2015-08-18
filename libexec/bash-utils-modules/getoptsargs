@@ -32,34 +32,37 @@
 ##@!@##
 #### SCRIPT OPTIONS / ARGUMENTS #############################################################################
 
-##@ ORIGINAL_SCRIPT_OPTS="$@" (read-only)
-## Original list of raw command line arguments
-declare -rx ORIGINAL_SCRIPT_OPTS="$*"
-##@ SCRIPT_PARAMS=''
-## String of re-arranged parameters (options & arguments)
-declare -x SCRIPT_PARAMS=''
-##@ SCRIPT_PIPED_INPUT=''
-## String of any piped content from previous command
-declare -x SCRIPT_PIPED_INPUT=''
-##@ SCRIPT_OPTS=()
-## Array of options with arguments
-declare -xa SCRIPT_OPTS=()
-##@ SCRIPT_ARGS=()
-## Array of script's arguments
-declare -xa SCRIPT_ARGS=()
-##@ SCRIPT_OPTS_ERRS=()
-## Array of options errors
-declare -ax SCRIPT_OPTS_ERRS=()
-##@ ARGIND
-## Integer of current argument index
-declare -xi ARGIND=0
-##@ ARGUMENT
-## Current argument string (see `ARGIND`)
-declare -x ARGUMENT=''
 
-## Options errors messages
-declare -rx UNKNOWN_OPTION_MASK="unknown option '%s'!"
-declare -rx MISSING_OPTION_ARGUMENT_MASK="option '%s' requires an argument!"
+if [ -z "${ORIGINAL_SCRIPT_OPTS:-}" ]; then
+    ##@ ORIGINAL_SCRIPT_OPTS="$@" (read-only)
+    ## Original list of raw command line arguments
+    declare -rx ORIGINAL_SCRIPT_OPTS="$*"
+    ##@ SCRIPT_PARAMS=''
+    ## String of re-arranged parameters (options & arguments)
+    declare -x SCRIPT_PARAMS=''
+    ##@ SCRIPT_PIPED_INPUT=''
+    ## String of any piped content from previous command
+    declare -x SCRIPT_PIPED_INPUT=''
+    ##@ SCRIPT_OPTS=()
+    ## Array of options with arguments
+    declare -xa SCRIPT_OPTS=()
+    ##@ SCRIPT_ARGS=()
+    ## Array of script's arguments
+    declare -xa SCRIPT_ARGS=()
+    ##@ SCRIPT_OPTS_ERRS=()
+    ## Array of options errors
+    declare -ax SCRIPT_OPTS_ERRS=()
+    ##@ ARGIND
+    ## Integer of current argument index
+    declare -xi ARGIND=0
+    ##@ ARGUMENT
+    ## Current argument string (see `ARGIND`)
+    declare -x ARGUMENT=''
+
+    ## Options errors messages
+    declare -rx UNKNOWN_OPTION_MASK="unknown option '%s'!"
+    declare -rx MISSING_OPTION_ARGUMENT_MASK="option '%s' requires an argument!"
+fi
 
 # usage: `read_from_pipe [file=/dev/stdin]`
 read_from_pipe()
