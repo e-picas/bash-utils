@@ -233,17 +233,16 @@ load_module_info()
 # usage: `load_modules_list`
 load_modules_list()
 {
-    local modules_info='' _add=''
+    local modules_info='' _add='' f l length=0
     export PRELOAD=true
+    for l in ${MODULES_AVAILABLE[@]}; do
+        [ "${#l}" -gt "$length" ] && length="${#l}";
+    done
     for f in "$BASH_UTILS_MODULES"/*; do
         if [ -f "$f" ] && [ -x "$f" ]; then
             CMD_DESCRIPTION=''
             source "$f"
-            modules_info+="
-    $(basename "$f")";
-            if [ -n "$CMD_DESCRIPTION" ]; then
-                modules_info+=" : ${CMD_DESCRIPTION}";
-            fi
+            modules_info+="$(printf "\n    %$((length+1))s    : %s\n" "$(basename "$f")" "${CMD_DESCRIPTION:-}")"
         fi
     done
     export PRELOAD=false
@@ -253,6 +252,7 @@ paths:
     $BASH_UTILS_MODULES
 ";
     CMD_USAGE=''
+    CMD_SYNOPSIS=''
     CMD_OPTS_SHORT=( f q v x V h )
     CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
     CMD_MODULE='<module-name>'
