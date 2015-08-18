@@ -18,7 +18,7 @@ Usage of the library as a script's interpreter:
 
 Usage of the library in a script:
 
-    source bash-utils || { echo "> bash-utils not found!" >&2; exit 1; };
+    source bash-utils -- || { echo "> bash-utils not found!" >&2; exit 1; };
 
 Usage of the library as a command:
 

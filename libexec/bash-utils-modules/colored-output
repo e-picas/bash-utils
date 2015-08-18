@@ -24,12 +24,10 @@
 # <http://www.apache.org/licenses/LICENSE-2.0>.
 #
 
-##@!@##
 #### COLORIZED CONTENTS #############################################################################
 
 if [ -z "${TEXTCOLORS:-}" ]; then
-    ##@ TEXTCOLORS = ( default black red green yellow blue magenta cyan grey white lightred lightgreen lightyellow lightblue lightmagenta lightcyan lightgrey ) (read-only)
-    ## Terminal colors table
+    # terminal colors table
     declare -rxa TEXTCOLORS=(default black red green yellow blue magenta cyan grey white lightred lightgreen lightyellow lightblue lightmagenta lightcyan lightgrey)
     declare -rxa TEXTCOLORS_CODES_FOREGROUND=(39 30 31 32 33 34 35 36 90 97 91 92 93 94 95 96 37)
     declare -rxa TEXTCOLORS_CODES_BACKGROUND=(49 40 41 42 43 44 45 46 100 107 101 102 103 104 105 106 47)
@@ -37,21 +35,43 @@ if [ -z "${TEXTCOLORS:-}" ]; then
     set_env_array TEXTCOLORS_CODES_FOREGROUND TEXTCOLORS_CODES_FOREGROUND[@]
     set_env_array TEXTCOLORS_CODES_BACKGROUND TEXTCOLORS_CODES_BACKGROUND[@]
 
-    ##@ TEXTOPTIONS = ( normal bold small underline blink reverse hidden ) (read-only)
-    ## Terminal text options table
+    # terminal text options table
     declare -rxa TEXTOPTIONS=(normal bold small underline blink reverse hidden)
     declare -rxa TEXTOPTIONS_CODES=(0 1 2 4 5 7 8)
     set_env_array TEXTOPTIONS TEXTOPTIONS[@]
     set_env_array TEXTOPTIONS_CODES TEXTOPTIONS_CODES[@]
 fi
 
-## stop here on pre-loading
+# you can define here a string about module's usage (short synopsis), description, name and version
+CMD_NAME='Colored-Output'
+CMD_VERSION='0.0.0'
+CMD_USAGE="colored-output <string>"
+CMD_DESCRIPTION="colorize a string with tags like '<bold>string</bold>'"
+CMD_HELP="tags constuction:
+     ... <bold>my text</bold> ...      : with 'tag' in TEXTOPTIONS
+     ... <red>my text</red> ...        : with 'tag' in TEXTCOLORS
+     ... <red_bg>my text</red_bg> ...  : with 'tag' in TEXTCOLORS, constructed as 'TAG_bg'
+
+available styles:
+    TEXTOPTIONS
+        ${TEXTOPTIONS[@]}
+    TEXTCOLORS
+        ${TEXTCOLORS[@]}
+
+Tags can be imbricated like '<red_bg>my text with <bold>bold</bold> in red background</red_bg>'.
+";
+
+## !! REQUIRED !! ## stop here on pre-loading
 if ${PRELOAD:-false}; then return 0; fi
 
-#### get_text_format_tag ( code )
-## echoes the terminal tag code for color: "\ 033[CODEm"
-##@param code must be one of the library colors or text-options codes
-get_text_format_tag () {
+#######################
+## module's logic, library ...
+
+# echoes the terminal tag code for color: "\ 033[CODEm"
+# param '<code>' must be one of the library colors or text-options codes
+# usage: `get_text_format_tag <code>`
+get_text_format_tag()
+{
     if [ -n "$1" ]; then
         case "$CMD_OS" in
             Linux|FreeBSD|OpenBSD|SunOS)
@@ -64,9 +84,10 @@ get_text_format_tag () {
     return 1
 }
 
-#### get_color_code ( name , background = false )
-##@param name must be in TEXTCOLORS
-get_color_code () {
+# param '<name>' must be in `TEXTCOLORS`
+# usage: `get_color_code <name> [background=false]`
+get_color_code()
+{
     if [ -n "$1" ]; then
         if in_array "$1" "${TEXTCOLORS[@]}"; then
             if [ $# -gt 1 ]
@@ -79,9 +100,10 @@ get_color_code () {
     return 1
 }
 
-#### get_color_tag ( name , background = false )
-##@param name must be in TEXTCOLORS
-get_color_tag () {
+# param '<name>' must be in `TEXTCOLORS`
+# usage: `get_color_tag <name> [background=false]`
+get_color_tag()
+{
     if [ -n "$1" ]; then
         if in_array "$1" "${TEXTCOLORS[@]}"; then
             if [ $# -gt 1 ]
@@ -94,9 +116,10 @@ get_color_tag () {
     return 1
 }
 
-#### get_text_option_code ( name )
-##@param name must be in TEXTOPTIONS
-get_text_option_code () {
+# param '<name>' must be in `TEXTOPTIONS`
+# usage: `get_text_option_code <name>`
+get_text_option_code()
+{
     if [ -n "$1" ]; then
         if in_array "$1" "${TEXTOPTIONS[@]}"
         then
@@ -107,9 +130,10 @@ get_text_option_code () {
     return 1
 }
 
-#### get_text_option_tag ( name )
-##@param name must be in TEXTOPTIONS
-get_text_option_tag () {
+# param '<name>' must be in `TEXTOPTIONS`
+# usage: `get_text_option_tag <name>`
+get_text_option_tag()
+{
     if [ -n "$1" ]; then
         if in_array "$1" "${TEXTOPTIONS[@]}"
         then
@@ -122,7 +146,8 @@ get_text_option_tag () {
 
 #### get_text_option_tag_close ( name )
 ##@param name must be in TEXTOPTIONS
-get_text_option_tag_close () {
+get_text_option_tag_close()
+{
     if [ -n "$1" ]; then
         if in_array "$1" "${TEXTOPTIONS[@]}"
         then
@@ -133,11 +158,11 @@ get_text_option_tag_close () {
     return 1
 }
 
-# usage: `colorize <string> <text_option> <foreground> <background>`
-## echoes a colorized string ; all arguments are optional except `string`
-##@param text_option must be in TEXTOPTIONS
-##@param foreground must be in TEXTCOLORS
-##@param background must be in TEXTCOLORS
+# echoes a colorized string ; all arguments are optional except '<string>'
+# param '<text_option>' must be in `TEXTOPTIONS`
+# param '<foreground>' must be in `TEXTCOLORS`
+# param '<background>' must be in `TEXTCOLORS`
+# usage: `colorize <string> [text_option=null] [foreground=null] [background=null]`
 colorize()
 {
     [ $# -eq 0 ] && return 0;
@@ -162,11 +187,11 @@ colorize()
     return 0
 }
 
+# parse in-text tags like:
+#     ... <bold>my text</bold> ...      // "tag" in TEXTOPTIONS
+#     ... <red>my text</red> ...        // "tag" in TEXTCOLORS
+#     ... <red_bg>my text</red_bg> ...  // "tag" in TEXTCOLORS, constructed as "TAG_bg"
 # usage: `parse_color_tags <"string with <bold>tags</bold>">`
-## parse in-text tags like:
-##     ... <bold>my text</bold> ...     // "tag" in TEXTOPTIONS
-##     ... <red>my text</red> ...       // "tag" in TEXTCOLORS
-##     ... <bgred>my text</bgred> ...   // "tag" in TEXTCOLORS, constructed as "bgTAG"
 parse_color_tags()
 {
     if [ $# -eq 0 ]; then return 0; fi
@@ -231,8 +256,24 @@ strip_colors()
     return 0
 }
 
-# treat direct params
-if [ $# -gt 0 ]; then
+#######################
+## treat direct params ...
+
+# called params should be treated directly for direct calls
+if [ $# -gt 0 ] || [ -n "$CMD_MODULE" ]; then
+    [ $# -eq 0 ] && usage_info && exit 1;
+    rearrange_options "$@"
+    [ -n "$CMD_REQ" ] && eval set -- "$CMD_REQ";
+    common_options "$@"
+    $DEBUG && debug;
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -- ) shift; break;;
+            * )  ! is_known_option "$1" && error "unknown option '$1'";;
+        esac
+        shift
+    done
     [ -z "$LINUX_OS" ]      && declare -a LINUX_OS=("$(get_env_array_LINUX_OS)")
     [ -z "$TEXTOPTIONS" ]   && declare -a TEXTOPTIONS=("$(get_env_array_TEXTOPTIONS)")
     [ -z "$TEXTCOLORS" ]    && declare -a TEXTCOLORS=("$(get_env_array_TEXTCOLORS)")
@@ -240,6 +281,5 @@ if [ $# -gt 0 ]; then
     exit $?
 fi
 
-##@!@##
 [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

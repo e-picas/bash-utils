@@ -31,7 +31,29 @@ teardown()
     : # nothing
 }
 
+# coding
+
+@test "[lib coding-1] function_exists" {
+    # classic / func exist
+    run function_exists function_exists
+    $TEST_DEBUG && {
+        echo "running: function_exists function_exists"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    # classic / func not exist
+    run function_exists abcdefghijklmnopqrstuvw
+    $TEST_DEBUG && {
+        echo "running: function_exists abcdefghijklmnopqrstuvw"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -ne 0 ]
+}
+
 # booleans
+
 @test "[lib booleans-1] onoff_bit" {
     # no arg
     run onoff_bit
@@ -434,6 +456,15 @@ TESTARRAY=( 'one' 'two' 'four' )
     } >&1
     [ "$status" -eq 0 ]
     [ "$output" = 'ABCDEFGHIJKLM' ]
+    # alphanum
+    run string_to_upper "a1b2c3d4e5f6g7H8I9J10k11L12M"
+    $TEST_DEBUG && {
+        echo "running: string_to_upper a1b2c3d4e5f6g7H8I9J10k11L12M"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ "$output" = 'A1B2C3D4E5F6G7H8I9J10K11L12M' ]
 }
 
 @test "[lib strings-2] string_to_lower" {
@@ -454,4 +485,13 @@ TESTARRAY=( 'one' 'two' 'four' )
     } >&1
     [ "$status" -eq 0 ]
     [ "$output" = 'abcdefghijklm' ]
+    # alphanum
+    run string_to_lower "a1b2c3d4e5f6g7H8I9J10k11L12M"
+    $TEST_DEBUG && {
+        echo "running: string_to_lower a1b2c3d4e5f6g7H8I9J10k11L12M"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ "$output" = 'a1b2c3d4e5f6g7h8i9j10k11l12m' ]
 }

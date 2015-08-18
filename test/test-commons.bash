@@ -20,9 +20,7 @@ TESTBASHUTILS_MODULES="${TESTBASHUTILS_ROOT_DIR}/libexec/bash-utils-modules/"
 TESTBASHUTILS_MODELMODULE="${TESTBASHUTILS_MODULES}/model"
 
 bats_definition=$(declare -f run)
-source "$TESTBASHUTILS_CORE" || { echo "> bash-utils-core not found!" >&2; exit 1; };
+source "$TESTBASHUTILS_CORE" -- || { echo "> bash-utils-core not found!" >&2; exit 1; };
 set +o posix
-set +o nounset
-trap - 1 2 3 15 ERR
-trap - EXIT
+set +u
 eval "$bats_definition"

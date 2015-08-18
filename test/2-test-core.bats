@@ -120,22 +120,132 @@ teardown()
     [ -n "$output" ]
 }
 
-@test "[core 5] function_exists" {
-    # classic / func exist
-    run function_exists function_exists
+@test "[core 5] module_exists" {
+    # no arg error
+    run module_exists
     $TEST_DEBUG && {
-        echo "running: function_exists function_exists"
+        echo "running: module_exists"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 1 ]
+    # args with true module
+    run module_exists model
+    $TEST_DEBUG && {
+        echo "running: module_exists model"
         echo "output: $output"
         echo "status: $status"
     } >&1
     [ "$status" -eq 0 ]
-    # classic / func not exist
-    run function_exists abcdefghijklmnopqrstuvw
+    # args with false module
+    run module_exists abcdefghijklmnopqrstuvwxyz
     $TEST_DEBUG && {
-        echo "running: function_exists abcdefghijklmnopqrstuvw"
+        echo "running: module_exists abcdefghijklmnopqrstuvwxyz"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 1 ]
+}
+
+@test "[core 6] find_module" {
+    # no arg error
+    run find_module
+    $TEST_DEBUG && {
+        echo "running: find_module"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -ne 0 ]
+    # args with true module
+    run find_module model
+    $TEST_DEBUG && {
+        echo "running: find_module model"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+    # args with false module
+    run find_module abcdefghijklmnopqrstuvwxyz
+    $TEST_DEBUG && {
+        echo "running: find_module abcdefghijklmnopqrstuvwxyz"
         echo "output: $output"
         echo "status: $status"
     } >&1
     [ "$status" -ne 0 ]
 }
 
+@test "[core 7] is_known_option" {
+    # no arg error
+    run is_known_option
+    $TEST_DEBUG && {
+        echo "running: is_known_option"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -ne 0 ]
+    # args with short known option 'f'
+    run is_known_option f
+    $TEST_DEBUG && {
+        echo "running: is_known_option f"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    # args with short known option '-f'
+    run is_known_option '-f'
+    $TEST_DEBUG && {
+        echo "running: is_known_option -f"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    # args with long known option 'force'
+    run is_known_option force
+    $TEST_DEBUG && {
+        echo "running: is_known_option force"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    # args with short known option '--force'
+    run is_known_option '--force'
+    $TEST_DEBUG && {
+        echo "running: is_known_option --force"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    # args with short known option 'z'
+    run is_known_option z
+    $TEST_DEBUG && {
+        echo "running: is_known_option z"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 1 ]
+    # args with short known option '-z'
+    run is_known_option '-z'
+    $TEST_DEBUG && {
+        echo "running: is_known_option -z"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 1 ]
+    # args with long known option 'abcef'
+    run is_known_option abcef
+    $TEST_DEBUG && {
+        echo "running: is_known_option abcef"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 1 ]
+    # args with short known option '--abcef'
+    run is_known_option '--abcef'
+    $TEST_DEBUG && {
+        echo "running: is_known_option --abcef"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 1 ]
+}

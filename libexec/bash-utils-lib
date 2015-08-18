@@ -28,8 +28,6 @@ set -e
         { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils-core not found!" >&2; exit 1; }; \
 };
 
-##@!@##
-
 #### CODING ####
 
 # test if a function exists - returns a boolean
@@ -241,6 +239,5 @@ string_to_lower()
 declare -xa LINUX_OS=(Linux FreeBSD OpenBSD SunOS)
 set_env_array LINUX_OS LINUX_OS[@]
 
-##@!@##
 [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

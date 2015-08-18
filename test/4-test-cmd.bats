@@ -218,3 +218,150 @@ teardown()
     [ "$status" -eq 0 ]
     echo "$output" | grep 'model'
 }
+
+@test "[cmd/core 7] common options flags" {
+    # dry-run
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$DRY_RUN"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $DRY_RUN'"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'false' ]
+    run "$TESTBASHUTILS_BIN" --dry-run --exec='truefalse_bit "$DRY_RUN"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --dry-run --exec='truefalse_bit $DRY_RUN'"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$DRY_RUN"' --dry-run
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $DRY_RUN' --dry-run"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    # force
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$FORCE"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $FORCE'"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'false' ]
+    run "$TESTBASHUTILS_BIN" -f --exec='truefalse_bit "$FORCE"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN -f --exec='truefalse_bit $FORCE'"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    run "$TESTBASHUTILS_BIN" --force --exec='truefalse_bit "$FORCE"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --force --exec='truefalse_bit $FORCE'"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$FORCE"' -f
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $FORCE' -f"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$FORCE"' --force
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $FORCE' --force"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    # verbose
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$VERBOSE"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $VERBOSE'"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'false' ]
+    run "$TESTBASHUTILS_BIN" -v --exec='truefalse_bit "$VERBOSE"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN -v --exec='truefalse_bit $VERBOSE'"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    run "$TESTBASHUTILS_BIN" --verbose --exec='truefalse_bit "$VERBOSE"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --verbose --exec='truefalse_bit $VERBOSE'"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$VERBOSE"' -v
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $VERBOSE' -v"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$VERBOSE"' --verbose
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $VERBOSE' --verbose"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    # quiet
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$QUIET"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $QUIET'"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'false' ]
+    run "$TESTBASHUTILS_BIN" -q --exec='truefalse_bit "$QUIET"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN -q --exec='truefalse_bit $QUIET'"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    run "$TESTBASHUTILS_BIN" --quiet --exec='truefalse_bit "$QUIET"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --quiet --exec='truefalse_bit $QUIET'"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$QUIET"' -q
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $QUIET' -q"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$QUIET"' --quiet
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $QUIET' --quiet"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'true' ]
+    # debug
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$DEBUG"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $DEBUG'"
+        echo "output: $output"
+    } >&1
+    [ "$output" = 'false' ]
+    run "$TESTBASHUTILS_BIN" -x --exec='truefalse_bit "$DEBUG"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN -x --exec='truefalse_bit $DEBUG'"
+        echo "output: $output"
+    } >&1
+    echo "$output" | grep 'true$'
+    run "$TESTBASHUTILS_BIN" --debug --exec='truefalse_bit "$DEBUG"'
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --debug --exec='truefalse_bit $DEBUG'"
+        echo "output: $output"
+    } >&1
+    echo "$output" | grep 'true$'
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$DEBUG"' -x
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $DEBUG' -x"
+        echo "output: $output"
+    } >&1
+    echo "$output" | grep 'true$'
+    run "$TESTBASHUTILS_BIN" --exec='truefalse_bit "$DEBUG"' --debug
+    $TEST_DEBUG && {
+        echo "running: $TESTBASHUTILS_BIN --exec='truefalse_bit $DEBUG' --debug"
+        echo "output: $output"
+    } >&1
+    echo "$output" | grep 'true$'
+}
+
