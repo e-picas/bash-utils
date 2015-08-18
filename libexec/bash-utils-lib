@@ -307,6 +307,8 @@ is_known_option()
     local opt="$1"
     opt="$(echo "$opt" | cut -d'=' -f1)"
     opt="${opt//:}"
+    opt="${opt#-}"
+    opt="${opt#-}"
     for o in "${CMD_OPTS_SHORT[@]}"; do
         o="${o//:}"
         [ -z "$o" ] && continue;
