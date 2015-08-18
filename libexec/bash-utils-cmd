@@ -28,7 +28,6 @@ set -e
         { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils-core not found!" >&2; exit 1; }; \
 };
 
-##@!@##
 #### Bash-Utils command ####
 
 CMD_NAME="$BASH_UTILS_NAME"
@@ -69,6 +68,7 @@ paths:
     $BASH_UTILS
     $BASH_UTILS_MODULES
 ";
+
 CMD_OPTS_SHORT=( ':' 'e::' f h q v V x )
 CMD_OPTS_LONG=( 'exec::' debug dry-run force help quiet verbose version )
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_KEY
@@ -76,6 +76,7 @@ TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_VERSION
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_ROOT
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_MODULES
+
 [ $# -eq 0 ] && usage_info && exit 1;
 rearrange_options "$@"
 [ -n "$CMD_REQ" ] && eval set -- "$CMD_REQ";
@@ -121,6 +122,7 @@ while [ $# -gt 0 ]; do
                         load_module_info "$2"
                     fi
                     version_info true && exit 0;;
+        *)          error "unknown argument '$1'";;
     esac
     shift
 done

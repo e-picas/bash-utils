@@ -29,7 +29,6 @@
 #-n, --name progname
 #-o, --options shortopts
 
-##@!@##
 #### SCRIPT OPTIONS / ARGUMENTS #############################################################################
 
 
@@ -393,6 +392,5 @@ rearrange_request()
 # treat direct params
 [ $# -gt 0 ] && rearrange_request_new "$@";
 
-##@!@##
 [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

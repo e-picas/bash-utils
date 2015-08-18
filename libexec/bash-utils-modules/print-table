@@ -27,7 +27,6 @@
 ## stop here on pre-loading
 if ${PRELOAD:-false}; then return 0; fi
 
-##@!@##
 #### PRINT TABLE ####
 
 # print a table with optional headers
@@ -166,6 +165,5 @@ print_table_separator_line()
 #    print_table TABLE_ITEMS[@] TABLE_HEADERS[@] TABLE_PADDINGS[@] TABLE_PADDERS[@] TABLE_SEPARATORS[@]
 #fi
 
-##@!@##
 [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

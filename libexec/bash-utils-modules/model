@@ -24,8 +24,6 @@
 # <http://www.apache.org/licenses/LICENSE-2.0>.
 #
 
-# the tag below marks the entry and end points for automatic generated documentation
-##@!@##
 #### COLORIZED CONTENTS #############################################################################
 
 # you can define here a string about module's usage (short synopsis), description, name and version
@@ -55,7 +53,11 @@ export BASHUTILS_MODEL_BASHMODULE="${BASHUTILS_MODEL_DIRS}/bash-utils-module"
 if ${PRELOAD:-false}; then return 0; fi
 
 #######################
-## script's logic ...
+## treat direct params ...
+
+if [ -z "$CMD_MODULE" ]; then
+    [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
+fi
 
 [ $# -eq 0 ] && usage_info && exit 1;
 rearrange_options "$@"
@@ -107,7 +109,6 @@ else
     $QUIET && echo "${source/$(pwd)\//}" || cat "$source";
 fi
 
-##@!@##
 [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
 ## vim default shell setup (must be the very last line):
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

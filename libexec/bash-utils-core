@@ -21,7 +21,6 @@
 # file that was distributed with this source code or see
 # <http://www.apache.org/licenses/LICENSE-2.0>.
 #
-##@!@##
 
 #### BASH OPTIONS ####
 
@@ -30,7 +29,7 @@ shopt -s expand_aliases
 # export all modified vars
 #set -a
 set -o allexport
-# match the POSIX 1003.2 standard
+# match the POSIX 1003.2 standard ; see <http://www.gnu.org/software/bash/manual/html_node/Bash-POSIX-Mode.html>
 set -o posix
 # exit if a command has a non-zero status
 #set -e
@@ -192,19 +191,21 @@ is_known_option()
 {
     [ $# -lt 1 ] && die 'usage: `is_known_option <option_name>`';
     local opt="$1"
+    [ -z "$CMD_OPTS_SHORT" ]   && declare -a CMD_OPTS_SHORT=("$(get_env_array_CMD_OPTS_SHORT)")
+    [ -z "$CMD_OPTS_LONG" ]    && declare -a CMD_OPTS_LONG=("$(get_env_array_CMD_OPTS_LONG)")
     opt="$(echo "$opt" | cut -d'=' -f1)"
     opt="${opt//:}"
     opt="${opt#-}"
     opt="${opt#-}"
-    for o in "${CMD_OPTS_SHORT[@]}"; do
+    for o in ${CMD_OPTS_SHORT[@]}; do
         o="${o//:}"
-        [ -z "$o" ] && continue;
-        [ "$o" = "$opt" ] && return 0;
+        [ -n "$o" ] || continue;
+        [ "$o" != "$opt" ] || return 0;
     done
-    for o in "${CMD_OPTS_LONG[@]}"; do
+    for o in ${CMD_OPTS_LONG[@]}; do
         o="${o//:}"
-        [ -z "$o" ] && continue;
-        [ "$o" = "$opt" ] && return 0;
+        [ -n "$o" ] || continue;
+        [ "$o" != "$opt" ] || return 0;
     done
     return 1
 }
@@ -574,6 +575,5 @@ export FORCE=false          # write in force mode:      $FORCE && echo '...';
 export DRY_RUN=false        # exec in not dry-run mode: $DRY_RUN || ...;
 
 # the core always returns a no-error status
-##@!@##
 [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

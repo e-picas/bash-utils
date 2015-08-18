@@ -5,7 +5,7 @@
 set -eETu
 set -o pipefail
 
-source bash-utils || { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils not found!" >&2; exit 1; };
+source bash-utils -- || { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils not found!" >&2; exit 1; };
 
 CMD_NAME='script-model-sample'
 CMD_VERSION='0.0.0'
