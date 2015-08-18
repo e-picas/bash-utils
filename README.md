@@ -60,7 +60,7 @@ To use the library, the best practice is to use it as your script's *interpreter
 If you prefer use a classic *shebang*, you just have to load the library by *sourcing* it:
 
     #!/usr/bin/env bash
-    source bash-utils
+    source bash-utils --
     
     # write your script here
     # ...

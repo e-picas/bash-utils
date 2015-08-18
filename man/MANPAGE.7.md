@@ -15,7 +15,9 @@ will create a starter template script:
 
 Actually, the only requirement to use the library is to source it in your script:
 
-    source bash-utils
+    source bash-utils --
+
+The final double-dashes `--` are required to avoid parameters expansion when including the library.
 
 You can also use it as your script's *interpreter* defining it in your 
 [*hash bang* (*shebang*)](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) line (this is the case
@@ -124,7 +126,7 @@ for default options and arguments. To use this, add in your script:
 
 You can **overwrite any method** by re-defining it after having sourced the library:
 
-    source .../bash-utils
+    source bash-utils -- || { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils not found!" >&2; exit 1; };
     
     error() {
         # your custom error handler
@@ -132,7 +134,7 @@ You can **overwrite any method** by re-defining it after having sourced the libr
 
 The best practice is to create user methods instead of overwrite native ones and call them:
 
-    source .../bash-utils
+    source bash-utils -- || { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils not found!" >&2; exit 1; };
     
     user_error() {
         # your custom error handler
