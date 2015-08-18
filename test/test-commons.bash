@@ -16,7 +16,8 @@ TESTBASHUTILS_TEST_TMPSCRIPT="${TESTBASHUTILS_ROOT_DIR}/test/tmp-test-script.sh"
 TESTBASHUTILS_TESTSCRIPT="${TESTBASHUTILS_ROOT_DIR}/test/bash-utils-sample.sh"
 TESTBASHUTILS_BIN="${TESTBASHUTILS_ROOT_DIR}/bin/bash-utils"
 TESTBASHUTILS_CORE="${TESTBASHUTILS_ROOT_DIR}/libexec/bash-utils-core"
-TESTBASHUTILS_MODEL="${TESTBASHUTILS_ROOT_DIR}/libexec/bash-utils-model"
+TESTBASHUTILS_MODULES="${TESTBASHUTILS_ROOT_DIR}/libexec/bash-utils-modules/"
+TESTBASHUTILS_MODELMODULE="${TESTBASHUTILS_MODULES}/model"
 
 bats_definition=$(declare -f run)
 source "$TESTBASHUTILS_CORE" || { echo "> bash-utils-core not found!" >&2; exit 1; };
