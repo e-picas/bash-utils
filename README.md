@@ -4,7 +4,7 @@ Bash-Utils - Utilities for Bash scripting
 The `Bash-Utils` project is a short and simple utilities library for 
 [Bash](https://en.wikipedia.org/wiki/Bash_%28Unix_shell%29) scripts.
 You can use it as a basis to quickly build robust shell scripts for UNIX systems 
-with options, arguments, error handling and common usage and help strings.
+with options and arguments, error handling and code debugging, and common usage and help strings.
 The library is licensed under an [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
 The library is fully "unit-tested" using [BATS](http://github.com/sstephenson/bats) to keep it as robust as possible.
 
@@ -20,7 +20,7 @@ Key features:
 -   handling of some common options with associated behaviors: *verbose*, *quiet*, *force*, *help*, *version* ...
 -   handling of errors with information about what throws it or where it was thrown
 -   some debugging information (enabled by default) with a *stack trace* in case of process or sub-processes errors
--   generation of an automatic *synopsis* of the script based on declared available options (short and longs, with or 
+-   generation of an automatic *synopsis* of the script based on declared available options (shorts and longs, with or 
     without arguments)
 -   generation of help and version strings based on declared variables
 -   a set of commonly used functions about *strings*, *arrays* and *file system*
@@ -32,7 +32,7 @@ To make the library accessible for all users, the best practice is to install it
 
     ./make.sh install /usr/local/bin
 
-This way, any user can use in its scripts:
+This way, any user can use it in its scripts:
 
     source bash-utils
 
@@ -55,9 +55,9 @@ If you prefer use a classic *shebang*, you just have to load the library by *sou
     # write your script here
     # ...
 
-The library embeds a model you can use as a more complex starter template:
+The library embeds a *model*'s module you can use as a more complex starter template:
 
-    bash-utils model ~/bin/name-of-your-script
+    bash-utils model bash-utils ~/bin/name-of-your-script
 
 Usage
 -----

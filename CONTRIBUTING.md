@@ -112,9 +112,12 @@ Tom Preston-Werner for more info about the release version name construction rul
 ### Create a new module
 
 If you want to create a new module, put your fork on a new `module-NAME` branch and develop your
-module in the `libexec/bash-utils-modules/` directory using the Bash-Utils internal model. Then create
-a unit-test file to test your module's features in a `test/module-NAME.bats` file. A good practice should
-be to develop on a "test-driven-programming" concept:
+module in the `libexec/bash-utils-modules/` directory using the Bash-Utils internal *model*:
+
+    bash-utils model module <module-name>
+
+Then create a unit-test file to test your module's features in a `test/module-NAME.bats` file.
+A good practice should be to develop on a "test-driven-programming" concept:
 
 -   the test of a feature is first written and should fail
 -   the feature is developed to pass the tests
@@ -123,6 +126,9 @@ Once your module is done, ask a pull-request to the "dev-modules" branch. It is 
 last "master" release.
 
 A module is finally integrated on "master" ONLY IF IT IS WELL CODED AND PASSED ITS TESTS.
+
+Please note that ANY module will finally be part of *Bash-Utils* and will be offered under the same 
+license and copyright conditions.
 
 How-tos
 -------
