@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+#
+# <http://gitlab.com/piwi/bash-utils>
+# Copyright (c) 2015 Pierre Cassat & contributors
+# License Apache 2.0 - This program comes with ABSOLUTELY NO WARRANTY.
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code or see <http://www.apache.org/licenses/LICENSE-2.0>.
+#
+# Bash script starter template
+#
+
+#######################
+## Bash options enabled by default
+set -e      # exit if a command has a non-zero status
+#set -E      # trap on ERR are inherited by shell functions
+#set -T      # trap on DEBUG and RETURN are inherited by shell functions
+#set -o pipefail # do not mask pipeline's errors
+#set -u      # throw error on unset variable usage
+#set -x      # for dev usage: debug commands before to execute them
+#set -v      # for dev usage: print shell input lines as they are read
+
+#######################
+## command options & arguments
+
+# usage info if no argument
+if [ $# -eq 0 ]; then
+    {   echo "usage: $0 <options>"
+        echo "  e.g. $0 my-sample-option"
+    } >&2
+    exit 1
+fi
+
+#######################
+## script's logic ...
+
+# ...
+
+
+
+
+#######################
+## exit
+# a bash script should always exit with a status (0 for no error)
+exit 0
+
+## vim default shell setup (must be the very last line):
+# vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

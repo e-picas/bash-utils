@@ -1,119 +1,113 @@
 #!/usr/bin/env bash-utils
 #
+# This script is a module for Bash-Utils
+#
+# bash-utils - A *bash* library for better scripting
 # <http://gitlab.com/piwi/bash-utils>
 # Copyright (c) 2015 Pierre Cassat & contributors
-# License Apache 2.0 - This program comes with ABSOLUTELY NO WARRANTY.
+#
+# Licensed under the Apache Software Foundation license, Version 2.0;
+# you may not use this file except in compliance with the License.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# For sources & updates, see <http://gitlab.com/piwi/bash-utils>.
+#
+# To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
+#
 # For the full copyright and license information, please view the LICENSE
-# file that was distributed with this source code or see <http://www.apache.org/licenses/LICENSE-2.0>.
-#
-# Demonstration usage of the 'bash-utils' library
-# Default options are: -f | -q | -v | -x | --dry-run
+# file that was distributed with this source code or see
+# <http://www.apache.org/licenses/LICENSE-2.0>.
 #
 
-#######################
-## Bash options enabled by default
-set -e      # exit if a command has a non-zero status
-set -E      # trap on ERR are inherited by shell functions
-set -T      # trap on DEBUG and RETURN are inherited by shell functions
-set -o pipefail # do not mask pipeline's errors
-set -u      # throw error on unset variable usage
-#set -x      # for dev usage: debug commands before to execute them
-#set -v      # for dev usage: print shell input lines as they are read
+# the tag below marks the entry and end points for automatic generated documentation
+##@!@##
+#### COLORIZED CONTENTS #############################################################################
 
-#######################
-## command info
-CMD_NAME='bash-utils-model'
+# you can define here a string about module's usage (short synopsis), description, name and version
+CMD_NAME='Model'
 CMD_VERSION='0.0.0'
-CMD_COPYRIGHT='My command copyright'
-CMD_LICENSE='My command license'
-CMD_SOURCES='My command sources'
-CMD_DESCRIPTION='A model for *bash* scripts using the *bash-utils* library.'
-# the synopsis should not be overwritten as it is automatically built with `CMD_OPTS_...`
-# CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
-CMD_HELP="My command help string ...
+CMD_USAGE="model <type> [file_path]"
+CMD_DESCRIPTION="see one of the bash models contents or copy it in 'file_path'"
+CMD_HELP="arguments:
+    <type>      model's type in 'bash', 'bash-utils', 'module'
+    <file_path> if set, the model will be copied to that file
 
-Available options:
-    --dry-run       process a dry-run
-    -f|--force      do not prompt for choices if a default choice exists
-    -h|--help       get this help info
-    -q|--quiet      decrease script's verbosity
-    -v|--verbose    increase script's verbosity
-    -V|--version    get library information (license, version etc)
-                    use option '--quiet' to get version number only
-    -x|--debug      see some debugging information
+Use option '--dry-run' with the '<file_path>' argument to see what will be done first.
+Use option '--quiet' without a '<file_path>' argument to get the model path.
 ";
-CMD_OPTS_SHORT=(f h q v V x)
-CMD_OPTS_LONG=(debug dry-run force help quiet verbose version)
+#CMD_OPTS_SHORT=( f q v x V h )
+#CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
+#set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
+#set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+
+# models
+export BASHUTILS_MODEL_DIRS="${BASH_UTILS_MODULES}/models/"
+export BASHUTILS_MODEL_BASH="${BASHUTILS_MODEL_DIRS}/bash-model"
+export BASHUTILS_MODEL_BASHUTILS="${BASHUTILS_MODEL_DIRS}/bash-utils-model"
+export BASHUTILS_MODEL_BASHMODULE="${BASHUTILS_MODEL_DIRS}/bash-utils-module"
+
+## !! REQUIRED !! ## stop here on pre-loading
+if ${PRELOAD:-false}; then return 0; fi
 
 #######################
-## command options & arguments
+## script's logic ...
 
-# re-arrangement of options and arguments
+[ $# -eq 0 ] && usage_info && exit 1;
 rearrange_options "$@"
 [ -n "$CMD_REQ" ] && eval set -- "$CMD_REQ";
-
-# common options treatment
 common_options "$@"
+$DEBUG && debug;
 
-# custom options eventually
 while [ $# -gt 0 ]; do
     case "$1" in
-        # user options
-        # to add your own options, use:
-        #
-        # declare -xr CMD_OPTS_SHORT=(f q v x 'a:' 'b::')
-        # declare -xr CMD_OPTS_LONG=(force quiet verbose debug dry-run 'test1:' 'test2::')
-        #
-        # -a | --test1 ) OPTARG="$(echo "$2" | cut -d'=' -f2)"; TEST1="${OPTARG}"; shift;;
-        # -b | --test2 ) OPTARG="$(echo "$2" | cut -d'=' -f2)"; TEST2="${OPTARG:-default}"; shift;;
-        #
-        
-        # end of options
         -- ) shift; break;;
-        # error for unknown option
         * )  ! is_known_option "$1" && error "unknown option '$1'";;
     esac
     shift
 done
 
-# usage info if no argument
-[ $# -eq 0 ] && usage_info && exit 1;
+[ ! -d "$BASHUTILS_MODEL_DIRS" ] && error "directory '$BASHUTILS_MODEL_DIRS' not found";
+type="$1"
+target=''
+source=''
+[ $# -gt 1 ] && target="$2"
 
-# debug environment in debug mode
-$DEBUG && debug;
+case "$type" in
+    'bash')         source="$BASHUTILS_MODEL_BASH";;
+    'bash-utils')   source="$BASHUTILS_MODEL_BASHUTILS";;
+    'bash-utils-module'|'bash-module'|'module')
+                    source="$BASHUTILS_MODEL_BASHMODULE"
+                    if [ -n "$target" ] && ! $FORCE; then
+                        targetfile="$(basename "$target")"
+                        if [ "$targetfile" = "$target" ]; then
+                            [ -d "$(pwd)/libexec/bash-utils-modules/" ] && \
+                                target="$(pwd)/libexec/bash-utils-modules/${target}" || \
+                                    target="${BASH_UTILS_MODULES}/${target}";
+                        fi
+                    fi
+                    ;;
+    * )             error "undefined model type '$type'";;
+esac
 
-#######################
-## script's logic ...
+[ ! -f "$source" ] && error "model '$source' not found";
+if [ -n "$target" ]; then
+    if $DRY_RUN; then
+        comment "cp '${source/$(pwd)\//}' '${target/$(pwd)\//}' && chmod a+x '${target/$(pwd)\//}'"
+    else
+        cp "$source" "$target"
+        chmod a+x "$target"
+        ! $QUIET && echo "$target";
+    fi
+else
+    $QUIET && echo "${source/$(pwd)\//}" || cat "$source";
+fi
 
-# to throw an error for 'non-dev' users
-# error 'my error string'
-
-# to throw an error for 'dev' users
-# die 'my error string'
-
-# to write colorized content
-# e_color 'my string with <red>styles</red> <bold>tags</bold>'
-
-# to write a string in verbose mode only
-# $VERBOSE && echo 'my string';
-
-# to write a string in not quiet mode
-# $QUIET || echo 'my string';
-
-# to not execute a command in dry-run mode
-# if $DRY_RUN; then echo 'rm -f filename.txt'; else rm -f filename.txt; fi
-
-# see the 'bash-utils.bash' sources themselves for complete documentation
-
-# ...
-
-
-
-
-#######################
-## exit
-# a bash script should always exit with a status (0 for no error)
-exit 0
-
+##@!@##
+[ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
 ## vim default shell setup (must be the very last line):
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh
