@@ -527,7 +527,7 @@ export CMD_CALL=''
 export CMD_MODULE=''
 export PIPED_INPUT=''
 
-# load defaults
+# load library & modules on PRELOAD
 source "$BASH_UTILS_ROOT"/bash-utils-lib
 declare -xa MODULES_AVAILABLE=()
 export PRELOAD=true
