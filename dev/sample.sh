@@ -117,10 +117,15 @@ case "${1:-}" in
         debug
         ;;
 
-    # test an error
-    error )
+    # test an trapped error
+    die )
         f() { abqsdffhjfqskdlfjqfhs; }
         f 1 2
+        ;;
+
+    # test an error
+    error )
+        error 'my test error string'
         ;;
 
     # test a try/catch statement
