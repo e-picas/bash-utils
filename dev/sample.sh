@@ -138,6 +138,7 @@ case "${1:-}" in
 
     # test a globbing pattern as argument (for option a)
     globb)
+        TEST1="$(resolve "$TEST1")"
         for f in $TEST1; do
             echo "f: $f"
         done

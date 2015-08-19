@@ -195,6 +195,17 @@ real_path_dirname()
     return 0
 }
 
+# resolve a system path replacing '~' and '.'
+# usage: `resolve <path>`
+resolve()
+{
+    [ $# -eq 0 ] && return 0;
+    local _path="$1"
+    if [ "${_path:0:1}" = '~' ]; then _path="${_path/\~/${HOME}}"; fi
+    if [ "${_path:0:1}" != '/' ]; then _path="$(pwd)/${_path}"; fi
+    echo "$_path"
+}
+
 # resolve symbolic link
 # inspired by <https://github.com/sstephenson/bats>
 # usage: `resolve_link <path>`
