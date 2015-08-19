@@ -92,15 +92,19 @@ make_version()
 
 make_release()
 {
+    echo 'TO REBUILD !!'
+    exit 1
+
     [ -z "$VERSION" ] && { echo "Invalid version number '$VERSION'. Aborting." >&2; exit 1; }
     TAGNAME="v${VERSION}"
-    git stash save 'pre-release stashing'
+    local stashed=false
+    git stash save 'pre-release stashing' && stashed=true;
     git checkout master
     $0 version "$VERSION"
     $0 manpages
     git commit -am "Upgrade app to $VERSION (automatic commit)"
     git tag "$TAGNAME" -m "New release $VERSION (automatic tag)"
-    git stash pop
+    $stashed && git stash pop;
     return $?
 }
 
