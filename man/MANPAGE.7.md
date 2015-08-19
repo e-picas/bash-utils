@@ -49,20 +49,20 @@ A command-line program (such as a shell script) often accepts to set some option
 or another script. A global synopsis of a command line call can be:
 
     path/to/script [-o | --options (=argument)] [--] [<parameter> ...]
-    # i.e.:
+    # e.g.:
     program-to-run -o --option='my value' --option-2 'my value' argument1 argument2
 
 The rules are the followings:
 
 -   *options* are various settings passed to the script when calling it ; each option is prefixed by one or more dash `-` 
-    and can have an argument ; by convention, a short option is composed by one single letter prefixed by one dash, i.e. `-o`, 
-    and a long option is composed by a word prefixed by two dashes, i.e. `--option` ; when an option accepts an argument, 
-    it must be separated from the option name by an equal sign, i.e. `--option=argument` and `-o=argument` ; i.e. 
+    and can have an argument ; by convention, a short option is composed by one single letter prefixed by one dash, e.g. `-o`, 
+    and a long option is composed by a word prefixed by two dashes, e.g. `--option` ; when an option accepts an argument, 
+    it must be separated from the option name by an equal sign, e.g. `--option=argument` and `-o=argument` ; e.g. 
     `./script -o --option-with-no-arg --option-with-arg=argument_value`
 -   a double dashes ` -- ` can be used to identify the end of options ; the rest of the call will be considered as arguments
     only
 -   an *argument* is a setting passed to the script when calling it ; the arguments are not the same as the options as 
-    they are not named but identified by their positions ; i.e. `./script --option argument1 argument2`
+    they are not named but identified by their positions ; e.g. `./script --option argument1 argument2`
 
 #### Commands vs. builtins
 
