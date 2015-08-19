@@ -56,7 +56,10 @@ To use the library, the best practice is to use it as your script's *interpreter
     
     # write your script here
     # ...
-    
+
+To let such notation works correctly, the *bash-utils* script must be accessible from your `$PATH` variable.
+To check this, use: `/usr/bin/env bash-utils --version`.
+
 If you prefer use a classic *shebang*, you just have to load the library by *sourcing* it:
 
     #!/usr/bin/env bash
