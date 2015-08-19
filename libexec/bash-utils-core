@@ -26,31 +26,24 @@
 
 # use aliases
 shopt -s expand_aliases
-# export all modified vars
-#set -a
+# export all modified vars (set -a)
 set -o allexport
 # match the POSIX 1003.2 standard ; see <http://www.gnu.org/software/bash/manual/html_node/Bash-POSIX-Mode.html>
 set -o posix
-# exit if a command has a non-zero status
-#set -e
+# exit if a command has a non-zero status (set -e)
 set -o errexit
 # do not mask pipeline's errors
 set -o pipefail
-# trap on ERR are inherited by shell functions
-#set -E
+# trap on ERR are inherited by shell functions (set -E)
 set -o errtrace
-# trap on DEBUG and RETURN are inherited by shell functions
-#set -T
+# trap on DEBUG and RETURN are inherited by shell functions (set -T)
 set -o functrace
-## throw error on unset variable usage
-#set -u
+## throw error on unset variable usage (set -u)
 set -o nounset
 
-## for dev usage: debug commands before to execute them
-##set -x
+## for dev usage: debug commands before to execute them (set -x)
 #set -o xtrace
-## for dev usage: print shell input lines as they are read
-##set -v
+## for dev usage: print shell input lines as they are read (set -v)
 #set -o verbose
 
 # trap errors to 'die'
