@@ -40,10 +40,14 @@ test_title()
     return 0
 }
 
+## System
+test_title 'System'
+uname -a
+
 ## Shell
 test_title '*Bash* environment'
 
-bashcmd="$(which bash)"
+bashcmd="$(command -v bash)"
 
 # $SHELL
 run_test 'searching "$SHELL" environment variable' \
@@ -108,7 +112,7 @@ test_title '*Bash-Utils* installation'
 
 result="$(/usr/bin/env bash-utils)"
 out=$?
-bashutilscmd="$(which bash-utils)"
+bashutilscmd="$(command -v bash-utils)"
 run_test 'searching for global "bash-utils"' \
     '( [ "$out" -gt 1 ] && [ -n "$bashutilscmd" ] ) && return 1 || return 0' \
     'the *Bash-Utils* library is NOT installed' \
@@ -116,5 +120,6 @@ run_test 'searching for global "bash-utils"' \
     "you should install it running \"./make.sh /usr/local/bin\"";
 
 
+echo
 exit $status
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh
