@@ -250,6 +250,8 @@ load_modules_list()
 {
     local modules_info='' _add='' f l length=0
     export PRELOAD=true
+    declare -a oldCMD_OPTS_SHORT=("${CMD_OPTS_SHORT[@]}")
+    declare -a oldCMD_OPTS_LONG=("${CMD_OPTS_LONG[@]}")
     for l in ${MODULES_AVAILABLE[@]}; do
         [ "${#l}" -gt "$length" ] && length="${#l}";
     done
@@ -268,8 +270,8 @@ paths:
 ";
     CMD_USAGE=''
     CMD_SYNOPSIS=''
-    CMD_OPTS_SHORT=( f q v x V h )
-    CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
+    CMD_OPTS_SHORT=("${oldCMD_OPTS_SHORT[@]}")
+    CMD_OPTS_LONG=("${oldCMD_OPTS_LONG[@]}")
     CMD_MODULE='<module-name>'
     CMD_SYNOPSIS="$(synopsis_info)"
     CMD_DESCRIPTION="List of available modules.
