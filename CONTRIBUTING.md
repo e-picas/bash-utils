@@ -132,6 +132,13 @@ How-tos
 The `make.sh` script distributed with the sources embeds all required utilities to build, test and document
 the package.
 
+### Terminal completion
+
+To load local *Bash-Utils* auto-completion, use:
+
+    source libexec/bash-utils-completion
+
+
 ### Generate the man-pages
 
 The manpages of the app are built with [Markdown-Extended](http://github.com/piwi/markdown-extended).

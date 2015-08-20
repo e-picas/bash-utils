@@ -57,18 +57,19 @@ usage() {
 make_cleanup()
 {
     ( [ -z "$PREFIX" ] || [ ! -d "$PREFIX" ] ) && { echo "Invalid prefix '$PREFIX'. Aborting." >&2; exit 1; }
-    rm -rf "$PREFIX"/{bin,libexec,share/man/{man1,man7}}/bash-utils*
+    rm -rf "$PREFIX"/{bin,etc/bash_completion.d,libexec,share/man/{man1,man7}}/bash-utils*
     return $?
 }
 
 make_install()
 {
     ( [ -z "$PREFIX" ] || [ ! -d "$PREFIX" ] ) && { echo "Invalid prefix '$PREFIX'. Aborting." >&2; exit 1; }
-    mkdir -p "$PREFIX"/{bin,libexec,share/man/{man1,man7}}
+    mkdir -p "$PREFIX"/{bin,etc/bash_completion.d,libexec,share/man/{man1,man7}}
     cp -R "$ROOT_DIR"/bin/* "$PREFIX"/bin/
     cp -R "$ROOT_DIR"/libexec/* "$PREFIX"/libexec/
-    cp "$ROOT_DIR"/man/bash-utils.1.man "$PREFIX"/share/man/man1/
-    cp "$ROOT_DIR"/man/bash-utils.7.man "$PREFIX"/share/man/man7/
+    cp -R "$ROOT_DIR"/etc/bash_completion.d/* "$PREFIX"/etc/bash_completion.d/
+    cp -R "$ROOT_DIR"/man/*.1.man "$PREFIX"/share/man/man1/
+    cp -R "$ROOT_DIR"/man/*.7.man "$PREFIX"/share/man/man7/
     return $?
 }
 
