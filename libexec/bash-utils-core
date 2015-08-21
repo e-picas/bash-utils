@@ -194,8 +194,8 @@ is_known_option()
 {
     [ $# -lt 1 ] && die 'usage: `is_known_option <option_name>`';
     local opt="$1"
-    [ -z "$CMD_OPTS_SHORT" ]   && declare -a CMD_OPTS_SHORT=($(get_env_array_CMD_OPTS_SHORT))
-    [ -z "$CMD_OPTS_LONG" ]    && declare -a CMD_OPTS_LONG=($(get_env_array_CMD_OPTS_LONG))
+    [ -z "${CMD_OPTS_SHORT:-}" ]   && declare -a CMD_OPTS_SHORT=($(get_env_array_CMD_OPTS_SHORT))
+    [ -z "${CMD_OPTS_LONG:-}" ]    && declare -a CMD_OPTS_LONG=($(get_env_array_CMD_OPTS_LONG))
     opt="$(echo "$opt" | cut -d'=' -f1)"
     opt="${opt//:}"
     opt="${opt#-}"
@@ -213,6 +213,7 @@ is_known_option()
     return 1
 }
 
+# load all `CMD_...` variables on some blank values
 # usage: `init_blank`
 init_blank()
 {
@@ -234,6 +235,7 @@ init_blank()
     set_env_array CMD_ARGS CMD_ARGS[@]
 }
 
+# load all `CMD_...` variables on their default values
 # usage: `init_defaults`
 init_defaults()
 {
@@ -250,14 +252,15 @@ init_defaults()
     CMD_SYNOPSIS="$DEFAULT_SYNOPSIS"
     CMD_USAGE="$DEFAULT_USAGE"
     export CMD_NAME CMD_VERSION CMD_COPYRIGHT CMD_LICENSE CMD_SOURCES CMD_DESCRIPTION CMD_HELP CMD_SYNOPSIS CMD_USAGE
-    CMD_OPTS_SHORT=("${DEFAULT_OPTS_SHORT[@]}")
-    CMD_OPTS_LONG=("${DEFAULT_OPTS_LONG[@]}")
-    CMD_ARGS=("${DEFAULT_ARGS[@]}")
+    CMD_OPTS_SHORT=("${DEFAULT_OPTS_SHORT[@]:-}")
+    CMD_OPTS_LONG=("${DEFAULT_OPTS_LONG[@]:-}")
+    CMD_ARGS=("${DEFAULT_ARGS[@]:-}")
     set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
     set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
     set_env_array CMD_ARGS CMD_ARGS[@]
 }
 
+# load all `CMD_...` variables on their library values
 # usage: `init_bashutils`
 init_bashutils()
 {
@@ -274,9 +277,9 @@ init_bashutils()
     CMD_SYNOPSIS="$BASH_UTILS_SYNOPSIS"
     CMD_USAGE="$BASH_UTILS_USAGE"
     export CMD_NAME CMD_VERSION CMD_COPYRIGHT CMD_LICENSE CMD_SOURCES CMD_DESCRIPTION CMD_HELP CMD_SYNOPSIS CMD_USAGE
-    CMD_OPTS_SHORT=("${BASH_UTILS_OPTS_SHORT[@]}")
-    CMD_OPTS_LONG=("${BASH_UTILS_OPTS_LONG[@]}")
-    CMD_ARGS=("${BASH_UTILS_ARGS[@]}")
+    CMD_OPTS_SHORT=("${BASH_UTILS_OPTS_SHORT[@]:-}")
+    CMD_OPTS_LONG=("${BASH_UTILS_OPTS_LONG[@]:-}")
+    CMD_ARGS=("${BASH_UTILS_ARGS[@]:-}")
     set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
     set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
     set_env_array CMD_ARGS CMD_ARGS[@]
@@ -320,14 +323,19 @@ load_modules_list()
         fi
     done
     export PRELOAD=false
+    init_bashutils
     CMD_HELP="available modules: $modules_info
 
 paths:
     $BASH_UTILS_MODULES
 ";
-    init_bashutils
-    CMD_OPTS_SHORT=("${oldCMD_OPTS_SHORT[@]}")
-    CMD_OPTS_LONG=("${oldCMD_OPTS_LONG[@]}")
+    [ -z "${DEFAULT_OPTS_SHORT:-}" ]   && declare -a DEFAULT_OPTS_SHORT=($(get_env_array_DEFAULT_OPTS_SHORT))
+    [ -z "${DEFAULT_OPTS_LONG:-}" ]    && declare -a DEFAULT_OPTS_LONG=($(get_env_array_DEFAULT_OPTS_LONG))
+    [ -z "${DEFAULT_ARGS:-}" ]         && declare -a DEFAULT_ARGS=($(get_env_array_DEFAULT_ARGS))
+    CMD_OPTS_SHORT=("${DEFAULT_OPTS_SHORT[@]:-}")
+    CMD_OPTS_LONG=("${DEFAULT_OPTS_LONG[@]:-}")
+    CMD_SYNOPSIS=''
+    CMD_USAGE=''
     CMD_MODULE='<module-name>'
     CMD_SYNOPSIS="$(synopsis_info)"
     CMD_DESCRIPTION="List of available modules.
@@ -365,14 +373,14 @@ read_from_pipe()
 # usage: `rearrange_options "$@"`
 rearrange_options()
 {
-    [ -z "$CMD_OPTS_SHORT" ]   && declare -a CMD_OPTS_SHORT=($(get_env_array_CMD_OPTS_SHORT))
-    [ -z "$CMD_OPTS_LONG" ]    && declare -a CMD_OPTS_LONG=($(get_env_array_CMD_OPTS_LONG))
+    [ -z "${CMD_OPTS_SHORT:-}" ]   && declare -a CMD_OPTS_SHORT=($(get_env_array_CMD_OPTS_SHORT))
+    [ -z "${CMD_OPTS_LONG:-}" ]    && declare -a CMD_OPTS_LONG=($(get_env_array_CMD_OPTS_LONG))
     local shorts=''
-    for opt in "${CMD_OPTS_SHORT[@]}"; do
+    for opt in "${CMD_OPTS_SHORT[@]:-}"; do
         shorts+="${opt}"
     done
     local longs=''
-    for opt in "${CMD_OPTS_LONG[@]}"; do
+    for opt in "${CMD_OPTS_LONG[@]:-}"; do
         longs+="${opt},"
     done
     longs="${longs%,}"
@@ -415,6 +423,7 @@ run()
 
 # set an environment (global) array
 # to get back the array values, call `get_env_array_ARRAY_NAME`
+# safe usage: `[ -z "${MYARRAY:-}" ] && declare -a MYARRAY=($(get_env_array_MYARRAY))`
 # usage: `set_env_array <name> <values = array[@]>`
 set_env_array()
 {

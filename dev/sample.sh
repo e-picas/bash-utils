@@ -170,7 +170,7 @@ case "${1:-}" in
         padder="$(printf '%0.1s' "-"{1..120})"
         loremipsum='lorem ipsum sit amet'
 
-        [ -z "$TEXTOPTIONS" ] && declare -a TEXTOPTIONS=($(get_env_array_TEXTOPTIONS))
+        [ -z "${TEXTOPTIONS:-}" ] && declare -a TEXTOPTIONS=($(get_env_array_TEXTOPTIONS))
         title="TEXTOPTIONS"
         printf "%*.*s | %s %*.*s\n" 0 16 "$padder" "$title" 0 $((80 - ${#title})) "$padder"
         for i in "${TEXTOPTIONS[@]}"; do
@@ -180,7 +180,7 @@ case "${1:-}" in
         done
 
         title="TEXTCOLORS (foregrounds)"
-        [ -z "$TEXTCOLORS" ] && declare -a TEXTCOLORS=($(get_env_array_TEXTCOLORS))
+        [ -z "${TEXTCOLORS:-}" ] && declare -a TEXTCOLORS=($(get_env_array_TEXTCOLORS))
         printf "%*.*s | %s %*.*s\n" 0 16 "$padder" "$title" 0 $((80 - ${#title})) "$padder"
         for i in "${TEXTCOLORS[@]}"; do
             [ "$i" = 'normal' ] && continue;
