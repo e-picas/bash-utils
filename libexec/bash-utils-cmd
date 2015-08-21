@@ -36,48 +36,19 @@ CMD_COPYRIGHT="$BASH_UTILS_COPYRIGHT"
 CMD_LICENSE="$BASH_UTILS_LICENSE"
 CMD_SOURCES="$BASH_UTILS_SOURCES"
 CMD_DESCRIPTION="$BASH_UTILS_DESCRIPTION"
-#CMD_SYNOPSIS="$0 [-fqvVx] [--debug|--dry-run|--force|--quiet|--verbose|--version] [-e|--exec[=<arg>]] [--] <arguments>"
-CMD_SYNOPSIS=''
-CMD_USAGE=''
-CMD_HELP="arguments:
-    about                   alias of '--version'
-    about <module_name>     alias of '<module-name> --version'
-    help                    alias of '--help'
-    help <module_name>      get the help about a module
-    modules                 get the list of available modules
-    usage                   get the library synopsis
-    usage <module_name>     get a module synopsis
-    version                 alias of '--version --quiet'
-    version <module_name>   alias of '<module_name> --version --quiet'
-
-options:
-    --dry-run           process a dry-run
-    -e|--exec=<arg>     execute the argument in the library's environment:
-                            # bash-utils --exec='e_color \"<bold>test</bold>\"'
-    -e|--exec           without argument, any piped content will be evaluated:
-                            # echo 'e_color \"<bold>test</bold>\"' | bash-utils --exec
-    -f|--force          do not prompt for choices if a default choice exists
-    -h|--help           get this help info
-    -q|--quiet          decrease script's verbosity
-    -v|--verbose        increase script's verbosity
-    -V|--version        get library information (license, version etc)
-                        use option '--quiet' to get version number only
-    -x|--debug          see some debugging information
-
-paths:
-    $BASH_UTILS
-    $BASH_UTILS_MODULES
-";
-
-CMD_OPTS_SHORT=( ':' 'e::' f h q v V x )
-CMD_OPTS_LONG=( 'exec::' debug dry-run force help quiet verbose version )
-declare -a CMD_ACTIONS=(about debug help modules usage version)
-declare -a CMD_ACTIONS_ON_MODULE=(about help usage version)
+CMD_SYNOPSIS="$BASH_UTILS_SYNOPSIS"
+CMD_USAGE="$BASH_UTILS_USAGE"
+CMD_HELP="$BASH_UTILS_HELP";
+CMD_OPTS_SHORT=("${BASH_UTILS_OPTS_SHORT[@]}")
+CMD_OPTS_LONG=("${BASH_UTILS_OPTS_LONG[@]}")
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_KEY
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_VERSION
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_ROOT
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_MODULES
+set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
+set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+set_env_array TO_DEBUG TO_DEBUG[@]
 
 [ $# -eq 0 ] && usage_info && exit 1;
 rearrange_options "$@"
@@ -143,14 +114,14 @@ while [ $# -gt 0 ]; do
                             ;;
                         'actions')
                             opts=''
-                            for o in "${CMD_ACTIONS[@]}"; do
+                            for o in "${BASH_UTILS_ARGS[@]}"; do
                                 opts+="${o} "
                             done
                             echo "${opts% }"
                             ;;
                         'actions_on_modules')
                             opts=''
-                            for o in "${CMD_ACTIONS_ON_MODULE[@]}"; do
+                            for o in "${BASH_UTILS_ACTIONS_ON_MODULE[@]}"; do
                                 opts+="${o} "
                             done
                             echo "${opts% }"

@@ -138,6 +138,15 @@ To load local *Bash-Utils* auto-completion, use:
 
     source libexec/bash-utils-completion
 
+To enable the completion function for a module, use:
+
+    _bashutils_MODULE_NAME()
+    {
+        export COMPMODULE='MODULE_NAME'
+        _bashutils
+        return $?
+    }
+    complete -o default -F _bashutils_MODULE_NAME module-cmd
 
 ### Generate the man-pages
 
