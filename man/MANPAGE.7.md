@@ -2,7 +2,7 @@ Man:        Bash-Utils Documentation
 Man-name:   bash-utils
 Author:     Pierre Cassat
 Section:    7
-Date: 2015-08-21
+Date: 2015-08-22
 Version: 0.0.1@dev
 
 
@@ -26,6 +26,14 @@ of the model):
     #!/usr/bin/env bash-utils
 
     # write your script here
+
+You can even enable some library's flags by adding options to the *shebang*:
+
+    #!/usr/bin/env bash-utils -v
+
+You must separate them when using multiple flags:
+
+    #!/usr/bin/env bash-utils -v -x
 
 ### Notes about *bash* scripting and usage
 

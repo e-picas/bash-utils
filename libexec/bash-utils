@@ -42,6 +42,19 @@ appfile="$(getapplibexec "${BASH_SOURCE[0]}")/bash-utils-core"
 if [ ! -f "$appfile" ]; then echo "> ${BASH_SOURCE[0]}:${LINENO}: required file '$appfile' not found!" >&2; exit 1; fi
 source "$appfile"
 
+# direct options if so
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -f | --force )  FORCE=true;;
+        -q | --quiet )  QUIET=true; VERBOSE=false;;
+        -v | --verbose ) VERBOSE=true; QUIET=false;;
+        -x | --debug )  DEBUG=true;;
+        --dry-run )     DRY_RUN=true;;
+        * ) break;;
+    esac
+    shift
+done
+
 # transmit the process to called script or module
 defaultcmd="${BASH_UTILS_ROOT}/bash-utils-cmd"
 cmd=''
