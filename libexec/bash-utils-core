@@ -50,6 +50,15 @@ set -o nounset
 trap 'die "trapped error at ${BASH_SOURCE}:${BASH_LINENO:-}:${FUNCNAME:-}()"' 1 2 3 15 ERR
 # trap exit to 'shutdown_handler'
 trap 'shutdown_handler' EXIT
+## signals (`kill -l` for full list):
+# SIGHUP    1           : Hang Up. The controlling terminal has gone away.
+# SIGINT    2           : Interrupt. The user has pressed the interrupt key (usually Ctrl-C or DEL).
+# SIGQUIT   3           : Quit. The user has pressed the quit key (usually Ctrl-\). Exit and dump core.
+# SIGKILL   9           : Kill. This signal cannot be caught or ignored. Unconditionally fatal. No cleanup possible.
+# SIGTERM   15          : Terminate. This is the default signal sent by the kill command.
+# SIGSTOP   17,19,23    : Stop the process
+# EXIT      0           : Not really a signal. In a shell script, an EXIT trap is run on any exit, signalled or not.
+##
 
 #### CORE ####
 # functions are written in alphabetical order
