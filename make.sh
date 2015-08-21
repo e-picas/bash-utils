@@ -47,7 +47,6 @@ usage() {
         {   echo "usage: $0 install <prefix>"
             echo "       $0 cleanup <prefix>"
             echo "       $0 check"
-            echo "       $0 test"
             echo
             echo "  e.g. $0 install /usr/local"
             echo "       $0 cleanup /usr/local"
