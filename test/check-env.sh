@@ -71,26 +71,35 @@ run_test '*Bash* version 3+' \
     "you should update it with \"aptitude upgrade bash\"";
 
 # ~/.bashrc
+starterfile="${HOME}/.bashrc"
 run_test 'searching *Bash* starter file' \
-    '[ -n "$BASH_ENV" ] && [ -f "$BASH_ENV" ] && return 0 || return 1' \
+    '[ -f "$starterfile" ] && return 0 || return 1' \
     'you do NOT have a *Bash* starter file' \
+    "$starterfile" \
+    "you should use a default \"\$HOME/.bashrc\"";
+
+# $BASH_ENV
+[ -n "$BASH_ENV" ] && starterfile="$BASH_ENV";
+run_test 'searching for the "$BASH_ENV" variable' \
+    '[ -n "$BASH_ENV" ] && [ -f "$BASH_ENV" ] && return 0 || return 1' \
+    '"$BASH_ENV" environment variable is NOT defined' \
     "$BASH_ENV" \
-    "you should use a default \"${HOME}/.bashrc\"";
+    "you should define it as \"BASH_ENV=\$HOME/.bashrc\"";
 
 # ~/bin
 run_test 'searching for personal "bin/" directory' \
     '[ -d ~/bin ] && return 0 || return 1' \
     'you do NOT have a personal "bin/" directory' \
     "${HOME}/bin" \
-    "you should create directory \"${HOME}/bin\" to store your shell scripts";
+    "you should create directory \"\$HOME/bin\" to store your shell scripts";
 
 # ~/bin added in PATH
-result="$(cat "$BASH_ENV" | grep -E 'PATH=.*\${?HOME}?/bin.*')"
+result="$(cat "$starterfile" 2>/dev/null | grep -E 'PATH=.*\${?HOME}?/bin.*')"
 run_test 'searching if personal "bin/" is added in the "$PATH"' \
     '[ -z "$result" ] && return 1 || return 0' \
     'your personal "bin/" directory is NOT included in the "$PATH"' \
     "${BASH_ENV} : ${result}" \
-    "you should add \"export PATH=\$PATH:\$HOME/bin\" in your \"${HOME}/.bashrc\"";
+    "you should add \"export PATH=\$PATH:\$HOME/bin\" in your \"\$HOME/.bashrc\"";
 
 
 ## commands
