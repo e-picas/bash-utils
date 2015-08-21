@@ -68,7 +68,7 @@ The rules are the followings:
 
 *Bash* proposes a large set of **builtins** "commands", which must be differentiated from *external commands*. The bash 
 builtins are always available in any bash environment while external commands must be installed on the system to work.
-If you have a doubt about a command, you can verify running `help <command-name>`, which will respond `... is a shell builtin`
+If you have a doubt about a command, you can verify running `type <command-name>`, which will respond `... is a shell builtin`
 for builtins. If you have the choice, you should always prefer a builtin rather than an external command, unless you
 are absolutely sure it is present on all UNIX installations.
 
