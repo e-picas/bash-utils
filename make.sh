@@ -103,7 +103,7 @@ make_release()
     $0 version "$VERSION"
     $0 manpages
     git commit -am "Upgrade app to $VERSION (automatic commit)"
-    git tag "$TAGNAME" -m "New release $VERSION (automatic tag)"
+    git tag -a "$TAGNAME" -m "New release $VERSION (automatic tag)"
     git checkout "$branch"
     $stashed && git stash pop;
     git archive --format tar "$TAGNAME" | gzip -9 > "${TAGNAME}.tar.gz" && \
