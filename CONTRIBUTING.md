@@ -242,6 +242,18 @@ Keep in mind the followings:
 -   comment your work (just enough)
 -   in case of error, ALWAYS use the `die()` or `error()` functions with a message
 
+Useful links
+------------
+
+-   the *Bash Guide for Beginners*: <http://tldp.org/LDP/Bash-Beginners-Guide/html/index.html> (recommended) 
+-   the *Advanced Bash-Scripting Guide*: <http://tldp.org/LDP/abs/html/index.html> (recommended) 
+-   the *Bash Reference Manual*: <http://www.gnu.org/software/bash/manual/html_node/index.html>
+-   the *GNU Coding Standards*: <http://www.gnu.org/prep/standards/standards.html>
+-   *BATS*, a test suite for Bash scripts: <http://github.com/sstephenson/bats>
+-   *ShellCheck*, a Bash validator: <http://www.shellcheck.net/> (wiki: <https://github.com/koalaman/shellcheck/wiki>)
+-   a well-done POSIX review: <http://shellhaters.org/>
+-   the last (2008) version of *POSIX* specifications: <http://pubs.opengroup.org/onlinepubs/9699919799/>
+
 
 ----
 

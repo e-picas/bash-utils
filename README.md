@@ -49,7 +49,7 @@ You can use the `make.sh` script to clean-up an installed library or update it ;
 Starter template
 ----------------
 
-To use the library, the best practice is to use it as your script's *interpreter* defining it as your 
+To load the library, the best practice is to use it as your script's *interpreter* defining it as your 
 [*shebang*](https://en.wikipedia.org/wiki/Shebang_%28Unix%29): 
 
     #!/usr/bin/env bash-utils
@@ -63,7 +63,7 @@ To check this, use: `/usr/bin/env bash-utils --version`.
 If you prefer use a classic *shebang*, you just have to load the library by *sourcing* it:
 
     #!/usr/bin/env bash
-    source bash-utils --
+    source bash-utils -- # keep the trailing double-dash to avoid parameter expansion
     
     # write your script here
     # ...
@@ -79,3 +79,8 @@ Usage
 For a documentation of the library, please see the [documentation manpage](man/MANPAGE.7.md).
 
 For a complete review of the library's usage, please see the [usage manpage](man/MANPAGE.1.md).
+
+If you want to test the library locally, you need to install its binary in one of your `$PATH` directory
+(it will be replaced if you finally install the library):
+
+    ln -s "$(pwd)/bin/bash-utils" /usr/local/bin/
