@@ -323,6 +323,7 @@ load_modules_list()
         fi
     done
     export PRELOAD=false
+    init_blank
     init_bashutils
     CMD_HELP="available modules: $modules_info
 
@@ -708,6 +709,9 @@ declare -ax CMD_ARGS=()
 set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
 set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
 set_env_array CMD_ARGS CMD_ARGS[@]
+
+# init defaults
+init_defaults
 
 # default logfile
 CMD_LOGFILE="$(make_tmp_file "$BASH_UTILS_KEY")"
