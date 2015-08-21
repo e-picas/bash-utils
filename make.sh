@@ -96,19 +96,24 @@ make_release()
 {
     [ -z "$VERSION" ] && { echo "Invalid version number '$VERSION'. Aborting." >&2; exit 1; }
     TAGNAME="v${VERSION}"
+    TARBALLNAME="bash-utils-${TAGNAME}.tar.gz"
     local stashed=false branch
     branch="$(git rev-parse --abbrev-ref HEAD)"
     git stash save 'pre-release stashing' && stashed=true;
     git checkout master
+    echo "> $0 version $VERSION"
     $0 version "$VERSION"
+    echo "> $0 manpages"
     $0 manpages
+    echo "> git commit -am 'Upgrade app to $VERSION (automatic commit)'"
     git commit -am "Upgrade app to $VERSION (automatic commit)"
+    echo "> git tag -a $TAGNAME -m 'New release $VERSION (automatic tag)'"
     git tag -a "$TAGNAME" -m "New release $VERSION (automatic tag)"
     git checkout "$branch"
     $stashed && git stash pop;
-    git archive --format tar "$TAGNAME" | gzip -9 > "${TAGNAME}.tar.gz" && \
-        $(type -p gmd5sum md5sum | head -1) "${TAGNAME}.tar.gz" | cut -d ' ' -f 1 > "${TAGNAME}.tar.gz.md5sum" && \
-            echo "tarball and checsum built at ${TAGNAME}.tar.gz(.md5sum)";
+    git archive --format tar "$TAGNAME" | gzip -9 > "$TARBALLNAME" && \
+        $(type -p gmd5sum md5sum | head -1) "$TARBALLNAME" | cut -d ' ' -f 1 > "${TARBALLNAME}.md5sum" && \
+            echo "> tag tarball and checksum built at ${TARBALLNAME}(.md5sum)";
     return $?
 }
 
