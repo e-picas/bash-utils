@@ -86,7 +86,7 @@ is_prime()
     local j=2 nb
     nb="$1"
     [ "$nb" -lt 2 ] && return 1;
-    while [ $(($nb%j)) -ne 0 ]
+    while [ $((nb%j)) -ne 0 ]
     do
         ((j++))
     done

@@ -106,7 +106,7 @@ if [ -n "$target" ]; then
         ! $QUIET && echo "$target";
     fi
 else
-    $QUIET && echo "${source/$(pwd)\//}" || cat "$source";
+    if $QUIET; then echo "${source/$(pwd)\//}"; else cat "$source"; fi
 fi
 
 [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
