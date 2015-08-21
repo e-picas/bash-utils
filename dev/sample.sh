@@ -19,6 +19,7 @@ CMD_HELP="Example of usage:
     ./sample.sh version
     ./sample.sh version --quiet
     ./sample.sh error
+    ./sample.sh die
     ./sample.sh try
     ./sample.sh -v warning
     ./sample.sh -v warning 2>/dev/null
