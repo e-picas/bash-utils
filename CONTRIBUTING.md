@@ -132,6 +132,23 @@ How-tos
 The `make.sh` script distributed with the sources embeds all required utilities to build, test and document
 the package.
 
+### Terminal completion
+
+To load local *Bash-Utils* auto-completion, use:
+
+    source libexec/bash-utils-completion
+
+To enable the completion function for a module, use:
+
+    _bashutils_MODULE_NAME()
+    {
+        export COMPMODULE='MODULE_NAME'
+        _bashutils
+        unset COMPMODULE
+        return $?
+    }
+    complete -o default -F _bashutils_MODULE_NAME module-cmd
+
 ### Generate the man-pages
 
 The manpages of the app are built with [Markdown-Extended](http://github.com/piwi/markdown-extended).
@@ -224,6 +241,18 @@ Keep in mind the followings:
 -   use space (no tab) ; 1 tab = 4 spaces
 -   comment your work (just enough)
 -   in case of error, ALWAYS use the `die()` or `error()` functions with a message
+
+Useful links
+------------
+
+-   the *Bash Guide for Beginners*: <http://tldp.org/LDP/Bash-Beginners-Guide/html/index.html> (recommended) 
+-   the *Advanced Bash-Scripting Guide*: <http://tldp.org/LDP/abs/html/index.html> (recommended) 
+-   the *Bash Reference Manual*: <http://www.gnu.org/software/bash/manual/html_node/index.html>
+-   the *GNU Coding Standards*: <http://www.gnu.org/prep/standards/standards.html>
+-   *BATS*, a test suite for Bash scripts: <http://github.com/sstephenson/bats>
+-   *ShellCheck*, a Bash validator: <http://www.shellcheck.net/> (wiki: <https://github.com/koalaman/shellcheck/wiki>)
+-   a well-done POSIX review: <http://shellhaters.org/>
+-   the last (2008) version of *POSIX* specifications: <http://pubs.opengroup.org/onlinepubs/9699919799/>
 
 
 ----

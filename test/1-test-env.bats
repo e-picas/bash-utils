@@ -82,5 +82,4 @@ teardown()
         echo "status: $status"
     } >&1
     [ "$status" -ne 0 ]
-    echo "$output" | grep "command not found$"
 }

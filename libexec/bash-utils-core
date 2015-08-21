@@ -21,54 +21,49 @@
 # file that was distributed with this source code or see
 # <http://www.apache.org/licenses/LICENSE-2.0>.
 #
+#
+# bash-utils-core:  this is the core of the Bash-Utils library
+#                   it defines the environment and some basic functions to let it work
+#                   it uses almost only bash builtins
+#
 
 #### BASH OPTIONS ####
 
 # use aliases
 shopt -s expand_aliases
-# export all modified vars
-#set -a
+# export all modified vars (set -a)
 set -o allexport
 # match the POSIX 1003.2 standard ; see <http://www.gnu.org/software/bash/manual/html_node/Bash-POSIX-Mode.html>
 set -o posix
-# exit if a command has a non-zero status
-#set -e
+# exit if a command has a non-zero status (set -e)
 set -o errexit
 # do not mask pipeline's errors
 set -o pipefail
-# trap on ERR are inherited by shell functions
-#set -E
+# trap on ERR are inherited by shell functions (set -E)
 set -o errtrace
-# trap on DEBUG and RETURN are inherited by shell functions
-#set -T
+# trap on DEBUG and RETURN are inherited by shell functions (set -T)
 set -o functrace
-## throw error on unset variable usage
-#set -u
+## throw error on unset variable usage (set -u)
 set -o nounset
 
-## for dev usage: debug commands before to execute them
-##set -x
+## for dev usage: debug commands before to execute them (set -x)
 #set -o xtrace
-## for dev usage: print shell input lines as they are read
-##set -v
+## for dev usage: print shell input lines as they are read (set -v)
 #set -o verbose
 
 # trap errors to 'die'
 trap 'die "trapped error at ${BASH_SOURCE}:${BASH_LINENO:-}:${FUNCNAME:-}()"' 1 2 3 15 ERR
 # trap exit to 'shutdown_handler'
 trap 'shutdown_handler' EXIT
-
-#### ID ####
-
-readonly BASH_UTILS_NAME='Bash-Utils'
-readonly BASH_UTILS_KEY='bash-utils'
-readonly BASH_UTILS_VERSION='0.0.1'
-readonly BASH_UTILS_COPYRIGHT='Copyright (c) 2015 Pierre Cassat & contributors'
-readonly BASH_UTILS_LICENSE='Apache Software Foundation license 2.0 <http://www.apache.org/licenses/LICENSE-2.0>'
-readonly BASH_UTILS_SOURCES='Sources & updates: <http://gitlab.com/piwi/bash-utils.git>'
-readonly BASH_UTILS_DESCRIPTION='A short *bash* library for better scripting.'
-readonly BASH_UTILS_MODULE_INFO='a module for:'
-readonly BASH_UTILS_SCRIPT_INFO='using:'
+## signals (`kill -l` for full list):
+# SIGHUP    1           : Hang Up. The controlling terminal has gone away.
+# SIGINT    2           : Interrupt. The user has pressed the interrupt key (usually Ctrl-C or DEL).
+# SIGQUIT   3           : Quit. The user has pressed the quit key (usually Ctrl-\). Exit and dump core.
+# SIGKILL   9           : Kill. This signal cannot be caught or ignored. Unconditionally fatal. No cleanup possible.
+# SIGTERM   15          : Terminate. This is the default signal sent by the kill command.
+# SIGSTOP   17,19,23    : Stop the process
+# EXIT      0           : Not really a signal. In a shell script, an EXIT trap is run on any exit, signalled or not.
+##
 
 #### CORE ####
 # functions are written in alphabetical order
@@ -96,6 +91,10 @@ common_options()
             -V | --version) _todo='version_info && exit 0;';;
             -h | --help)    _todo='help_info && exit 0;';;
             --dry-run )     DRY_RUN=true;;
+            --completion)   if [ -n "$2" ]
+                                then _todo="completion_info ${2#=} && exit 0;"; shift;
+                                else _todo='echo "" && exit 0;'
+                            fi;;
             -- )            shift; break;;
             * )             if ! is_known_option "$1" && [ "${CMD_OPTS_SHORT[0]}" != ":" ]
                                 then error "unknown option '$1'"; fi;;
@@ -104,6 +103,34 @@ common_options()
     done
     [ -n "$_todo" ] && eval "$_todo";
     return 0
+}
+
+# compute and write a completion info ; type in 'short_opts', 'long_opts', 'args', 'modules'
+# usage: `completion_info <type>`
+completion_info()
+{
+    [ $# -lt 1 ] && die 'usage: `completion_info <type>`';
+    local type="$1"
+    [ -z "${CMD_OPTS_SHORT:-}" ]    && declare -a CMD_OPTS_SHORT=($(get_env_array_CMD_OPTS_SHORT))
+    [ -z "${CMD_OPTS_LONG:-}" ]     && declare -a CMD_OPTS_LONG=($(get_env_array_CMD_OPTS_LONG))
+    [ -z "${CMD_ARGS:-}" ]          && declare -a CMD_ARGS=($(get_env_array_CMD_ARGS))
+    [ -z "${MODULES_AVAILABLE:-}" ] && declare -a MODULES_AVAILABLE=($(get_env_array_MODULES_AVAILABLE))
+    opts=''
+    case "$type" in
+        'short_opts')
+            for o in "${CMD_OPTS_SHORT[@]:-}"; do [ -z "${o//:}" ] || opts+="-${o} "; done
+            ;;
+        'long_opts')
+            for o in "${CMD_OPTS_LONG[@]:-}"; do [ -z "${o//:}" ] || opts+="--${o} "; done
+            ;;
+        'args')
+            for o in "${CMD_ARGS[@]:-}"; do opts+="${o} "; done
+            ;;
+        'modules')
+            for o in "${MODULES_AVAILABLE[@]:-}"; do opts+="${o} "; done
+            ;;
+    esac
+    echo "${opts% }"
 }
 
 # debug environment variables from the `$TO_DEBUG` array
@@ -148,8 +175,14 @@ die()
 # usage: `error [string='unknown error'] [status=1]`
 error()
 {
-    {   echo "error: ${1:-unknown error}"
-        $VERBOSE && echo "# in ${BASH_SOURCE[1]##*/} at line ${BASH_LINENO[0]}";
+    local errstr
+    if $VERBOSE; then
+        errstr="$(gnu_error_string "${1:-unknown error}")"
+    else
+        errstr="${1:-unknown error}"
+    fi
+    {   echo '---'
+        echo "error: ${errstr}"
         echo '---'
         usage_info
     } >&2
@@ -168,6 +201,22 @@ find_module()
     else
         return 1
     fi
+}
+
+# must echoes something like 'sourcefile:lineno: message'
+# see <https://www.gnu.org/prep/standards/html_node/Errors.html>
+# usage: `gnu_error_string <string> [filename=BASH_SOURCE[2]] [funcname=FUNCNAME[2]] [line=BASH_LINENO[1]]`
+gnu_error_string()
+{
+    local errorstr=''
+    local _source="${2:-${BASH_SOURCE[2]}}"
+    [ -z "$_source" ] || errorstr+="${_source}:";
+    local _func="${3:-${FUNCNAME[2]}}"
+    [ -z "$_func" ] || errorstr+="${_func}:";
+    local _line="${4:-${BASH_LINENO[1]}}"
+    [ -z "$_line" ] || errorstr+="${_line}:";
+    echo "${errorstr} ${1}"
+    return 0
 }
 
 # write help string to STDERR & exit
@@ -191,18 +240,18 @@ is_known_option()
 {
     [ $# -lt 1 ] && die 'usage: `is_known_option <option_name>`';
     local opt="$1"
-    [ -z "$CMD_OPTS_SHORT" ]   && declare -a CMD_OPTS_SHORT=("$(get_env_array_CMD_OPTS_SHORT)")
-    [ -z "$CMD_OPTS_LONG" ]    && declare -a CMD_OPTS_LONG=("$(get_env_array_CMD_OPTS_LONG)")
+    [ -n "${CMD_OPTS_SHORT:-}" ]   || declare -a CMD_OPTS_SHORT=($(get_env_array_CMD_OPTS_SHORT))
+    [ -n "${CMD_OPTS_LONG:-}" ]    || declare -a CMD_OPTS_LONG=($(get_env_array_CMD_OPTS_LONG))
     opt="$(echo "$opt" | cut -d'=' -f1)"
     opt="${opt//:}"
     opt="${opt#-}"
     opt="${opt#-}"
-    for o in ${CMD_OPTS_SHORT[@]}; do
+    for o in "${CMD_OPTS_SHORT[@]:-}"; do
         o="${o//:}"
         [ -n "$o" ] || continue;
         [ "$o" != "$opt" ] || return 0;
     done
-    for o in ${CMD_OPTS_LONG[@]}; do
+    for o in "${CMD_OPTS_LONG[@]:-}"; do
         o="${o//:}"
         [ -n "$o" ] || continue;
         [ "$o" != "$opt" ] || return 0;
@@ -210,15 +259,86 @@ is_known_option()
     return 1
 }
 
+# load all `CMD_...` variables on some blank values
+# usage: `init_blank`
+init_blank()
+{
+    CMD_NAME=''
+    CMD_VERSION=''
+    CMD_COPYRIGHT=''
+    CMD_LICENSE=''
+    CMD_SOURCES=''
+    CMD_DESCRIPTION=''
+    CMD_HELP=''
+    CMD_SYNOPSIS=''
+    CMD_USAGE=''
+    export CMD_NAME CMD_VERSION CMD_COPYRIGHT CMD_LICENSE CMD_SOURCES CMD_DESCRIPTION CMD_HELP CMD_SYNOPSIS CMD_USAGE
+    CMD_OPTS_SHORT=()
+    CMD_OPTS_LONG=()
+    CMD_ARGS=()
+    set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
+    set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+    set_env_array CMD_ARGS CMD_ARGS[@]
+}
+
+# load all `CMD_...` variables on their default values
+# usage: `init_defaults`
+init_defaults()
+{
+    [ -z "${DEFAULT_OPTS_SHORT:-}" ]   && declare -a DEFAULT_OPTS_SHORT=($(get_env_array_DEFAULT_OPTS_SHORT))
+    [ -z "${DEFAULT_OPTS_LONG:-}" ]    && declare -a DEFAULT_OPTS_LONG=($(get_env_array_DEFAULT_OPTS_LONG))
+    [ -z "${DEFAULT_ARGS:-}" ]         && declare -a DEFAULT_ARGS=($(get_env_array_DEFAULT_ARGS))
+    CMD_NAME="$DEFAULT_NAME"
+    CMD_VERSION="$DEFAULT_VERSION"
+    CMD_COPYRIGHT="$DEFAULT_COPYRIGHT"
+    CMD_LICENSE="$DEFAULT_LICENSE"
+    CMD_SOURCES="$DEFAULT_SOURCES"
+    CMD_DESCRIPTION="$DEFAULT_DESCRIPTION"
+    CMD_HELP="$DEFAULT_HELP"
+    CMD_SYNOPSIS="$DEFAULT_SYNOPSIS"
+    CMD_USAGE="$DEFAULT_USAGE"
+    export CMD_NAME CMD_VERSION CMD_COPYRIGHT CMD_LICENSE CMD_SOURCES CMD_DESCRIPTION CMD_HELP CMD_SYNOPSIS CMD_USAGE
+    CMD_OPTS_SHORT=("${DEFAULT_OPTS_SHORT[@]:-}")
+    CMD_OPTS_LONG=("${DEFAULT_OPTS_LONG[@]:-}")
+    CMD_ARGS=("${DEFAULT_ARGS[@]:-}")
+    set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
+    set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+    set_env_array CMD_ARGS CMD_ARGS[@]
+}
+
+# load all `CMD_...` variables on their library values
+# usage: `init_bashutils`
+init_bashutils()
+{
+    [ -z "${BASH_UTILS_OPTS_SHORT:-}" ]   && declare -a BASH_UTILS_OPTS_SHORT=($(get_env_array_BASH_UTILS_OPTS_SHORT))
+    [ -z "${BASH_UTILS_OPTS_LONG:-}" ]    && declare -a BASH_UTILS_OPTS_LONG=($(get_env_array_BASH_UTILS_OPTS_LONG))
+    [ -z "${BASH_UTILS_ARGS:-}" ]         && declare -a BASH_UTILS_ARGS=($(get_env_array_BASH_UTILS_ARGS))
+    CMD_NAME="$BASH_UTILS_NAME"
+    CMD_VERSION="$BASH_UTILS_VERSION"
+    CMD_COPYRIGHT="$BASH_UTILS_COPYRIGHT"
+    CMD_LICENSE="$BASH_UTILS_LICENSE"
+    CMD_SOURCES="$BASH_UTILS_SOURCES"
+    CMD_DESCRIPTION="$BASH_UTILS_DESCRIPTION"
+    CMD_HELP="$BASH_UTILS_HELP"
+    CMD_SYNOPSIS="$BASH_UTILS_SYNOPSIS"
+    CMD_USAGE="$BASH_UTILS_USAGE"
+    export CMD_NAME CMD_VERSION CMD_COPYRIGHT CMD_LICENSE CMD_SOURCES CMD_DESCRIPTION CMD_HELP CMD_SYNOPSIS CMD_USAGE
+    CMD_OPTS_SHORT=("${BASH_UTILS_OPTS_SHORT[@]:-}")
+    CMD_OPTS_LONG=("${BASH_UTILS_OPTS_LONG[@]:-}")
+    CMD_ARGS=("${BASH_UTILS_ARGS[@]:-}")
+    set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
+    set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+    set_env_array CMD_ARGS CMD_ARGS[@]
+}
+
 # load info of a single module
 # usage: `load_module_info <module-name>`
 load_module_info()
 {
-    [ $# -lt 1 ] && die 'usage: `help_module <module-name>`';
+    [ $# -lt 1 ] && die 'usage: `load_module_info <module-name>`';
     local module_name="$1" module
     module="$(find_module "$module_name")"
-    CMD_OPTS_SHORT=( f q v x V h )
-    CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
+    init_defaults
     export PRELOAD=true
     source "$module"
     export PRELOAD=false
@@ -233,34 +353,41 @@ load_module_info()
 # usage: `load_modules_list`
 load_modules_list()
 {
-    local modules_info='' _add=''
+    local modules_info='' _add='' f l length=0
     export PRELOAD=true
+    declare -a oldCMD_OPTS_SHORT=("${CMD_OPTS_SHORT[@]}")
+    declare -a oldCMD_OPTS_LONG=("${CMD_OPTS_LONG[@]}")
+    init_defaults
+    [ -z "${MODULES_AVAILABLE:-}" ]   && declare -a MODULES_AVAILABLE=($(get_env_array_MODULES_AVAILABLE))
+    for l in "${MODULES_AVAILABLE[@]}"; do
+        [ "${#l}" -gt "$length" ] && length="${#l}";
+    done
     for f in "$BASH_UTILS_MODULES"/*; do
         if [ -f "$f" ] && [ -x "$f" ]; then
             CMD_DESCRIPTION=''
             source "$f"
-            modules_info+="
-    $(basename "$f")";
-            if [ -n "$CMD_DESCRIPTION" ]; then
-                modules_info+=" : ${CMD_DESCRIPTION}";
-            fi
+            modules_info+="$(printf "\n    %$((length+1))s    : %s\n" "$(basename "$f")" "${CMD_DESCRIPTION:-}")"
         fi
     done
     export PRELOAD=false
+    init_blank
+    init_bashutils
     CMD_HELP="available modules: $modules_info
 
 paths:
     $BASH_UTILS_MODULES
 ";
+    [ -z "${DEFAULT_OPTS_SHORT:-}" ]   && declare -a DEFAULT_OPTS_SHORT=($(get_env_array_DEFAULT_OPTS_SHORT))
+    [ -z "${DEFAULT_OPTS_LONG:-}" ]    && declare -a DEFAULT_OPTS_LONG=($(get_env_array_DEFAULT_OPTS_LONG))
+    [ -z "${DEFAULT_ARGS:-}" ]         && declare -a DEFAULT_ARGS=($(get_env_array_DEFAULT_ARGS))
+    CMD_OPTS_SHORT=("${DEFAULT_OPTS_SHORT[@]:-}")
+    CMD_OPTS_LONG=("${DEFAULT_OPTS_LONG[@]:-}")
+    CMD_SYNOPSIS=''
     CMD_USAGE=''
-    CMD_OPTS_SHORT=( f q v x V h )
-    CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
     CMD_MODULE='<module-name>'
     CMD_SYNOPSIS="$(synopsis_info)"
     CMD_DESCRIPTION="List of available modules.
 Run 'help <module-name>' to get help on a specific module.";
-    CMD_NAME="$BASH_UTILS_NAME"
-    CMD_VERSION="$BASH_UTILS_VERSION"
     return 0
 }
 
@@ -294,12 +421,14 @@ read_from_pipe()
 # usage: `rearrange_options "$@"`
 rearrange_options()
 {
+    [ -z "${CMD_OPTS_SHORT:-}" ]   && declare -a CMD_OPTS_SHORT=($(get_env_array_CMD_OPTS_SHORT))
+    [ -z "${CMD_OPTS_LONG:-}" ]    && declare -a CMD_OPTS_LONG=($(get_env_array_CMD_OPTS_LONG))
     local shorts=''
-    for opt in "${CMD_OPTS_SHORT[@]}"; do
+    for opt in "${CMD_OPTS_SHORT[@]:-}"; do
         shorts+="${opt}"
     done
-    local longs=''
-    for opt in "${CMD_OPTS_LONG[@]}"; do
+    local longs='completion:,'
+    for opt in "${CMD_OPTS_LONG[@]:-}"; do
         longs+="${opt},"
     done
     longs="${longs%,}"
@@ -342,13 +471,18 @@ run()
 
 # set an environment (global) array
 # to get back the array values, call `get_env_array_ARRAY_NAME`
+# safe usage: `[ -z "${MYARRAY:-}" ] && declare -a MYARRAY=($(get_env_array_MYARRAY))`
 # usage: `set_env_array <name> <values = array[@]>`
 set_env_array()
 {
     [ $# -lt 2 ] && die 'usage: `set_env_array <name> <values = array[@]>`';
     local index="$1"
-    declare -a values=("${!2}")
-    eval "get_env_array_${index}(){ echo \"${values[@]}\"; };";
+    declare -a values=("${!2:-}")
+    if [ "${#values[@]}" -eq 0 ] || ([ "${#values[@]}" -eq 1 ] && [ "${values[*]}" = '' ]); then
+        eval "get_env_array_${index}(){ echo ''; };";
+    else
+        eval "get_env_array_${index}(){ echo \"${values[@]}\"; };";
+    fi
     return 0
 }
 
@@ -380,14 +514,14 @@ synopsis_info()
 {
     if [ -z "$CMD_SYNOPSIS" ]; then
         local shorts='' shorts_args=''
-        for opt in "${CMD_OPTS_SHORT[@]}"; do
+        for opt in "${CMD_OPTS_SHORT[@]:-}"; do
             [ "$opt" = ':' ] && continue;
             [ "${opt: -2}" = '::' ] && shorts_args+="|-${opt/::/}[=<arg>]" && continue;
             [ "${opt: -1}" = ':' ] && shorts_args+="|-${opt/:/} <arg>" && continue;
             shorts+="${opt}"
         done
         local longs=''
-        for opt in "${CMD_OPTS_LONG[@]}"; do
+        for opt in "${CMD_OPTS_LONG[@]:-}"; do
             [ "$opt" = ':' ] && continue;
             [ "${opt: -2}" = '::' ] && longs+="--${opt/::/}[=<arg>]|" && continue;
             [ "${opt: -1}" = ':' ] && longs+="--${opt/:/} <arg>|" && continue;
@@ -449,7 +583,7 @@ usage_info()
     return 0
 }
 
-# load an app's library
+# load an app's module
 # @see <http://stackoverflow.com/a/3524860/3592658>
 # usage: `use <module_name>`
 use()
@@ -508,11 +642,64 @@ abs_dirname() {
     pwd
     cd "$cwd"
 }
+
+#### Bash-Utils ID ####
+
 sourcename="$(basename "${BASH_SOURCE[0]}")"
 libexecdir="$(abs_dirname "${BASH_SOURCE[0]}")"
 readonly BASH_UTILS="${libexecdir}/bash-utils"
 readonly BASH_UTILS_ROOT="${libexecdir}"
 readonly BASH_UTILS_MODULES="${libexecdir}/bash-utils-modules"
+readonly BASH_UTILS_NAME='Bash-Utils'
+readonly BASH_UTILS_KEY='bash-utils'
+readonly BASH_UTILS_VERSION='0.0.1@dev'
+readonly BASH_UTILS_COPYRIGHT='Copyright (c) 2015 Pierre Cassat & contributors'
+readonly BASH_UTILS_LICENSE='Apache Software Foundation license 2.0 <http://www.apache.org/licenses/LICENSE-2.0>'
+readonly BASH_UTILS_SOURCES='Sources & updates: <http://gitlab.com/piwi/bash-utils.git>'
+readonly BASH_UTILS_DESCRIPTION='A short *bash* library for better scripting.'
+readonly BASH_UTILS_MODULE_INFO='a module for:'
+readonly BASH_UTILS_SCRIPT_INFO='using:'
+readonly BASH_UTILS_SYNOPSIS="bash-utils [-f|--force] [-q|--quiet] [-v|--verbose] [-x|--debug] [--dry-run]
+                  [-e|--exec[=<arg>]] [-V|--version] [-h|--help]
+                  [--] <command> [arguments]";
+readonly BASH_UTILS_USAGE=''
+readonly BASH_UTILS_HELP="arguments:
+    about                   alias of '--version'
+    about <module_name>     alias of '<module-name> --version'
+    help                    alias of '--help'
+    help <module_name>      get the help about a module
+    modules                 get the list of available modules
+    usage                   get the library synopsis
+    usage <module_name>     get a module synopsis
+    version                 alias of '--version --quiet'
+    version <module_name>   alias of '<module_name> --version --quiet'
+
+options:
+    --dry-run           process a dry-run
+    -e|--exec=<arg>     execute the argument in the library's environment:
+                            # bash-utils --exec='truefalse_bit false'
+    -e|--exec           without argument, any piped content will be evaluated:
+                            # echo 'truefalse_bit false' | bash-utils --exec
+    -f|--force          do not prompt for choices if a default choice exists
+    -h|--help           get this help info
+    -q|--quiet          decrease script's verbosity
+    -v|--verbose        increase script's verbosity
+    -V|--version        get library information (license, version etc)
+                        use option '--quiet' to get version number only
+    -x|--debug          see some debugging information
+
+paths:
+    $BASH_UTILS
+    $BASH_UTILS_MODULES
+";
+declare -ax BASH_UTILS_OPTS_SHORT=(':' 'e::' f h q v V x)
+declare -ax BASH_UTILS_OPTS_LONG=('exec::' debug dry-run force help quiet verbose version)
+declare -ax BASH_UTILS_ARGS=('about::' debug 'help::' modules 'usage::' 'version::')
+set_env_array BASH_UTILS_OPTS_SHORT BASH_UTILS_OPTS_SHORT[@]
+set_env_array BASH_UTILS_OPTS_LONG BASH_UTILS_OPTS_LONG[@]
+set_env_array BASH_UTILS_ARGS BASH_UTILS_ARGS[@]
+
+## globals
 
 CMD_PROG="$(basename "$0")"
 CMD_ROOT="$(abs_dirname "$0")"
@@ -529,7 +716,7 @@ export PIPED_INPUT=''
 
 # load library & modules on PRELOAD
 source "$BASH_UTILS_ROOT"/bash-utils-lib
-declare -xa MODULES_AVAILABLE=()
+declare -a MODULES_AVAILABLE=()
 export PRELOAD=true
 for f in "$BASH_UTILS_MODULES"/*; do
     if [ -f "$f" ] && [ -x "$f" ]; then
@@ -542,30 +729,45 @@ set_env_array MODULES_AVAILABLE MODULES_AVAILABLE[@]
 
 #### COMMANDS INFO ####
 
-export CMD_NAME='overwrite the CMD_NAME variable to customize this information'
-export CMD_VERSION='overwrite the CMD_VERSION variable to customize this information'
-export CMD_COPYRIGHT='overwrite the CMD_COPYRIGHT variable to customize this information'
-export CMD_LICENSE='overwrite the CMD_LICENSE variable to customize this information'
-export CMD_SOURCES='overwrite the CMD_SOURCES variable to customize this information'
-export CMD_DESCRIPTION='overwrite the CMD_DESCRIPTION variable to customize this information'
-export CMD_HELP='overwrite the CMD_HELP variable to customize this information'
-declare -xa CMD_OPTS_SHORT=( f q v x V h )
-declare -xa CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
-declare -xa TO_DEBUG=(
-    CMD_PROG CMD_ROOT CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_OS
-    CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN
-)
+# defaults
+export DEFAULT_NAME='overwrite the DEFAULT_NAME variable to customize this information'
+export DEFAULT_VERSION='overwrite the DEFAULT_VERSION variable to customize this information'
+export DEFAULT_COPYRIGHT='overwrite the DEFAULT_COPYRIGHT variable to customize this information'
+export DEFAULT_LICENSE='overwrite the DEFAULT_LICENSE variable to customize this information'
+export DEFAULT_SOURCES='overwrite the DEFAULT_SOURCES variable to customize this information'
+export DEFAULT_DESCRIPTION='overwrite the DEFAULT_DESCRIPTION variable to customize this information'
+export DEFAULT_HELP='overwrite the DEFAULT_HELP variable to customize this information'
+export DEFAULT_SYNOPSIS=''
+export DEFAULT_USAGE=''
+declare -ax DEFAULT_OPTS_SHORT=(f h q v V x)
+declare -ax DEFAULT_OPTS_LONG=(debug dry-run force help quiet verbose version)
+declare -ax DEFAULT_ARGS=()
+set_env_array DEFAULT_OPTS_SHORT DEFAULT_OPTS_SHORT[@]
+set_env_array DEFAULT_OPTS_LONG DEFAULT_OPTS_LONG[@]
+set_env_array DEFAULT_ARGS DEFAULT_ARGS[@]
+
+# CMD: to be overwritten by sub-cmd
+export CMD_NAME CMD_VERSION CMD_COPYRIGHT CMD_LICENSE CMD_SOURCES CMD_DESCRIPTION CMD_HELP CMD_SYNOPSIS CMD_USAGE
+declare -ax CMD_OPTS_SHORT=()
+declare -ax CMD_OPTS_LONG=()
+declare -ax CMD_ARGS=()
 set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
 set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
-set_env_array TO_DEBUG TO_DEBUG[@]
+set_env_array CMD_ARGS CMD_ARGS[@]
+
+# init defaults
+init_defaults
+
+# default logfile
 CMD_LOGFILE="$(make_tmp_file "$BASH_UTILS_KEY")"
 export CMD_LOGFILE
 
-# the synopsis should be left empty as it will be automatically generated with options declarations
-export CMD_SYNOPSIS=''
-#declare -x CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] [--] <arguments>"
-# you can use `CMD_USAGE` instead, which will be added to default options
-export CMD_USAGE=''
+# special debug table
+declare -ax TO_DEBUG=(
+    CMD_PROG CMD_ROOT CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_OS
+    CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN
+)
+set_env_array TO_DEBUG TO_DEBUG[@]
 
 # script flags used as booleans
 export VERBOSE=false        # write in verbose mode:    $VERBOSE && echo '...';

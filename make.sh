@@ -33,11 +33,12 @@ usage() {
     if $ISGITCLONE; then
         {   echo "usage: $0 install <prefix>"
             echo "       $0 cleanup <prefix>"
+            echo "       $0 check"
+            echo "       $0 code-check"
+            echo "       $0 test"
             echo "       $0 manpages"
             echo "       $0 version <version>"
             echo "       $0 release <version>"
-            echo "       $0 test"
-            echo "       $0 validate"
             echo
             echo "  e.g. $0 install /usr/local"
             echo "       $0 cleanup /usr/local"
@@ -45,7 +46,7 @@ usage() {
     else
         {   echo "usage: $0 install <prefix>"
             echo "       $0 cleanup <prefix>"
-            echo "       $0 test"
+            echo "       $0 check"
             echo
             echo "  e.g. $0 install /usr/local"
             echo "       $0 cleanup /usr/local"
@@ -57,18 +58,19 @@ usage() {
 make_cleanup()
 {
     ( [ -z "$PREFIX" ] || [ ! -d "$PREFIX" ] ) && { echo "Invalid prefix '$PREFIX'. Aborting." >&2; exit 1; }
-    rm -rf "$PREFIX"/{bin,libexec,share/man/{man1,man7}}/bash-utils*
+    rm -rf "$PREFIX"/{bin,etc/bash_completion.d,libexec,share/man/{man1,man7}}/bash-utils*
     return $?
 }
 
 make_install()
 {
     ( [ -z "$PREFIX" ] || [ ! -d "$PREFIX" ] ) && { echo "Invalid prefix '$PREFIX'. Aborting." >&2; exit 1; }
-    mkdir -p "$PREFIX"/{bin,libexec,share/man/{man1,man7}}
+    mkdir -p "$PREFIX"/{bin,etc/bash_completion.d,libexec,share/man/{man1,man7}}
     cp -R "$ROOT_DIR"/bin/* "$PREFIX"/bin/
     cp -R "$ROOT_DIR"/libexec/* "$PREFIX"/libexec/
-    cp "$ROOT_DIR"/man/bash-utils.1.man "$PREFIX"/share/man/man1/
-    cp "$ROOT_DIR"/man/bash-utils.7.man "$PREFIX"/share/man/man7/
+    cp -R "$ROOT_DIR"/etc/bash_completion.d/* "$PREFIX"/etc/bash_completion.d/
+    cp -R "$ROOT_DIR"/man/*.1.man "$PREFIX"/share/man/man1/
+    cp -R "$ROOT_DIR"/man/*.7.man "$PREFIX"/share/man/man7/
     return $?
 }
 
@@ -94,13 +96,19 @@ make_release()
 {
     [ -z "$VERSION" ] && { echo "Invalid version number '$VERSION'. Aborting." >&2; exit 1; }
     TAGNAME="v${VERSION}"
-    git stash save 'pre-release stashing'
+    local stashed=false branch
+    branch="$(git rev-parse --abbrev-ref HEAD)"
+    git stash save 'pre-release stashing' && stashed=true;
     git checkout master
     $0 version "$VERSION"
     $0 manpages
     git commit -am "Upgrade app to $VERSION (automatic commit)"
-    git tag "$TAGNAME" -m "New release $VERSION (automatic tag)"
-    git stash pop
+    git tag -a "$TAGNAME" -m "New release $VERSION (automatic tag)"
+    git checkout "$branch"
+    $stashed && git stash pop;
+    git archive --format tar "$TAGNAME" | gzip -9 > "${TAGNAME}.tar.gz" && \
+        $(type -p gmd5sum md5sum | head -1) "${TAGNAME}.tar.gz" | cut -d ' ' -f 1 > "${TAGNAME}.tar.gz.md5sum" && \
+            echo "tarball and checsum built at ${TAGNAME}.tar.gz(.md5sum)";
     return $?
 }
 
@@ -113,8 +121,16 @@ make_tests()
 
 make_check()
 {
+    "$ROOT_DIR"/test/check-env.sh
+}
+
+make_code_check()
+{
     command -v shellcheck >/dev/null 2>&1 || { echo "ShellCheck command not found. Aborting." >&2; exit 1; }
-    for f in $(find "$ROOT_DIR"/libexec/ -type f); do
+    for f in $(find "$ROOT_DIR"/libexec/ -type f ! -name "*.md"); do
+        shellcheck --shell=bash --exclude=SC2034,SC2016 "$f" || true;
+    done
+    for f in $(find "$ROOT_DIR"/etc/ -type f ! -name "*.md"); do
         shellcheck --shell=bash --exclude=SC2034,SC2016 "$f" || true;
     done
     return $?
@@ -163,9 +179,12 @@ case "$1" in
     test)
         make_tests
         ;;
-    validate)
-        ! $ISGITCLONE && usage;
+    check)
         make_check
+        ;;
+    code-check)
+        ! $ISGITCLONE && usage;
+        make_code_check
         ;;
     *) usage;;
 esac

@@ -21,6 +21,11 @@
 # file that was distributed with this source code or see
 # <http://www.apache.org/licenses/LICENSE-2.0>.
 #
+#
+# bash-utils:   this is the entry point of the Bash-Utils library
+#               it acts like a basic command which transmit the run to children & modules
+#               it also acts like a script's interpreter
+#
 set -e
 
 # include required lib & load bash-utils env
@@ -36,6 +41,19 @@ getapplibexec() {
 appfile="$(getapplibexec "${BASH_SOURCE[0]}")/bash-utils-core"
 if [ ! -f "$appfile" ]; then echo "> ${BASH_SOURCE[0]}:${LINENO}: required file '$appfile' not found!" >&2; exit 1; fi
 source "$appfile"
+
+# direct options if so
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -f | --force )  FORCE=true;;
+        -q | --quiet )  QUIET=true; VERBOSE=false;;
+        -v | --verbose ) VERBOSE=true; QUIET=false;;
+        -x | --debug )  DEBUG=true;;
+        --dry-run )     DRY_RUN=true;;
+        * ) break;;
+    esac
+    shift
+done
 
 # transmit the process to called script or module
 defaultcmd="${BASH_UTILS_ROOT}/bash-utils-cmd"

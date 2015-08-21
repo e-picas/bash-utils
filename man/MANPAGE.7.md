@@ -27,7 +27,17 @@ of the model):
 
     # write your script here
 
+You can even enable some library's flags by adding options to the *shebang*:
+
+    #!/usr/bin/env bash-utils -v
+
+You must separate them when using multiple flags:
+
+    #!/usr/bin/env bash-utils -v -x
+
 ### Notes about *bash* scripting and usage
+
+#### Use your binaries easily
 
 To enable "per-user" binaries (let the system look in any `$HOME/bin/` directory when searching scripts), 
 be sure to add that directory to the `$PATH` environment variable (in your `$HOME/.bashrc` for instance):
@@ -41,25 +51,42 @@ The file extension has no incidence upon the script's type (*bash* in our case) 
 `.sh`, a `.bash` and even a `.py` extension (which would have no real sense here) or let it without extension 
 at all with no difference.
 
+#### Scripts terminal usage
+
 A command-line program (such as a shell script) often accepts to set some options and arguments calling it in a terminal
 or another script. A global synopsis of a command line call can be:
 
     path/to/script [-o | --options (=argument)] [--] [<parameter> ...]
-    # i.e.:
+    # e.g.:
     program-to-run -o --option='my value' --option-2 'my value' argument1 argument2
 
 The rules are the followings:
 
 -   *options* are various settings passed to the script when calling it ; each option is prefixed by one or more dash `-` 
-    and can have an argument ; by convention, a short option is composed by one single letter prefixed by one dash, i.e. `-o`, 
-    and a long option is composed by a word prefixed by two dashes, i.e. `--option` ; when an option accepts an argument, 
-    it must be separated from the option name by an equal sign, i.e. `--option=argument` and `-o=argument` ; i.e. 
+    and can have an argument ; by convention, a short option is composed by one single letter prefixed by one dash, e.g. `-o`, 
+    and a long option is composed by a word prefixed by two dashes, e.g. `--option` ; when an option accepts an argument, 
+    it must be separated from the option name by an equal sign, e.g. `--option=argument` and `-o=argument` ; e.g. 
     `./script -o --option-with-no-arg --option-with-arg=argument_value`
 -   a double dashes ` -- ` can be used to identify the end of options ; the rest of the call will be considered as arguments
     only
 -   an *argument* is a setting passed to the script when calling it ; the arguments are not the same as the options as 
-    they are not named but identified by their positions ; i.e. `./script --option argument1 argument2`
+    they are not named but identified by their positions ; e.g. `./script --option argument1 argument2`
 
+#### Commands vs. builtins
+
+*Bash* proposes a large set of **builtins** "commands", which must be differentiated from *external commands*. The bash 
+builtins are always available in any bash environment while external commands must be installed on the system to work.
+If you have a doubt about a command, you can verify running `type <command-name>`, which will respond `... is a shell builtin`
+for builtins. If you have the choice, you should always prefer a builtin rather than an external command, unless you
+are absolutely sure it is present on all UNIX installations.
+
+To get the help about an external command, you can read its *manpage*:
+
+    man <command-name>
+
+To get the help about a builtin, you may use `help`:
+
+    help <builtin>
 
 ### Starter template
 
@@ -79,7 +106,6 @@ You should use the *model* module for a more complex template:
 
     bash-utils model bash-utils
 
-
 ### Customize your script
 
 To build your own command, you may first override informational variables:
@@ -94,12 +120,12 @@ To build your own command, you may first override informational variables:
     CMD_HELP=...
     CMD_OPTS_SHORT=(...)
     CMD_OPTS_LONG=(...)
+    CMD_ARGS=(...)
     #CMD_SYNOPSIS=...
     CMD_USAGE=...
 
 Then you can customize script's options (see below) to fit your needs and write your script's logic in the last
 part of the model.
-
 
 ## DOCUMENTATION
 
@@ -112,10 +138,7 @@ The library embeds a short set of methods to facilitate your scripts:
 -   the `warning()` method will write an error message to STDERR (without exiting the script)
 -   the `try()` method will emulate a *try/catch* process by calling a sub-command catching its result
 
-Errors are handled by the `die()` method (using the *trap* built-in command).
-
-Exits are handled by the `cleanup()` method (using again the *trap* built-in command). You can add in this method 
-any cleanup you want to be done when the script exits.
+Errors are handled by the `die()` method (using the *trap* built-in command - see the *Technical points* section below).
 
 A special *options* and *arguments* handling is designed to rebuild the input command and follow special treatments
 for default options and arguments. To use this, add in your script:
@@ -141,7 +164,6 @@ The best practice is to create user methods instead of overwrite native ones and
     }
     
     [ -f filename ] || user_error 'file not found';
-
 
 ### Script's options
 
@@ -170,6 +192,8 @@ These options are handled by the *getopt* program. You can add your own options 
 
     CMD_OPTS_SHORT=(f h q v V x)
     CMD_OPTS_LONG=(debug dry-run force help quiet verbose version)
+
+The `CMD_OPTS_...` definitions are used to build auto-completion.
 
 By default, the `common_options()` method will throw en error if an unknown option is met. You can avoid this behavior
 by prefixing the `CMD_OPTS_SHORT` by a colon `:`:
@@ -202,6 +226,22 @@ In your script, you can use a flag like:
 Due to known limitations of the *getopt* program, you should always use an equal sign between 
 an option (short or long) and its argument: `-o=arg` or `--option=arg`, even if that argument is required.
 
+### Script's arguments
+
+Arguments can be handled in the same logic as options:
+
+-   you may first define them in the `CMD_ARGS` array, with a trailing double point if it requires a second argument,
+and two double points if it can accept a second argument:
+
+        CMD_ARGS=('argument:' 'arg2::' arg3)
+
+-   then, once you have looped (and shifted) over all options, you can loop over arguments:
+
+        case "$1" in
+            ...
+        esac
+
+The `CMD_ARGS` definition is used to build auto-completion.
 
 ### Technical points
 
@@ -209,16 +249,22 @@ The library enables the following *Bash* options by default:
 
 -   `posix`: match the POSIX 1003.2 standard
 -   `expand_aliases`: allow to use aliases in scripts
--   `-a`: export all modified variables
--   `-e`: exit if a command has a non-zero status
--   `-E`: trap on ERR are inherited by shell functions
--   `-o pipefail`: do not mask pipeline's errors
--   `-u`: throw error on unset variable usage
--   `-T`: trap on DEBUG and RETURN are inherited by shell functions
+-   `allexport`: export all modified variables
+-   `errexit`: exit if a command has a non-zero status
+-   `errtrace`: trap on ERR are inherited by shell functions
+-   `pipefail`: do not mask pipeline's errors
+-   `nounset`: throw error on unset variable usage
+-   `functrace`: trap on DEBUG and RETURN are inherited by shell functions
+
+Run `help set` for a full list of bash *set* built-in available options. 
+
+Moreover, the library *trap* errors and early exits signals to the `die()` function to display an error string and
+stack trace in each case. It also defines a `shutdown_handler()` method trapped at the end of the process; you can 
+redefine this function with your own logic to make a cleanup at the end of each run.
 
 To make robust scripts, here are some reminders:
 
--   to use a variable eventually unset: `echo ${VARIABLE:-default}`
+-   to use a variable eventually unset: `echo ${VARIABLE:-default}` and `echo ${VARIABLE[*]:-}`
 -   to make a silent sub-command call: `val=$(sub-command 2>/dev/null)`
 
 ## FILES
@@ -240,6 +286,9 @@ to work by itself and to handle its modules.
 **libexec/bash-utils-modules/**
 :   This is the directory where modules are stored ; each module is a single script in that directory ; a module is
 identified by its filename.
+
+**etc/bash_completion.d/bash-utils-completion**
+:   This is the script that handles terminal completion for the library (core and modules).
 
 ## SEE ALSO
 

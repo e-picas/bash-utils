@@ -436,6 +436,28 @@ TESTARRAY=( 'one' 'two' 'four' )
     tail -n1 "$CMD_LOGFILE" | grep 'log string$'
 }
 
+@test "[lib file-system-6] resolve" {
+    # no arg error
+    run resolve
+    $TEST_DEBUG && {
+        echo "running: resolve"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ -z "$output" ]
+    # args
+    run resolve '~/bin'
+    $TEST_DEBUG && {
+        echo "running: resolve '~/bin'"
+        echo "output: $output"
+        echo "status: $status"
+    } >&1
+    [ "$status" -eq 0 ]
+    [ -n "$output" ]
+    [ "$output" = "${HOME}/bin" ]
+}
+
 # strings
 
 @test "[lib strings-1] string_to_upper" {

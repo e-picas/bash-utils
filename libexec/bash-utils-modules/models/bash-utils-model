@@ -44,6 +44,10 @@ Available options:
 ";
 #CMD_OPTS_SHORT=(f h q v V x)
 #CMD_OPTS_LONG=(debug dry-run force help quiet verbose version)
+#CMD_ARGS=()
+#set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
+#set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+#set_env_array CMD_ARGS CMD_ARGS[@]
 # the synopsis should not be overwritten as it is automatically built with `CMD_OPTS_...`
 #CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
 # you can use `CMD_USAGE` instead, which will be added to default options:
@@ -68,8 +72,8 @@ while [ $# -gt 0 ]; do
         # declare -xr CMD_OPTS_SHORT=(f q v x 'a:' 'b::')
         # declare -xr CMD_OPTS_LONG=(force quiet verbose debug dry-run 'test1:' 'test2::')
         #
-        # -a | --test1 ) OPTARG="$(echo "$2" | cut -d'=' -f2)"; TEST1="${OPTARG}"; shift;;
-        # -b | --test2 ) OPTARG="$(echo "$2" | cut -d'=' -f2)"; TEST2="${OPTARG:-default}"; shift;;
+        # -a | --test1 ) [ -z "$2" ] && error 'argument required'; TEST1="${2#=}"; shift;;
+        # -b | --test2 ) TEST2="${2:-default#=}"; shift;;
         #
         
         # end of options

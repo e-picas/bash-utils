@@ -10,14 +10,14 @@
 #
 
 #######################
-## Bash options enabled by default
-set -e      # exit if a command has a non-zero status
-#set -E      # trap on ERR are inherited by shell functions
-#set -T      # trap on DEBUG and RETURN are inherited by shell functions
-#set -o pipefail # do not mask pipeline's errors
-#set -u      # throw error on unset variable usage
-#set -x      # for dev usage: debug commands before to execute them
-#set -v      # for dev usage: print shell input lines as they are read
+## Bash options (uncomment to enable):
+set -e             # exit if a command has a non-zero status
+#set -E             # trap on ERR are inherited by shell functions
+#set -T             # trap on DEBUG and RETURN are inherited by shell functions
+#set -o pipefail    # do not mask pipeline's errors
+#set -u             # throw error on unset variable usage
+#set -x             # for dev usage: debug commands before to execute them
+#set -v             # for dev usage: print shell input lines as they are read
 
 #######################
 ## command options & arguments
