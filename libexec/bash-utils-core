@@ -77,6 +77,10 @@ common_options()
             -V | --version) _todo='version_info && exit 0;';;
             -h | --help)    _todo='help_info && exit 0;';;
             --dry-run )     DRY_RUN=true;;
+            --completion)   if [ -n "$2" ]
+                                then _todo="completion_info ${2#=} && exit 0;"; shift;
+                                else _todo='echo "" && exit 0;'
+                            fi;;
             -- )            shift; break;;
             * )             if ! is_known_option "$1" && [ "${CMD_OPTS_SHORT[0]}" != ":" ]
                                 then error "unknown option '$1'"; fi;;
@@ -85,6 +89,34 @@ common_options()
     done
     [ -n "$_todo" ] && eval "$_todo";
     return 0
+}
+
+# compute and write a completion info ; type in 'short_opts', 'long_opts', 'args', 'modules'
+# usage: `completion_info <type>`
+completion_info()
+{
+    [ $# -lt 1 ] && die 'usage: `completion_info <type>`';
+    local type="$1"
+    [ -z "${CMD_OPTS_SHORT:-}" ]    && declare -a CMD_OPTS_SHORT=($(get_env_array_CMD_OPTS_SHORT))
+    [ -z "${CMD_OPTS_LONG:-}" ]     && declare -a CMD_OPTS_LONG=($(get_env_array_CMD_OPTS_LONG))
+    [ -z "${CMD_ARGS:-}" ]          && declare -a CMD_ARGS=($(get_env_array_CMD_ARGS))
+    [ -z "${MODULES_AVAILABLE:-}" ] && declare -a MODULES_AVAILABLE=($(get_env_array_MODULES_AVAILABLE))
+    opts=''
+    case "$type" in
+        'short_opts')
+            for o in "${CMD_OPTS_SHORT[@]:-}"; do [ -z "${o//:}" ] || opts+="-${o} "; done
+            ;;
+        'long_opts')
+            for o in "${CMD_OPTS_LONG[@]:-}"; do [ -z "${o//:}" ] || opts+="--${o} "; done
+            ;;
+        'args')
+            for o in "${CMD_ARGS[@]:-}"; do opts+="${o} "; done
+            ;;
+        'modules')
+            for o in "${MODULES_AVAILABLE[@]:-}"; do opts+="${o} "; done
+            ;;
+    esac
+    echo "${opts% }"
 }
 
 # debug environment variables from the `$TO_DEBUG` array
@@ -200,12 +232,12 @@ is_known_option()
     opt="${opt//:}"
     opt="${opt#-}"
     opt="${opt#-}"
-    for o in "${CMD_OPTS_SHORT[@]}"; do
+    for o in "${CMD_OPTS_SHORT[@]:-}"; do
         o="${o//:}"
         [ -n "$o" ] || continue;
         [ "$o" != "$opt" ] || return 0;
     done
-    for o in "${CMD_OPTS_LONG[@]}"; do
+    for o in "${CMD_OPTS_LONG[@]:-}"; do
         o="${o//:}"
         [ -n "$o" ] || continue;
         [ "$o" != "$opt" ] || return 0;
@@ -381,7 +413,7 @@ rearrange_options()
     for opt in "${CMD_OPTS_SHORT[@]:-}"; do
         shorts+="${opt}"
     done
-    local longs=''
+    local longs='completion:,'
     for opt in "${CMD_OPTS_LONG[@]:-}"; do
         longs+="${opt},"
     done
@@ -468,14 +500,14 @@ synopsis_info()
 {
     if [ -z "$CMD_SYNOPSIS" ]; then
         local shorts='' shorts_args=''
-        for opt in "${CMD_OPTS_SHORT[@]}"; do
+        for opt in "${CMD_OPTS_SHORT[@]:-}"; do
             [ "$opt" = ':' ] && continue;
             [ "${opt: -2}" = '::' ] && shorts_args+="|-${opt/::/}[=<arg>]" && continue;
             [ "${opt: -1}" = ':' ] && shorts_args+="|-${opt/:/} <arg>" && continue;
             shorts+="${opt}"
         done
         local longs=''
-        for opt in "${CMD_OPTS_LONG[@]}"; do
+        for opt in "${CMD_OPTS_LONG[@]:-}"; do
             [ "$opt" = ':' ] && continue;
             [ "${opt: -2}" = '::' ] && longs+="--${opt/::/}[=<arg>]|" && continue;
             [ "${opt: -1}" = ':' ] && longs+="--${opt/:/} <arg>|" && continue;
@@ -648,12 +680,10 @@ paths:
 ";
 declare -ax BASH_UTILS_OPTS_SHORT=(':' 'e::' f h q v V x)
 declare -ax BASH_UTILS_OPTS_LONG=('exec::' debug dry-run force help quiet verbose version)
-declare -ax BASH_UTILS_ARGS=(about debug help modules usage version)
-declare -ax BASH_UTILS_ACTIONS_ON_MODULE=(about help usage version)
+declare -ax BASH_UTILS_ARGS=('about::' debug 'help::' modules 'usage::' 'version::')
 set_env_array BASH_UTILS_OPTS_SHORT BASH_UTILS_OPTS_SHORT[@]
 set_env_array BASH_UTILS_OPTS_LONG BASH_UTILS_OPTS_LONG[@]
 set_env_array BASH_UTILS_ARGS BASH_UTILS_ARGS[@]
-set_env_array BASH_UTILS_ACTIONS_ON_MODULE BASH_UTILS_ACTIONS_ON_MODULE[@]
 
 ## globals
 

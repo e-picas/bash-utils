@@ -144,6 +144,7 @@ To enable the completion function for a module, use:
     {
         export COMPMODULE='MODULE_NAME'
         _bashutils
+        unset COMPMODULE
         return $?
     }
     complete -o default -F _bashutils_MODULE_NAME module-cmd

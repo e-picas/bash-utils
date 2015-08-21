@@ -23,7 +23,7 @@
 #
 #set -eETu
 
-export COMPMODULE
+declare -x COMPMODULE=''
 
 _bashutils()
 {
@@ -33,11 +33,20 @@ _bashutils()
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     applibexec="$(command -v bash-utils)"
     [ -z "$COMPMODULE" ] || applibexec+=" $COMPMODULE";
-    shortopts="$(${applibexec} completion short_options)"
-    longopts="$(${applibexec} completion long_options)"
-    actions="$(${applibexec} completion actions)"
-    actions_on_modules="$(${applibexec} completion actions_on_modules)"
-    modules="$(${applibexec} completion modules)"
+    shortopts="$(${applibexec} --completion short_opts)"
+    longopts="$(${applibexec} --completion long_opts)"
+    actions="$(${applibexec} --completion args)"
+    modules="$(${applibexec} --completion modules)"
+    actions_on_modules=''
+    first=''
+
+    # actions on modules
+    if [ -z "$COMPMODULE" ]; then
+        for o in $actions; do
+            [ "${o//:}" != "$o" ] && actions_on_modules+="${o//:} "
+        done
+        actions_on_modules="${actions_on_modules% }"
+    fi
 
     # rebuild compwords
     compwords=()
@@ -47,11 +56,11 @@ _bashutils()
             compwords[${#compwords[*]}]="$curtmp"
         fi
     done
-    first="${compwords[0]:-}"
+    [ -z "$COMPMODULE" ] && first="${compwords[0]:-}";
 
     # options
     if [[ "${cur}" == -* ]]; then
-        COMPREPLY=( $(compgen -W "${shortopts} ${longopts}" -- "${cur}") )
+        COMPREPLY=( $(compgen -W "${shortopts//:} ${longopts//:}" -- "${cur}") )
         return 0
 
     # actions + modules listing
@@ -59,7 +68,11 @@ _bashutils()
         ( [ -n "$cur" ] && [ ${#compwords[@]} -eq 1 ] ) ||
         ( [ -z "$cur" ] && [ ${#compwords[@]} -eq 0 ] )
     ); then
-        COMPREPLY=( $(compgen -W "${actions} ${modules}" -- "${cur}") )
+        if [ -z "$COMPMODULE" ]; then
+            COMPREPLY=( $(compgen -W "${actions//:} ${modules}" -- "${cur}") )
+        else
+            COMPREPLY=( $(compgen -W "${actions//:}" -- "${cur}") )
+        fi
         return 0
 
     # modules listing
@@ -81,8 +94,9 @@ complete -o default -F _bashutils bash-utils
 
 _bashutils_model()
 {
-    export COMPMODULE='model'
+    COMPMODULE='model'
     _bashutils
+    unset COMPMODULE
     return $?
 }
 complete -o default -F _bashutils_model model

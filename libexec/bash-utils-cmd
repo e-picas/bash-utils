@@ -41,6 +41,7 @@ CMD_USAGE="$BASH_UTILS_USAGE"
 CMD_HELP="$BASH_UTILS_HELP";
 CMD_OPTS_SHORT=("${BASH_UTILS_OPTS_SHORT[@]}")
 CMD_OPTS_LONG=("${BASH_UTILS_OPTS_LONG[@]}")
+CMD_ARGS=("${BASH_UTILS_ARGS[@]}")
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_KEY
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_VERSION
@@ -48,6 +49,7 @@ TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_ROOT
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_MODULES
 set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
 set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+set_env_array CMD_ARGS CMD_ARGS[@]
 set_env_array TO_DEBUG TO_DEBUG[@]
 
 [ $# -eq 0 ] && usage_info && exit 1;
@@ -95,46 +97,6 @@ while [ $# -gt 0 ]; do
                         load_module_info "$2"
                     fi
                     version_info true && exit 0;;
-        'completion') arg="${2:-}"
-                    load_modules_list
-                    case "$arg" in
-                        'short_options')
-                            opts=''
-                            for o in "${CMD_OPTS_SHORT[@]}"; do
-                                [ -z "${o//:}" ] || opts+="-${o//:} ";
-                            done
-                            echo "${opts% }"
-                            ;;
-                        'long_options')
-                            opts=''
-                            for o in "${CMD_OPTS_LONG[@]}"; do
-                                [ -z "${o//:}" ] || opts+="--${o//:} ";
-                            done
-                            echo "${opts% }"
-                            ;;
-                        'actions')
-                            opts=''
-                            for o in "${BASH_UTILS_ARGS[@]}"; do
-                                opts+="${o} "
-                            done
-                            echo "${opts% }"
-                            ;;
-                        'actions_on_modules')
-                            opts=''
-                            for o in "${BASH_UTILS_ACTIONS_ON_MODULE[@]}"; do
-                                opts+="${o} "
-                            done
-                            echo "${opts% }"
-                            ;;
-                        'modules')
-                            opts=''
-                            for o in "${MODULES_AVAILABLE[@]}"; do
-                                opts+="${o} "
-                            done
-                            echo "${opts% }"
-                            ;;
-                    esac
-                    exit 0;;
         *)          error "unknown argument '$1'";;
     esac
     shift

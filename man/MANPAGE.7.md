@@ -258,6 +258,9 @@ to work by itself and to handle its modules.
 :   This is the directory where modules are stored ; each module is a single script in that directory ; a module is
 identified by its filename.
 
+**etc/bash_completion.d/bash-utils-completion**
+:   This is the script that handles terminal completion for the library (core and modules).
+
 ## SEE ALSO
 
 Online *bash* scripting guides and tools:
