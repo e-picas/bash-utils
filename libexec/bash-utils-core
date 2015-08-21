@@ -21,6 +21,11 @@
 # file that was distributed with this source code or see
 # <http://www.apache.org/licenses/LICENSE-2.0>.
 #
+#
+# bash-utils-core:  this is the core of the Bash-Utils library
+#                   it defines the environment and some basic functions to let it work
+#                   it uses almost only bash builtins
+#
 
 #### BASH OPTIONS ####
 
@@ -578,7 +583,7 @@ usage_info()
     return 0
 }
 
-# load an app's library
+# load an app's module
 # @see <http://stackoverflow.com/a/3524860/3592658>
 # usage: `use <module_name>`
 use()

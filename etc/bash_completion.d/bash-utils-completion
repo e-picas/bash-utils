@@ -21,7 +21,9 @@
 # file that was distributed with this source code or see
 # <http://www.apache.org/licenses/LICENSE-2.0>.
 #
-#set -eETu
+#
+# bash-utils-completion: completion script for the Bash-Utils library
+#
 
 declare -x COMPMODULE=''
 

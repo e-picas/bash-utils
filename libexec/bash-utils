@@ -21,6 +21,11 @@
 # file that was distributed with this source code or see
 # <http://www.apache.org/licenses/LICENSE-2.0>.
 #
+#
+# bash-utils:   this is the entry point of the Bash-Utils library
+#               it acts like a basic command which transmit the run to children & modules
+#               it also acts like a script's interpreter
+#
 set -e
 
 # include required lib & load bash-utils env

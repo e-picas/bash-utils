@@ -21,6 +21,11 @@
 # file that was distributed with this source code or see
 # <http://www.apache.org/licenses/LICENSE-2.0>.
 #
+#
+# bash-utils-lib:   this is the Bash-Utils library
+#                   it embeds various useful functions and variables
+#                   it required the core to be loaded
+#
 set -e
 
 [ -z "$BASH_UTILS_VERSION" ] && { \

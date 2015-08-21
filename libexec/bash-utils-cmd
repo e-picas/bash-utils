@@ -21,6 +21,10 @@
 # file that was distributed with this source code or see
 # <http://www.apache.org/licenses/LICENSE-2.0>.
 #
+#
+# bash-utils-cmd:   this is the default Bash-Utils library command
+#                   it is only loaded when calling the library directly
+#
 set -e
 
 [ -z "$BASH_UTILS_VERSION" ] && { \
