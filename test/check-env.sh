@@ -42,6 +42,8 @@ test_title()
 
 ## System
 test_title 'System'
+pwd
+date +'%Y-%m-%dT%H:%M:%S%z'
 uname -a
 
 ## Shell
