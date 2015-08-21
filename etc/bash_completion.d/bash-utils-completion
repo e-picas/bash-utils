@@ -27,12 +27,15 @@ declare -x COMPMODULE=''
 
 _bashutils()
 {
-    local cur prev opts fullopts actions actions_on_modules action_on_module modules applibexec compwords curtmp first
+    local cur prev opts fullopts actions actions_on_modules action_on_module modules applibexec compwords curtmp first curmodule
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     applibexec="$(command -v bash-utils)"
-    [ -z "$COMPMODULE" ] || applibexec+=" $COMPMODULE";
+    curmodule="${COMPMODULE:-}"
+    COMPMODULE=''
+
+    [ -z "$curmodule" ] || applibexec+=" $curmodule";
     shortopts="$(${applibexec} --completion short_opts)"
     longopts="$(${applibexec} --completion long_opts)"
     actions="$(${applibexec} --completion args)"
@@ -41,7 +44,7 @@ _bashutils()
     first=''
 
     # actions on modules
-    if [ -z "$COMPMODULE" ]; then
+    if [ -z "$curmodule" ]; then
         for o in $actions; do
             [ "${o//:}" != "$o" ] && actions_on_modules+="${o//:} "
         done
@@ -56,28 +59,58 @@ _bashutils()
             compwords[${#compwords[*]}]="$curtmp"
         fi
     done
-    [ -z "$COMPMODULE" ] && first="${compwords[0]:-}";
+    [ -z "$curmodule" ] && first="${compwords[0]:-}";
+
+    # if first is a module
+    if [ -z "$curmodule" ] && [ -n "${first:-}" ] && (
+        echo "$modules" | grep -w "$first" 2>&1 1>/dev/null
+    ); then
+        curmodule="$first"
+        applibexec+=" $curmodule";
+        shortopts="$(${applibexec} --completion short_opts)"
+        longopts="$(${applibexec} --completion long_opts)"
+        actions="$(${applibexec} --completion args)"
+    fi
 
     # options
     if [[ "${cur}" == -* ]]; then
-        COMPREPLY=( $(compgen -W "${shortopts//:} ${longopts//:}" -- "${cur}") )
-        return 0
+        if [ -n "${shortopts//:}" ] && [ -n "${longopts//:}" ]; then
+            COMPREPLY=( $(compgen -W "${shortopts//:} ${longopts//:}" -- "${cur}") )
+            return 0
+        elif [ -z "${shortopts//:}" ] && [ -n "${longopts//:}" ]; then
+            COMPREPLY=( $(compgen -W "${longopts//:}" -- "${cur}") )
+            return 0
+        elif [ -n "${shortopts//:}" ] && [ -z "${longopts//:}" ]; then
+            COMPREPLY=( $(compgen -W "${shortopts//:}" -- "${cur}") )
+            return 0
+        fi
 
     # actions + modules listing
     elif (
         ( [ -n "$cur" ] && [ ${#compwords[@]} -eq 1 ] ) ||
         ( [ -z "$cur" ] && [ ${#compwords[@]} -eq 0 ] )
     ); then
-        if [ -z "$COMPMODULE" ]; then
+        if [ -z "$curmodule" ] && [ -n "${actions//:}" ] && [ -n "${modules}" ]; then
             COMPREPLY=( $(compgen -W "${actions//:} ${modules}" -- "${cur}") )
-        else
+            return 0
+        elif [ -z "$curmodule" ] && [ -z "${actions//:}" ] && [ -n "${modules}" ]; then
+            COMPREPLY=( $(compgen -W "${modules}" -- "${cur}") )
+            return 0
+        elif [ -n "${actions//:}" ]; then
             COMPREPLY=( $(compgen -W "${actions//:}" -- "${cur}") )
+            return 0
         fi
+
+    # actions listing
+    elif (
+        [ -n "$curmodule" ] && [ -n "${actions//:}" ]
+    ); then
+        COMPREPLY=( $(compgen -W "${actions//:}" -- "${cur}") )
         return 0
 
     # modules listing
     elif (
-        [ -n "$first" ] && (
+        [ -n "$modules" ] && [ -n "$first" ] && (
             ( [ -n "$cur" ] && [ ${#compwords[@]} -eq 2 ] ) ||
             ( [ -z "$cur" ] && [ ${#compwords[@]} -eq 1 ] )
         ) && (echo "$actions_on_modules" | grep "$first" 2>&1 1>/dev/null)
