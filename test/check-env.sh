@@ -16,15 +16,15 @@ export status=0
 run_test()
 {
     [ $# -lt 2 ] && { echo "usage: run_test <test-description> \"test to run\" [failure-message=KO] [success-message=OK] [failure-comment=NULL]" >&2; exit 1; };
-    printf '> %s ...' "$1"
     result="$(eval "$2")"
     if [ $? -eq 0 ]; then
+        printf ' \033[0;32m✓\033[0m %s ...' "$1"
         [ -z "${4:-}" ] && echo " OK" || echo " OK: $4";
         return 0
     else
-        echo ' *****KO*****';
+        printf ' \033[0;31m✗ %s ... *****KO*****\033[0m\n' "$1"
         errstr=''
-        [ -z "${3:-}" ] && errstr+="!! > test KO: '$1'" || errstr+="!! > $3";
+        [ -z "${3:-}" ] && errstr+="   !! > test KO: '$1'" || errstr+="   !! > $3";
         [ -z "${5:-}" ] || errstr+=" ; $5";
         echo "$errstr" >&2;
         return 1
@@ -105,10 +105,10 @@ run_test 'searching if personal "bin/" is added in the "$PATH"' \
 ## commands
 test_title 'Required commands'
 
-cmds=(sed grep cut cat)
+cmds=(echo sed grep cut tr cat getopt mktemp)
 
 for cmd in "${cmds[@]}"; do
-    _cmd="$(command -v "$cmd")"
+    _cmd="$((type "$cmd" 2>/dev/null | grep -v 'alias') || command -v "$cmd")"
     run_test "searching for command '$cmd'" \
         "[ -z \"$_cmd\" ] && return 1 || return 0" \
         "the \"$cmd\" command can NOT be found" \

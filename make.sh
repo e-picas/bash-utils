@@ -33,11 +33,12 @@ usage() {
     if $ISGITCLONE; then
         {   echo "usage: $0 install <prefix>"
             echo "       $0 cleanup <prefix>"
+            echo "       $0 check"
+            echo "       $0 code-check"
+            echo "       $0 test"
             echo "       $0 manpages"
             echo "       $0 version <version>"
             echo "       $0 release <version>"
-            echo "       $0 test"
-            echo "       $0 validate"
             echo
             echo "  e.g. $0 install /usr/local"
             echo "       $0 cleanup /usr/local"
@@ -45,6 +46,7 @@ usage() {
     else
         {   echo "usage: $0 install <prefix>"
             echo "       $0 cleanup <prefix>"
+            echo "       $0 check"
             echo "       $0 test"
             echo
             echo "  e.g. $0 install /usr/local"
@@ -118,8 +120,16 @@ make_tests()
 
 make_check()
 {
+    "$ROOT_DIR"/test/check-env.sh
+}
+
+make_code_check()
+{
     command -v shellcheck >/dev/null 2>&1 || { echo "ShellCheck command not found. Aborting." >&2; exit 1; }
     for f in $(find "$ROOT_DIR"/libexec/ -type f); do
+        shellcheck --shell=bash --exclude=SC2034,SC2016 "$f" || true;
+    done
+    for f in $(find "$ROOT_DIR"/etc/ -type f); do
         shellcheck --shell=bash --exclude=SC2034,SC2016 "$f" || true;
     done
     return $?
@@ -168,9 +178,12 @@ case "$1" in
     test)
         make_tests
         ;;
-    validate)
-        ! $ISGITCLONE && usage;
+    check)
         make_check
+        ;;
+    code-check)
+        ! $ISGITCLONE && usage;
+        make_code_check
         ;;
     *) usage;;
 esac

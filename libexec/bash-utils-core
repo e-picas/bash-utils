@@ -312,7 +312,8 @@ load_modules_list()
     declare -a oldCMD_OPTS_SHORT=("${CMD_OPTS_SHORT[@]}")
     declare -a oldCMD_OPTS_LONG=("${CMD_OPTS_LONG[@]}")
     init_defaults
-    for l in ${MODULES_AVAILABLE[@]}; do
+    [ -z "${MODULES_AVAILABLE:-}" ]   && declare -a MODULES_AVAILABLE=($(get_env_array_MODULES_AVAILABLE))
+    for l in "${MODULES_AVAILABLE[@]}"; do
         [ "${#l}" -gt "$length" ] && length="${#l}";
     done
     for f in "$BASH_UTILS_MODULES"/*; do
