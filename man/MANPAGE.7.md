@@ -129,10 +129,7 @@ The library embeds a short set of methods to facilitate your scripts:
 -   the `warning()` method will write an error message to STDERR (without exiting the script)
 -   the `try()` method will emulate a *try/catch* process by calling a sub-command catching its result
 
-Errors are handled by the `die()` method (using the *trap* built-in command).
-
-Exits are handled by the `cleanup()` method (using again the *trap* built-in command). You can add in this method 
-any cleanup you want to be done when the script exits.
+Errors are handled by the `die()` method (using the *trap* built-in command - see the *Technical points* section below).
 
 A special *options* and *arguments* handling is designed to rebuild the input command and follow special treatments
 for default options and arguments. To use this, add in your script:
@@ -187,6 +184,8 @@ These options are handled by the *getopt* program. You can add your own options 
     CMD_OPTS_SHORT=(f h q v V x)
     CMD_OPTS_LONG=(debug dry-run force help quiet verbose version)
 
+The `CMD_OPTS_...` definitions are used to build auto-completion.
+
 By default, the `common_options()` method will throw en error if an unknown option is met. You can avoid this behavior
 by prefixing the `CMD_OPTS_SHORT` by a colon `:`:
 
@@ -218,24 +217,45 @@ In your script, you can use a flag like:
 Due to known limitations of the *getopt* program, you should always use an equal sign between 
 an option (short or long) and its argument: `-o=arg` or `--option=arg`, even if that argument is required.
 
+### Script's arguments
+
+Arguments can be handled in the same logic as options:
+
+-   you may first define them in the `CMD_ARGS` array, with a trailing double point if it requires a second argument,
+and two double points if it can accept a second argument:
+
+        CMD_ARGS=('argument:' 'arg2::' arg3)
+
+-   then, once you have looped (and shifted) over all options, you can loop over arguments:
+
+        case "$1" in
+            ...
+        esac
+
+The `CMD_ARGS` definition is used to build auto-completion.
+
 ### Technical points
 
 The library enables the following *Bash* options by default:
 
 -   `posix`: match the POSIX 1003.2 standard
 -   `expand_aliases`: allow to use aliases in scripts
--   `-a`: export all modified variables
--   `-e`: exit if a command has a non-zero status
--   `-E`: trap on ERR are inherited by shell functions
--   `-o pipefail`: do not mask pipeline's errors
--   `-u`: throw error on unset variable usage
--   `-T`: trap on DEBUG and RETURN are inherited by shell functions
+-   `allexport`: export all modified variables
+-   `errexit`: exit if a command has a non-zero status
+-   `errtrace`: trap on ERR are inherited by shell functions
+-   `pipefail`: do not mask pipeline's errors
+-   `nounset`: throw error on unset variable usage
+-   `functrace`: trap on DEBUG and RETURN are inherited by shell functions
 
 Run `help set` for a full list of bash *set* built-in available options. 
 
+Moreover, the library *trap* errors and early exits signals to the `die()` function to display an error string and
+stack trace in each case. It also defines a `shutdown_handler()` method trapped at the end of the process; you can 
+redefine this function with your own logic to make a cleanup at the end of each run.
+
 To make robust scripts, here are some reminders:
 
--   to use a variable eventually unset: `echo ${VARIABLE:-default}`
+-   to use a variable eventually unset: `echo ${VARIABLE:-default}` and `echo ${VARIABLE[*]:-}`
 -   to make a silent sub-command call: `val=$(sub-command 2>/dev/null)`
 
 ## FILES
