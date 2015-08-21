@@ -23,7 +23,7 @@ load test-commons
 
 setup()
 {
-    : # nothing
+    init_defaults
 }
 
 teardown()
