@@ -3,7 +3,7 @@ Man-name:   bash-utils
 Author:     Pierre Cassat
 Section:    7
 Date: 2015-08-22
-Version: 0.0.1-rc
+Version: 0.0.1@dev
 
 
 ## USAGE
