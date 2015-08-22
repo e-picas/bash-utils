@@ -11,7 +11,7 @@ CMD_NAME='script-model-sample'
 CMD_VERSION='0.0.0'
 CMD_COPYRIGHT='(CC-BY) 2015 Pierre Cassat & contributors'
 CMD_LICENSE='Creative Commons 4.0 BY license <http://creativecommons.org/licenses/by/4.0/legalcode>'
-CMD_SOURCES='Sources & updates: <http://gitlab.com/piwi/bash-utils.git>'
+CMD_SOURCES='Sources & updates: <http://github.com/piwi/bash-utils.git>'
 CMD_DESCRIPTION="A sample script from *bash* scripts' model."
 CMD_HELP="Example of usage:
     ./sample.sh usage

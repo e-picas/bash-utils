@@ -134,7 +134,7 @@ file that was distributed with this source code or see
 
 ## BUGS
 
-To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
+To transmit bugs, see <http://github.com/piwi/bash-utils/issues>.
 
 ## AUTHOR
 
@@ -143,6 +143,6 @@ To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
 
 ## SEE ALSO
 
-For documentation, sources & updates, see <http://gitlab.com/piwi/bash-utils.git>. 
+For documentation, sources & updates, see <http://github.com/piwi/bash-utils.git>. 
 
 bash(1), bash-utils(7)

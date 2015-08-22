@@ -5,7 +5,7 @@
 # --------
 #
 # bash-utils - A *bash* library for better scripting
-# <http://gitlab.com/piwi/bash-utils>
+# <http://github.com/piwi/bash-utils>
 # Copyright (c) 2015 Pierre Cassat & contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +17,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# For sources & updates, see <http://gitlab.com/piwi/bash-utils>.
+# For sources & updates, see <http://github.com/piwi/bash-utils>.
 #
-# To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
+# To transmit bugs, see <http://github.com/piwi/bash-utils/issues>.
 #
 # For the full copyright and license information, please view the LICENSE
 # file that was distributed with this source code or see
