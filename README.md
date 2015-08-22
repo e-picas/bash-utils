@@ -38,7 +38,7 @@ This way, any user can use it in its scripts by *sourcing* it:
 
 For a full download and installation from the command line, run:
 
-    wget --no-check-certificate https://gitlab.com/piwi/bash-utils/archive/master.tar.gz
+    wget --no-check-certificate https://github.com/piwi/bash-utils/archive/master.tar.gz
     tar -xvf master.tar.gz
     cd bash-utils*
     ./make.sh install /usr/local/bin
