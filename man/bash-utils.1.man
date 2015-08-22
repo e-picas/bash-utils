@@ -2,9 +2,9 @@
 .\" man-name: bash-utils
 .\" author: Pierre Cassat
 .\" section: 1
-.\" date: 2015-08-18
-.\" version: 0.0.1
-.TH  "bash-utils" "1" "2015-08-18" "Version 0.0.1" "Bash-Utils Manual"
+.\" date: 2015-08-22
+.\" version: 0.0.1-rc
+.TH  "bash-utils" "1" "2015-08-22" "Version 0.0.1-rc" "Bash-Utils Manual"
 .SH NAME
 .PP
 Bash-Utils - A short \fIbash\fP library for better scripting.
@@ -46,7 +46,7 @@ calling them directly, or in a script using the library with the help of the `\f
 .PP
 The following options are supported by default for any script using the library:
 .TP
-\fI-dry-run\fP
+\fI--dry-run\fP
 Process a dry-run.
 .TP
 \fI-f\fP, \fI--force\fP
@@ -73,7 +73,7 @@ Please note that these options are available but not necessarily used in scripts
 .PP
 The following additional options are available when you call the library itself:
 .TP
-\fI-e\fP, \fI--exec\fP [\fB=<arg>\fP]
+\fI-e\fP, \fI--exec\fP [\fB=arg\fP]
 Execute the argument in the library's environment ; as the argument is optional, the equal sign
 is REQUIRED ; without argument, any piped content will be evaluated:
 .br
@@ -87,13 +87,13 @@ The following additional arguments are available when you call the library itsel
 \fIabout\fP
 alias of '--version'
 .TP
-\fIabout <module_name>\fP
-alias of '<module-name> --version'
+\fIabout module-name\fP
+alias of 'module-name --version'
 .TP
 \fIhelp\fP
 alias of '--help'
 .TP
-\fIhelp <module_name>\fP
+\fIhelp module-name\fP
 get the help about a module
 .TP
 \fImodules\fP
@@ -102,14 +102,14 @@ get the list of available modules
 \fIusage\fP
 get the library synopsis
 .TP
-\fIusage <module_name>\fP
+\fIusage module-name\fP
 get a module synopsis
 .TP
 \fIversion\fP
 alias of '--version --quiet'
 .TP
-\fIversion <module_name>\fP
-alias of '<module_name> --version --quiet'
+\fIversion module-name\fP
+alias of 'module-name --version --quiet'
 .SH EXAMPLES
 .PP
 You can use the \fImodel\fP module to get a full example of a script using the library.
@@ -125,7 +125,7 @@ A starter template is available in bash-utils(7).
 .PP
 Copyright (c) 2015, Pierre Cassat & contributors
 .PP
-Licensed under the Apache Software Foundation license, Version 2.0;
+Licensed under the Apache Software Foundation license, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 .PP
 Unless required by applicable law or agreed to in writing, software
@@ -137,8 +137,6 @@ limitations under the License.
 For the full copyright and license information, please view the LICENSE
 file that was distributed with this source code or see 
 <http://www.apache.org/licenses/LICENSE-2.0>.
-.PP
-For documentation, sources & updates, see <http://github.com/piwi/bash-utils.git>.
 .SH BUGS
 .PP
 To transmit bugs, see <http://github.com/piwi/bash-utils/issues>.
@@ -147,5 +145,7 @@ To transmit bugs, see <http://github.com/piwi/bash-utils/issues>.
 \fBBash-Utils\fP is created and maintained by Pierre Cassat (piwi - <http://e-piwi.fr/>)
 & contributors.
 .SH SEE ALSO
+.PP
+For documentation, sources & updates, see <http://github.com/piwi/bash-utils.git>.
 .PP
 bash(1), bash-utils(7)
