@@ -30,7 +30,7 @@
 
 # you can define here a string about module's usage (short synopsis), description, name and version
 CMD_NAME='Model'
-CMD_VERSION='0.0.0'
+CMD_VERSION='0.0.1'
 CMD_USAGE="model <type> [file_path]"
 CMD_DESCRIPTION="see one of the bash models contents or copy it in 'file_path'"
 CMD_HELP="arguments:
