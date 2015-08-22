@@ -39,8 +39,10 @@ CMD_USAGE=''
 # custom script's options if needed:
 #CMD_OPTS_SHORT=( f q v x V h )
 #CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
+#CMD_ARGS=()
 #set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
 #set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+#set_env_array CMD_ARGS CMD_ARGS[@]
 
 # to add some information to the debug array, use:
 #TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_VERSION

@@ -2,9 +2,9 @@
 .\" man-name: bash-utils
 .\" author: Pierre Cassat
 .\" section: 7
-.\" date: 2015-08-14
-.\" version: 0.0.1@dev
-.TH  "bash-utils" "7" "2015-08-14" "Version 0.0.1@dev" "Bash-Utils Documentation"
+.\" date: 2015-08-18
+.\" version: 0.0.1
+.TH  "bash-utils" "7" "2015-08-18" "Version 0.0.1" "Bash-Utils Documentation"
 .SH USAGE
 .PP
 To create a script using the library, you can call the \fImodel\fP argument of the library itself, which
@@ -20,9 +20,11 @@ Actually, the only requirement to use the library is to source it in your script
 .RS
 
 .EX
-source bash-utils
+source bash-utils --
 .EE
 .RE
+.PP
+The final double-dashes `\fS--\fP` are required to avoid parameters expansion when including the library.
 .PP
 You can also use it as your script's \fIinterpreter\fP defining it in your 
 \fIhash bang\fP (\fIshebang\fP) <https://en.wikipedia.org/wiki/Shebang_%28Unix%29> line (this is the case
@@ -188,7 +190,7 @@ You can \fBoverwrite any method\fP by re-defining it after having sourced the li
 .RS
 
 .EX
-source .../bash-utils
+source bash-utils -- || { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils not found!" >&2; exit 1; };
 .br
 
 .br
@@ -204,7 +206,7 @@ The best practice is to create user methods instead of overwrite native ones and
 .RS
 
 .EX
-source .../bash-utils
+source bash-utils -- || { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils not found!" >&2; exit 1; };
 .br
 
 .br

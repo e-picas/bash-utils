@@ -2,8 +2,8 @@ Man:        Bash-Utils Manual
 Man-name:   bash-utils
 Author:     Pierre Cassat
 Section:    1
-Date: 2015-08-14
-Version: 0.0.1@dev
+Date: 2015-08-18
+Version: 0.0.1
 
 
 ## NAME
@@ -43,7 +43,7 @@ calling them directly, or in a script using the library with the help of the `ru
 
 The following options are supported by default for any script using the library:
 
-*-dry-run*
+*--dry-run*
 :   Process a dry-run. 
 
 *-f*, *--force*
@@ -71,7 +71,7 @@ Please note that these options are available but not necessarily used in scripts
 
 The following additional options are available when you call the library itself:
 
-*-e*, *--exec* [**=<arg>**]
+*-e*, *--exec* [**=arg**]
 :   Execute the argument in the library's environment ; as the argument is optional, the equal sign
 is REQUIRED ; without argument, any piped content will be evaluated:
 
@@ -83,13 +83,13 @@ The following additional arguments are available when you call the library itsel
 *about*
 :   alias of '--version'
 
-*about <module_name>*
-:   alias of '<module-name> --version'
+*about module-name*
+:   alias of 'module-name --version'
 
 *help*
 :   alias of '--help'
 
-*help <module_name>*
+*help module-name*
 :   get the help about a module
 
 *modules*
@@ -98,14 +98,14 @@ The following additional arguments are available when you call the library itsel
 *usage*
 :   get the library synopsis
 
-*usage <module_name>*
+*usage module-name*
 :   get a module synopsis
 
 *version*
 :   alias of '--version --quiet'
 
-*version <module_name>*
-:   alias of '<module_name> --version --quiet'
+*version module-name*
+:   alias of 'module-name --version --quiet'
 
 ## EXAMPLES
 

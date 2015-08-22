@@ -42,6 +42,8 @@ Use option '--quiet' without a '<file_path>' argument to get the model path.
 #CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
 #set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
 #set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+CMD_ARGS=(bash bash-utils module)
+set_env_array CMD_ARGS CMD_ARGS[@]
 
 # models
 export BASHUTILS_MODEL_DIRS="${BASH_UTILS_MODULES}/models/"
@@ -106,7 +108,7 @@ if [ -n "$target" ]; then
         ! $QUIET && echo "$target";
     fi
 else
-    $QUIET && echo "${source/$(pwd)\//}" || cat "$source";
+    if $QUIET; then echo "${source/$(pwd)\//}"; else cat "$source"; fi
 fi
 
 [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
