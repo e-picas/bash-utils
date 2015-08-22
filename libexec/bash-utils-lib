@@ -4,8 +4,10 @@
 # <http://github.com/piwi/bash-utils>
 # Copyright (c) 2015 Pierre Cassat & contributors
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
+# This program is free software: you can freely use it, redistribute it
+# and/or modify it according to your needs, for yourself or a commercial use,
+# under the terms of the Apache License version 2.0 (the "License") as
+# published by the Apache Software Foundation.
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,13 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# For sources & updates, see <http://github.com/piwi/bash-utils>.
+# The sources of this program are hosted on a public repository.
+# You can modify it, to ameliorate a feature or correct an error,
+# inform about a bug and follow updates at <http://github.com/piwi/bash-utils>.
 #
-# To transmit bugs, see <http://github.com/piwi/bash-utils/issues>.
-#
-# For the full copyright and license information, please view the LICENSE
-# file that was distributed with this source code or see
-# <http://www.apache.org/licenses/LICENSE-2.0>.
+# You should have received a copy of the License along with this program ;
+# please see the LICENSE file that was distributed with this source code.
+# If not, see <http://www.apache.org/licenses/LICENSE-2.0>.
 #
 # --------
 #

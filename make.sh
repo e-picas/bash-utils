@@ -30,28 +30,24 @@ abs_dirname() {
 }
 
 usage() {
+    {   echo "usage: $0 install <prefix>        # install or update the library in <prefix>"
+        echo "       $0 cleanup <prefix>        # remove the library from <prefix>"
+        echo "       $0 link <prefix>           # link the local library's binary in <prefix>"
+        echo "       $0 check                   # check your environment"
+    } >&2
     if $ISGITCLONE; then
-        {   echo "usage: $0 install <prefix>"
-            echo "       $0 cleanup <prefix>"
-            echo "       $0 check"
-            echo "       $0 code-check"
-            echo "       $0 test"
-            echo "       $0 manpages"
-            echo "       $0 version <version>"
-            echo "       $0 release <version>"
-            echo
-            echo "  e.g. $0 install /usr/local"
-            echo "       $0 cleanup /usr/local"
-        } >&2
-    else
-        {   echo "usage: $0 install <prefix>"
-            echo "       $0 cleanup <prefix>"
-            echo "       $0 check"
-            echo
-            echo "  e.g. $0 install /usr/local"
-            echo "       $0 cleanup /usr/local"
+        {   echo
+            echo "  dev: $0 code-check              # validate the code with ShellCheck"
+            echo "       $0 test                    # run BATS tests"
+            echo "       $0 manpages                # rebuild manpages with Markdown-Extended"
+            echo "       $0 version <version>       # upgrade library's version"
+            echo "       $0 release <version>       # make a new library's release (also run manpages & version)"
         } >&2
     fi
+    {   echo
+        echo "  e.g. $0 install /usr/local"
+        echo "       $0 cleanup /opt"
+    } >&2
     exit 1
 }
 
@@ -71,6 +67,15 @@ make_install()
     cp -R "$ROOT_DIR"/etc/bash_completion.d/* "$PREFIX"/etc/bash_completion.d/
     cp -R "$ROOT_DIR"/man/*.1.man "$PREFIX"/share/man/man1/
     cp -R "$ROOT_DIR"/man/*.7.man "$PREFIX"/share/man/man7/
+    return $?
+}
+
+make_link()
+{
+    ( [ -z "$PREFIX" ] || [ ! -d "$PREFIX" ] ) && { echo "Invalid prefix '$PREFIX'. Aborting." >&2; exit 1; }
+    [ ! -e "$(pwd)/bin/bash-utils" ] && { echo "Binary to link not found in '$PWD'. Aborting." >&2; exit 1; }
+    mkdir -p "$PREFIX"/bin
+    ln -s "$(pwd)/bin/bash-utils" "$PREFIX"/bin/
     return $?
 }
 
@@ -162,6 +167,11 @@ case "$1" in
         [ $# -lt 2 ] && usage;
         PREFIX="${2%/}"
         make_cleanup && echo "Removed Bash-Utils from $PREFIX/bin/";
+        ;;
+    link)
+        [ $# -lt 2 ] && usage;
+        PREFIX="${2%/}"
+        make_link && echo "Bash-Utils linked to $PREFIX/bin/";
         ;;
     manpages)
         ! $ISGITCLONE && usage;
