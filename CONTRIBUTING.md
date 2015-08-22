@@ -52,7 +52,7 @@ First of all, you may do the following three things:
 
 If you want to correct a typo or update a feature of Bash-Utils, the first thing to do is
 [create your own fork of the repository](http://help.github.com/articles/fork-a-repo).
-You will need a (free) GitHub account to do this and your copy will appear in your forks list.
+You will need a (free) [GitHub](http://github.com/) account to do this and your copy will appear in your forks list.
 Your work belongs to THIS repository (your own fork - you have no right to make 
 direct `push` on the original repository).
 
@@ -66,7 +66,7 @@ Note that the "merge" of a pull-request keeps your name and profile as the "comm
 (the one who made the stuff).
 
 **BEFORE** you start a work on the code, please check that this has NOT been done yet, or part
-of it, by giving a look at <http://gitlab.com/piwi/bash-utils/pulls>. If you 
+of it, by giving a look at <http://github.com/piwi/bash-utils/pulls>. If you 
 find a pull-request that seems to be like the modification you were going to do, you can 
 comment the request with your vision of the thing or your experience and participate to that
 work.
@@ -76,7 +76,7 @@ work.
 To prepare a development version of Bash-Utils, clone your fork of the repository and
 put it on the "dev" branch:
 
-    git clone http://gitlab.com/<your-username>/bash-utils.git
+    git clone https://github.com/<your-username>/bash-utils.git
     cd bash-utils
     git checkout dev
 
@@ -96,7 +96,7 @@ You can *synchronize* your fork with current original repository by defining a r
 and pulling new commits:
 
     // create an "upstream" remote to the original repo
-    git remote add upstream http://gitlab.com/piwi/bash-utils.git
+    git remote add upstream http://github.com/piwi/bash-utils.git
 
     // get last original remote commits
     git checkout dev

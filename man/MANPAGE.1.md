@@ -2,8 +2,8 @@ Man:        Bash-Utils Manual
 Man-name:   bash-utils
 Author:     Pierre Cassat
 Section:    1
-Date: 2015-08-18
-Version: 0.0.1
+Date: 2015-08-22
+Version: 0.0.1-rc
 
 
 ## NAME
@@ -119,7 +119,7 @@ A starter template is available in bash-utils(7).
 
 Copyright (c) 2015, Pierre Cassat & contributors
 
-Licensed under the Apache Software Foundation license, Version 2.0;
+Licensed under the Apache Software Foundation license, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 
 Unless required by applicable law or agreed to in writing, software
@@ -132,11 +132,9 @@ For the full copyright and license information, please view the LICENSE
 file that was distributed with this source code or see 
 <http://www.apache.org/licenses/LICENSE-2.0>.
 
-For documentation, sources & updates, see <http://gitlab.com/piwi/bash-utils.git>. 
-
 ## BUGS
 
-To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
+To transmit bugs, see <http://github.com/piwi/bash-utils/issues>.
 
 ## AUTHOR
 
@@ -144,5 +142,7 @@ To transmit bugs, see <http://gitlab.com/piwi/bash-utils/issues>.
 & contributors.
 
 ## SEE ALSO
+
+For documentation, sources & updates, see <http://github.com/piwi/bash-utils.git>. 
 
 bash(1), bash-utils(7)

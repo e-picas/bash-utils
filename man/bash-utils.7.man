@@ -2,9 +2,9 @@
 .\" man-name: bash-utils
 .\" author: Pierre Cassat
 .\" section: 7
-.\" date: 2015-08-18
-.\" version: 0.0.1
-.TH  "bash-utils" "7" "2015-08-18" "Version 0.0.1" "Bash-Utils Documentation"
+.\" date: 2015-08-22
+.\" version: 0.0.1-rc
+.TH  "bash-utils" "7" "2015-08-22" "Version 0.0.1-rc" "Bash-Utils Documentation"
 .SH USAGE
 .PP
 To create a script using the library, you can call the \fImodel\fP argument of the library itself, which
@@ -39,7 +39,26 @@ of the model):
 # write your script here
 .EE
 .RE
+.PP
+You can even enable some library's flags by adding options to the \fIshebang\fP:
+.RS
+
+.EX
+#!/usr/bin/env bash-utils -v
+.EE
+.RE
+.PP
+You must separate them when using multiple flags:
+.RS
+
+.EX
+#!/usr/bin/env bash-utils -v -x
+.EE
+.RE
 .SS Notes about \fIbash\fP scripting and usage
+.TP use-your-binaries-easily
+\fBUse your binaries easily\fP
+.RS
 .PP
 To enable "per-user" binaries (let the system look in any `\fS$HOME/bin/\fP` directory when searching scripts), 
 be sure to add that directory to the `\fS$PATH\fP` environment variable (in your `\fS$HOME/.bashrc\fP` for instance):
@@ -57,6 +76,10 @@ The file extension has no incidence upon the script's type (\fIbash\fP in our ca
 \fBshebang\fP directive <https://en.wikipedia.org/wiki/Shebang_%28Unix%29> ; you could name your script with an 
 `\fS.sh\fP`, a `\fS.bash\fP` and even a `\fS.py\fP` extension (which would have no real sense here) or let it without extension 
 at all with no difference.
+.RE
+.TP scripts-terminal-usage
+\fBScripts terminal usage\fP
+.RS
 .PP
 A command-line program (such as a shell script) often accepts to set some options and arguments calling it in a terminal
 or another script. A global synopsis of a command line call can be:
@@ -65,7 +88,7 @@ or another script. A global synopsis of a command line call can be:
 .EX
 path/to/script [-o | --options (=argument)] [--] [<parameter> ...]
 .br
-# i.e.:
+# e.g.:
 .br
 program-to-run -o --option='my value' --option-2 'my value' argument1 argument2
 .EE
@@ -75,17 +98,45 @@ The rules are the followings:
 .RS
 .IP \(bu 
 \fIoptions\fP are various settings passed to the script when calling it ; each option is prefixed by one or more dash `\fS-\fP` 
-and can have an argument ; by convention, a short option is composed by one single letter prefixed by one dash, i.e. `\fS-o\fP`, 
-and a long option is composed by a word prefixed by two dashes, i.e. `\fS--option\fP` ; when an option accepts an argument, 
-it must be separated from the option name by an equal sign, i.e. `\fS--option=argument\fP` and `\fS-o=argument\fP` ; i.e. 
+and can have an argument ; by convention, a short option is composed by one single letter prefixed by one dash, e.g. `\fS-o\fP`, 
+and a long option is composed by a word prefixed by two dashes, e.g. `\fS--option\fP` ; when an option accepts an argument, 
+it must be separated from the option name by an equal sign, e.g. `\fS--option=argument\fP` and `\fS-o=argument\fP` ; e.g. 
 `\fS./script -o --option-with-no-arg --option-with-arg=argument_value\fP`
 .IP \(bu 
 a double dashes `\fS--\fP` can be used to identify the end of options ; the rest of the call will be considered as arguments
 only
 .IP \(bu 
 an \fIargument\fP is a setting passed to the script when calling it ; the arguments are not the same as the options as 
-they are not named but identified by their positions ; i.e. `\fS./script --option argument1 argument2\fP`
+they are not named but identified by their positions ; e.g. `\fS./script --option argument1 argument2\fP`
 .RE
+.RE
+.TP commands-vs-builtins
+\fBCommands vs. builtins\fP
+.RS
+.PP
+\fIBash\fP proposes a large set of \fBbuiltins\fP "commands", which must be differentiated from \fIexternal commands\fP. The bash 
+builtins are always available in any bash environment while external commands must be installed on the system to work.
+If you have a doubt about a command, you can verify running `\fStype <command-name>\fP`, which will respond `\fS... is a shell builtin\fP`
+for builtins. If you have the choice, you should always prefer a builtin rather than an external command, unless you
+are absolutely sure it is present on all UNIX installations.
+.PP
+To get the help about an external command, you can read its \fImanpage\fP:
+.RS
+
+.EX
+man <command-name>
+.EE
+.RE
+.PP
+To get the help about a builtin, you may use `\fShelp\fP`:
+.RS
+
+.EX
+help <builtin>
+.EE
+.RE
+.RS
+.RS
 .SS Starter template
 .PP
 Below is a very simple starter template of a script using the library:
@@ -145,6 +196,8 @@ CMD_OPTS_SHORT=(...)
 .br
 CMD_OPTS_LONG=(...)
 .br
+CMD_ARGS=(...)
+.br
 #CMD_SYNOPSIS=...
 .br
 CMD_USAGE=...
@@ -168,10 +221,7 @@ the `\fSwarning()\fP` method will write an error message to STDERR (without exit
 the `\fStry()\fP` method will emulate a \fItry/catch\fP process by calling a sub-command catching its result
 .RE
 .PP
-Errors are handled by the `\fSdie()\fP` method (using the \fItrap\fP built-in command).
-.PP
-Exits are handled by the `\fScleanup()\fP` method (using again the \fItrap\fP built-in command). You can add in this method 
-any cleanup you want to be done when the script exits.
+Errors are handled by the `\fSdie()\fP` method (using the \fItrap\fP built-in command - see the \fITechnical points\fP section below).
 .PP
 A special \fIoptions\fP and \fIarguments\fP handling is designed to rebuild the input command and follow special treatments
 for default options and arguments. To use this, add in your script:
@@ -263,6 +313,8 @@ CMD_OPTS_LONG=(debug dry-run force help quiet verbose version)
 .EE
 .RE
 .PP
+The `\fSCMD_OPTS_...\fP` definitions are used to build auto-completion.
+.PP
 By default, the `\fScommon_options()\fP` method will throw en error if an unknown option is met. You can avoid this behavior
 by prefixing the `\fSCMD_OPTS_SHORT\fP` by a colon `\fS:\fP`:
 .RS
@@ -320,6 +372,35 @@ $FLAG || ...; # do something when FLAG is DISABLED
 .PP
 Due to known limitations of the \fIgetopt\fP program, you should always use an equal sign between 
 an option (short or long) and its argument: `\fS-o=arg\fP` or `\fS--option=arg\fP`, even if that argument is required.
+.SS Script's arguments
+.PP
+Arguments can be handled in the same logic as options:
+.RS
+.IP \(bu 
+.PP
+you may first define them in the `\fSCMD_ARGS\fP` array, with a trailing double point if it requires a second argument,
+and two double points if it can accept a second argument:
+.RS
+
+.EX
+CMD_ARGS=('argument:' 'arg2::' arg3)
+.EE
+.RE
+
+.IP \(bu 
+
+then, once you have looped (and shifted) over all options, you can loop over arguments:
+.br
+case "$1" in
+.br
+    ...
+.br
+esac
+.br
+
+.RE
+.PP
+The `\fSCMD_ARGS\fP` definition is used to build auto-completion.
 .SS Technical points
 .PP
 The library enables the following \fIBash\fP options by default:
@@ -329,23 +410,29 @@ The library enables the following \fIBash\fP options by default:
 .IP \(bu 
 `\fSexpand_aliases\fP`: allow to use aliases in scripts
 .IP \(bu 
-`\fS-a\fP`: export all modified variables
+`\fSallexport\fP`: export all modified variables
 .IP \(bu 
-`\fS-e\fP`: exit if a command has a non-zero status
+`\fSerrexit\fP`: exit if a command has a non-zero status
 .IP \(bu 
-`\fS-E\fP`: trap on ERR are inherited by shell functions
+`\fSerrtrace\fP`: trap on ERR are inherited by shell functions
 .IP \(bu 
-`\fS-o pipefail\fP`: do not mask pipeline's errors
+`\fSpipefail\fP`: do not mask pipeline's errors
 .IP \(bu 
-`\fS-u\fP`: throw error on unset variable usage
+`\fSnounset\fP`: throw error on unset variable usage
 .IP \(bu 
-`\fS-T\fP`: trap on DEBUG and RETURN are inherited by shell functions
+`\fSfunctrace\fP`: trap on DEBUG and RETURN are inherited by shell functions
 .RE
+.PP
+Run `\fShelp set\fP` for a full list of bash \fIset\fP built-in available options.
+.PP
+Moreover, the library \fItrap\fP errors and early exits signals to the `\fSdie()\fP` function to display an error string and
+stack trace in each case. It also defines a `\fSshutdown_handler()\fP` method trapped at the end of the process; you can 
+redefine this function with your own logic to make a cleanup at the end of each run.
 .PP
 To make robust scripts, here are some reminders:
 .RS
 .IP \(bu 
-to use a variable eventually unset: `\fSecho ${VARIABLE:-default}\fP`
+to use a variable eventually unset: `\fSecho ${VARIABLE:-default}\fP` and `\fSecho ${VARIABLE[*]:-}\fP`
 .IP \(bu 
 to make a silent sub-command call: `\fSval=$(sub-command 2>/dev/null)\fP`
 .RE
@@ -368,6 +455,9 @@ This is the script that handles default parameters and actions of \fIBash-Utils\
 \fBlibexec/bash-utils-modules/\fP
 This is the directory where modules are stored ; each module is a single script in that directory ; a module is
 identified by its filename.
+.TP
+\fBetc/bash_completion.d/bash-utils-completion\fP
+This is the script that handles terminal completion for the library (core and modules).
 .SH SEE ALSO
 .PP
 Online \fIbash\fP scripting guides and tools:
