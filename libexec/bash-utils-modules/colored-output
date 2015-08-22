@@ -30,23 +30,23 @@
 
 if [ -z "${TEXTCOLORS:-}" ]; then
     # terminal colors table
-    declare -rxa TEXTCOLORS=(default black red green yellow blue magenta cyan grey white lightred lightgreen lightyellow lightblue lightmagenta lightcyan lightgrey)
-    declare -rxa TEXTCOLORS_CODES_FOREGROUND=(39 30 31 32 33 34 35 36 90 97 91 92 93 94 95 96 37)
-    declare -rxa TEXTCOLORS_CODES_BACKGROUND=(49 40 41 42 43 44 45 46 100 107 101 102 103 104 105 106 47)
+    declare -xa TEXTCOLORS=(default black red green yellow blue magenta cyan grey white lightred lightgreen lightyellow lightblue lightmagenta lightcyan lightgrey)
+    declare -xa TEXTCOLORS_CODES_FOREGROUND=(39 30 31 32 33 34 35 36 90 97 91 92 93 94 95 96 37)
+    declare -xa TEXTCOLORS_CODES_BACKGROUND=(49 40 41 42 43 44 45 46 100 107 101 102 103 104 105 106 47)
     set_env_array TEXTCOLORS TEXTCOLORS[@]
     set_env_array TEXTCOLORS_CODES_FOREGROUND TEXTCOLORS_CODES_FOREGROUND[@]
     set_env_array TEXTCOLORS_CODES_BACKGROUND TEXTCOLORS_CODES_BACKGROUND[@]
 
     # terminal text options table
-    declare -rxa TEXTOPTIONS=(normal bold small underline blink reverse hidden)
-    declare -rxa TEXTOPTIONS_CODES=(0 1 2 4 5 7 8)
+    declare -xa TEXTOPTIONS=(normal bold small underline blink reverse hidden)
+    declare -xa TEXTOPTIONS_CODES=(0 1 2 4 5 7 8)
     set_env_array TEXTOPTIONS TEXTOPTIONS[@]
     set_env_array TEXTOPTIONS_CODES TEXTOPTIONS_CODES[@]
 fi
 
 # you can define here a string about module's usage (short synopsis), description, name and version
 CMD_NAME='Colored-Output'
-CMD_VERSION='0.0.0'
+CMD_VERSION='0.0.1'
 CMD_USAGE="colored-output <string>"
 CMD_DESCRIPTION="colorize a string with tags like '<bold>string</bold>'"
 CMD_HELP="tags constuction:
