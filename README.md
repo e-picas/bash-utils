@@ -1,6 +1,8 @@
 Bash-Utils - Utilities for Bash scripting
 =========================================
 
+[![Build Status](https://travis-ci.org/piwi/bash-utils.svg)](https://travis-ci.org/piwi/bash-utils)
+
 The `Bash-Utils` command is a small library of utilities to quickly build robust and complete
 [Bash](https://en.wikipedia.org/wiki/Bash_%28Unix_shell%29) scripts.
 It proposes a set of useful functions and environment variables in an enhanced environment with some system options enabled by default,
