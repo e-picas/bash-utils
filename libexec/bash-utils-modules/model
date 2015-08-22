@@ -2,11 +2,13 @@
 #
 # This script is a module for Bash-Utils
 #
+# --------
+#
 # bash-utils - A *bash* library for better scripting
 # <http://gitlab.com/piwi/bash-utils>
 # Copyright (c) 2015 Pierre Cassat & contributors
 #
-# Licensed under the Apache Software Foundation license, Version 2.0;
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 #
 # Unless required by applicable law or agreed to in writing, software

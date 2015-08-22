@@ -4,7 +4,7 @@
 # <http://gitlab.com/piwi/bash-utils>
 # Copyright (c) 2015 Pierre Cassat & contributors
 #
-# Licensed under the Apache Software Foundation license, Version 2.0;
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -21,6 +21,7 @@
 # file that was distributed with this source code or see
 # <http://www.apache.org/licenses/LICENSE-2.0>.
 #
+# --------
 #
 # bash-utils-completion: completion script for the Bash-Utils library
 #
