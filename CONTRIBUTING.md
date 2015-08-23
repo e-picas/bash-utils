@@ -1,7 +1,7 @@
 Contribute to Bash-Utils
 ========================
 
-If you want to contribute to this project, first you are very welcome ;) Then, this documentation
+If you want to contribute to this project, this documentation
 file will introduce you the "dev-cycle" of Bash-Utils.
 
 
@@ -90,7 +90,7 @@ The development process of the package requires some external dependencies to wo
 -   *BATS*, a test suite for Bash scripts: <http://github.com/sstephenson/bats>
 -   *ShellCheck*, a Bash scripting validator: <http://github.com/koalaman/shellcheck>
 
-Once you have installed them, your clone is ready ;)
+Once you have installed them, your clone is ready.
 
 You can *synchronize* your fork with current original repository by defining a remote to it
 and pulling new commits:
@@ -124,7 +124,7 @@ last "master" release.
 A module is finally integrated on "master" ONLY IF IT IS WELL CODED AND PASSED ITS TESTS.
 
 Please note that ANY module will finally be part of *Bash-Utils* and will be offered under the same 
-license and copyright conditions.
+license and copyright conditions. You can add an information about module's authors in the module itself.
 
 How-tos
 -------
@@ -202,7 +202,13 @@ is done by creating a tag named like `vX.Y.Z[-status]` from the "master" branch 
 merged the "dev" one in. Please see the [Semantic Versioning](http://semver.org/) work by 
 Tom Preston-Werner for more info about the release version name construction rules.
 
-To make a new release of the package, you must follow these steps:
+You can build a new release running:
+
+    ./make.sh release X.Y.Z
+
+This will call first the `version X.Y.Z` and `manpages` actions of `make.sh`.
+
+To make a new release of the package manually, you must follow these steps:
 
 1.  merge the "dev" branch into "master"
 
