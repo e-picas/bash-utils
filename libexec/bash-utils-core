@@ -26,7 +26,7 @@
 # --------
 #
 # bash-utils-core:  this is the core of the Bash-Utils library
-#                   it defines the environment and some basic functions to let it work
+#                   it defines the environment and some basic functions for the library to work by itself and to handle its modules
 #                   it uses almost only bash builtins
 #
 

@@ -275,10 +275,10 @@ it acts like a loader of the library and a script's interpreter you can use in a
 
 **libexec/bash-utils-core**
 :   This is the core of *Bash-Utils* ; it mostly defines required functions and environment variables for the library
-to work by itself and to handle its modules.
+to work by itself and to handle its modules ; it uses almost only bash *builtins*.
 
 **libexec/bash-utils-lib**
-:   This is the library of functions ; it embeds various functions commonly used in *bash* scripts.
+:   This is the library of functions ; it embeds various useful functions and variables commonly used in *bash* scripts.
 
 **libexec/bash-utils-cmd**
 :   This is the script that handles default parameters and actions of *Bash-Utils* when you call it directly.

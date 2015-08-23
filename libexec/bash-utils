@@ -25,8 +25,9 @@
 #
 # --------
 #
-# bash-utils:   this is the entry point of the Bash-Utils library
-#               it acts like a basic command which transmit the run to children & modules
+# bash-utils:   this is the "entry point" of the Bash-Utils library
+#               it should be available in one of the `$PATH` paths for all users
+#               it acts like a loader of the library and a basic command which transmits the run to children & modules
 #               it also acts like a script's interpreter
 #
 set -e

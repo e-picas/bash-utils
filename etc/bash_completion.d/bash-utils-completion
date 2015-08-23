@@ -25,7 +25,7 @@
 #
 # --------
 #
-# bash-utils-completion: completion script for the Bash-Utils library
+# bash-utils-completion: this is the script that handles terminal completion for the Bash-Utils library (core and modules)
 #
 
 declare -x COMPMODULE=''
