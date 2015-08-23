@@ -26,7 +26,7 @@
 # --------
 #
 # bash-utils-lib:   this is the Bash-Utils library
-#                   it embeds various useful functions and variables
+#                   it embeds various useful functions and variables commonly used in bash scripts
 #                   it required the core to be loaded
 #
 set -e

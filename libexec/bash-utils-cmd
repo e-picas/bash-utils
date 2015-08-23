@@ -26,7 +26,7 @@
 # --------
 #
 # bash-utils-cmd:   this is the default Bash-Utils library command
-#                   it is only loaded when calling the library directly
+#                   it handles default parameters and actions of Bash-Utils when you call it directly
 #
 set -e
 

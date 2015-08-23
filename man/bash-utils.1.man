@@ -2,9 +2,9 @@
 .\" man-name: bash-utils
 .\" author: Pierre Cassat
 .\" section: 1
-.\" date: 2015-08-22
+.\" date: 2015-08-23
 .\" version: 0.0.1-rc
-.TH  "bash-utils" "1" "2015-08-22" "Version 0.0.1-rc" "Bash-Utils Manual"
+.TH  "bash-utils" "1" "2015-08-23" "Version 0.0.1-rc" "Bash-Utils Manual"
 .SH NAME
 .PP
 Bash-Utils - A short \fIbash\fP library for better scripting.

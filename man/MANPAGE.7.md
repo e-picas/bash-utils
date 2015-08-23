@@ -2,8 +2,8 @@ Man:        Bash-Utils Documentation
 Man-name:   bash-utils
 Author:     Pierre Cassat
 Section:    7
-Date: 2015-08-22
-Version: 0.0.1@dev
+Date: 2015-08-23
+Version: 0.0.1-rc
 
 
 ## USAGE
@@ -170,9 +170,9 @@ The best practice is to create user methods instead of overwrite native ones and
 Default options handled by the library are:
 
 -   **-q** | **--quiet**: enables the `$QUIET` environment variables ; this should decrease script's output (only errors or
-    required output should be returned) ; this options disables the `$VERBOSE` environment variable
+    required output should be returned) ; this option disables the `$VERBOSE` environment variable
 -   **-v** | **--verbose**: enables the `$VERBOSE` environment variable ; this should increase script's verbosity (inform
-    user about what is happening) ; this options disables the `$QUIET` environment variable
+    user about what is happening) ; this option disables the `$QUIET` environment variable
 -   **-f** | **--force**: enables the `$FORCE` environment variable ; this should let the user to choose all default behaviors
     in case a choice is required (no prompt running the script)
 -   **-x** | **--debug**: enables the `$DEBUG` environment variable ; this should drastically increase script's verbosity
@@ -186,7 +186,7 @@ The library also handles those informational options:
 -   **-h** | **--help** to get the full help information of script's usage
 
 The output of the informational arguments listed above are constructed using the `CMD_...` environment
-variables you may define for each script.
+variables you may define for each script (see the *Customize your script* section above).
 
 These options are handled by the *getopt* program. You can add your own options by overriding the following variables:
 
@@ -202,8 +202,6 @@ by prefixing the `CMD_OPTS_SHORT` by a colon `:`:
 
 For each option added, you MUST define your own treatment for it in a parsing loop:
 
-    CMD_OPTS_SHORT=':fqvxo:'
-    CMD_OPTS_LONG='debug,dry-run,force,quiet,verbose,my-option'
     while [ $# -gt 0 ]; do
         case "$1" in
             # do not throw error for common options
@@ -275,10 +273,10 @@ it acts like a loader of the library and a script's interpreter you can use in a
 
 **libexec/bash-utils-core**
 :   This is the core of *Bash-Utils* ; it mostly defines required functions and environment variables for the library
-to work by itself and to handle its modules.
+to work by itself and to handle its modules ; it uses almost only bash *builtins*.
 
 **libexec/bash-utils-lib**
-:   This is the library of functions ; it embeds various functions commonly used in *bash* scripts.
+:   This is the library of functions ; it embeds various useful functions and variables commonly used in *bash* scripts.
 
 **libexec/bash-utils-cmd**
 :   This is the script that handles default parameters and actions of *Bash-Utils* when you call it directly.
