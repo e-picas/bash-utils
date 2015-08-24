@@ -99,8 +99,14 @@ common_options()
                                 else _todo='echo "" && exit 0;'
                             fi;;
             -- )            shift; break;;
-            * )             if ! is_known_option "$1" && [ "${CMD_OPTS_SHORT[0]}" != ":" ]
-                                then error "unknown option '$1'"; fi;;
+            * )             if ! is_known_option "$1" && [ "${CMD_OPTS_SHORT[0]}" != ":" ]; then
+                                error "unknown option '$1'"
+                            elif [ -n "$2" ] && [ "${2:0:1}" != '-' ] && (
+                                [[ "${CMD_OPTS_SHORT[@]}" == *"${1//-}:"* ]] || [[ "${CMD_OPTS_LONG[@]}" == *"${1//-}:"* ]]
+                            ); then
+                                shift
+                            fi
+                            ;;
         esac
         shift
     done
