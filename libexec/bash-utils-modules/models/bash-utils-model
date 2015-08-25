@@ -43,13 +43,13 @@ Available options:
     -x|--debug      see some debugging information
 ";
 #CMD_OPTS_SHORT=(f h q v V x)
-#CMD_OPTS_LONG=(debug dry-run force help quiet verbose version)
-#CMD_ARGS=()
 #set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
+#CMD_OPTS_LONG=(debug dry-run force help quiet verbose version)
 #set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+#CMD_ARGS=()
 #set_env_array CMD_ARGS CMD_ARGS[@]
 # the synopsis should not be overwritten as it is automatically built with `CMD_OPTS_...`
-#CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] <arguments> --"
+#CMD_SYNOPSIS="$0 [-fhqvVx] [--debug|--dry-run|--force|--help|--quiet|--verbose|--version] [--] <arguments>"
 # you can use `CMD_USAGE` instead, which will be added to default options:
 #CMD_USAGE=''
 
