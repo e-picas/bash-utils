@@ -1,0 +1,271 @@
+#!/usr/bin/env bash-utils
+#
+# This script is a module for Bash-Utils
+#
+# --------
+#
+# bash-utils - A *bash* library for better scripting
+# <http://github.com/piwi/bash-utils>
+# Copyright (c) 2015 Pierre Cassat & contributors
+#
+# This program is free software: you can freely use it, redistribute it
+# and/or modify it according to your needs, for yourself or a commercial use,
+# under the terms of the Apache License version 2.0 (the "License") as
+# published by the Apache Software Foundation.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# The sources of this program are hosted on a public repository.
+# You can modify it, to ameliorate a feature or correct an error,
+# inform about a bug and follow updates at <http://github.com/piwi/bash-utils>.
+#
+# You should have received a copy of the License along with this program ;
+# please see the LICENSE file that was distributed with this source code.
+# If not, see <http://www.apache.org/licenses/LICENSE-2.0>.
+#
+##@!@##
+
+#### Doc-Builder : build a documentation of a script source based on comments tags ####
+
+# you can define here a string about module's usage (short synopsis), description, name and version:
+CMD_NAME='Doc-Builder'
+CMD_VERSION='0.0.0'
+CMD_DESCRIPTION='Build a documentation of a script source based on comments tags'
+CMD_HELP="$(cat <<'MSG'
+Available options:
+    -q|--quiet          get a light output
+    -t|--type=<type>    switch output type in 'terminal' or 'markdown'
+    -o|--output=<path>  write generated documentation in a file
+
+Default type is 'terminal' when no output file is defined, 'markdown' otherwise.
+
+Tags used to build documentation:
+
+    '^#### [^#]* #*$'       # title line        : #### title # (this will be followed by the line number and a new line)
+    '^#### [^#]*$'          # fct name line     : #### name ( what ever )
+    '^##@ .*$'              # var line          : ##@ varname ( what ever )
+    '^## .*$'               # comment line      : ## comment (will NOT match "##! comment")
+    '^##+ .*$'              # 2nd comment line  : ##+ comment (will NOT match "##! comment")
+    '^##@[^ ]* .*$'         # tag line          : ##@tagname string
+
+MSG
+)";
+# the synopsis should be left empty as it will be automatically generated with options declarations:
+CMD_SYNOPSIS=''
+#CMD_SYNOPSIS="$0 [-fhqvVx] [--debug|--dry-run|--force|--help|--quiet|--verbose|--version] [--] <arguments>"
+# you can use `CMD_USAGE` instead, which will be added to default options:
+CMD_USAGE='doc-builder <source(s)>'
+# custom script's options if needed:
+CMD_OPTS_SHORT=(f h 'o:' q 't:' v V x)
+CMD_OPTS_LONG=(debug dry-run force help 'output:' quiet 'type:' verbose version)
+#CMD_ARGS=()
+set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
+set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+#set_env_array CMD_ARGS CMD_ARGS[@]
+
+# to add some information to the debug array, use:
+#TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_VERSION
+#set_env_array TO_DEBUG TO_DEBUG[@]
+
+## Documentation builder rules, tags and masks
+declare -xa DOCBUILDER_MASKS=()
+
+##@ DOCBUILDER_MARKER='##@!@##'
+## This is the 'begin' and 'end' documentation tag ; anything inside these will be parsed
+declare -x DOCBUILDER_MARKER='##@!@##'
+
+##@ DOCBUILDER_RULES=(...)
+## '^#### [^#]* #*$'    # title line        : #### title # (this will be followed by the line number and a new line)
+## '^#### [^#]*$'       # fct name line     : #### name ( what ever )
+## '^##@ .*$'           # var line          : ##@ varname ( what ever )
+## '^## .*$'            # comment line      : ## comment (will NOT match "##! comment")
+## '^##+ .*$'           # 2nd comment line  : ##+ comment (will NOT match "##! comment")
+## '^##@[^ ]* .*$'      # tag line          : ##@tagname string
+declare -xa DOCBUILDER_RULES=(
+    '^#### [^#]* #*$'                       # title line        : #### title # (this will be followed by the line number and a new line)
+    '^#### [^#]*$'                          # fct name line     : #### name ( what ever )
+    '^##@ .*$'                              # var line          : ##@ varname ( what ever )
+    '^## .*$'                               # comment line      : ## comment (will NOT match "##! comment")
+    '^##+ .*$'                              # 2nd comment line  : ##+ comment (will NOT match "##! comment")
+    '^##@[^ ]* .*$'                         # tag line          : ##@tagname string
+);
+
+##@ DOCBUILDER_TERMINAL_MASKS=(...)
+## This defines the replacement rules for 'terminal' type
+declare -xa DOCBUILDER_TERMINAL_MASKS=(
+    "s|^#### \(.*\) #*$|\\\n# \1 #|g"                   # title line
+    "s|^#### \(.*\)$|\\\n\\\t\1|g"                      # fct name line
+    "s|^##@ \(.*\)$|\\\n\\\t\1|g"                       # var line
+    "s|^## \(.*\)$|\\\t\\\t\1|g"                        # comment line
+    "s|^##+ \(.*\)$|\\\t\\\t\1|g"                       # 2nd comment line
+    "s|^##\(@[^ ]*\) \(.*\)$|\\\t\\\t\1 \2|g"           # tag line
+);
+
+##@ DOCBUILDER_MARKDOWN_MASKS=(...)
+## This defines the replacement rules for 'markdown' type
+declare -xa DOCBUILDER_MARKDOWN_MASKS=(
+    "s|^#### \(.*\) #*$|\\\n## \1|g"                    # title line
+    "s|^#### \(.*\)$|\\\n-   \*\*\1\*\*\\\n|g"          # fct name line
+    "s|^##@ \(.*\)$|\\\n-   \*\*\1\*\*|g"               # var line
+    "s|^## \(.*\)$|\\\n\\\t\1|g"                        # comment line
+    "s|^##+ \(.*\)$|\\\t\1|g"                           # 2nd comment line
+    "s|^##\(@[^ ]*\) \(.*\)$|\\\n\\\t\*\*\1:\*\* \2|g"  # tag line
+);
+set_env_array DOCBUILDER_MASKS DOCBUILDER_MASKS[@]
+set_env_array DOCBUILDER_RULES DOCBUILDER_RULES[@]
+set_env_array DOCBUILDER_TERMINAL_MASKS DOCBUILDER_TERMINAL_MASKS[@]
+set_env_array DOCBUILDER_MARKDOWN_MASKS DOCBUILDER_MARKDOWN_MASKS[@]
+
+##! !! REQUIRED !! ## stop here on pre-loading
+if ${PRELOAD:-false}; then return 0; fi
+
+#######################
+##! module's logic, library ...
+
+#### build_documentation ( type=TERMINAL , output=null , source=BASH_SOURCE[0] )
+## This will analyze <source> contents and parse it to build a documentation
+##+ based on some special comments tags.
+##@param type     in 'terminal' or 'markdown'
+##@param output   a file path to write documentation in
+##@param source   a file path to analyze (must exist)
+build_documentation()
+{
+    local type="${1:-TERMINAL}"
+    type="$(string_to_upper "$type")"
+    local output="${2:-}"
+    local source="${3:-${BASH_SOURCE[0]}}"
+    declare -a DOCBUILDER_MASKS=()
+    case "$type" in
+        TERMINAL)
+            DOCBUILDER_MASKS=("${DOCBUILDER_TERMINAL_MASKS[@]}")
+            ;;
+        MARKDOWN)
+            DOCBUILDER_MASKS=("${DOCBUILDER_MARKDOWN_MASKS[@]}")
+            ;;
+        *) error "unknown doc-builder type '${type}'";;
+    esac
+    set_env_array DOCBUILDER_MASKS DOCBUILDER_MASKS[@]
+    $VERBOSE && comment "generating documentation in format '${type}' from file '${source}'";
+    generate_documentation "$source" "$output"
+    return 0
+}
+
+#### generate_documentation ( filepath=BASH_SOURCE[0] , output=null )
+##@param output   a file path to write documentation in
+##@param source   a file path to analyze (must exist)
+generate_documentation()
+{
+    local sourcefile output docstr separator now margin i indoc intag
+    sourcefile="${1:-${BASH_SOURCE[0]}}"
+    if [ ! -f "$sourcefile" ]; then error "source file '$sourcefile' not found"; fi
+    [ -z "${DOCBUILDER_RULES:-}" ] && declare -a DOCBUILDER_RULES=($(get_env_array_DOCBUILDER_RULES))
+    [ -z "${DOCBUILDER_MASKS:-}" ] && declare -a DOCBUILDER_MASKS=($(get_env_array_DOCBUILDER_MASKS))
+    output="${2:-}"
+    docstr=''
+    separator="\n----\n"
+    docstr+="$(printf '## %s documentation' "$(basename "$sourcefile")")\n"
+    now="$(date '+%d-%-m-%Y %X')"
+    docstr+="(doc generated at ${now} from path '${sourcefile}')\n"
+    margin=1
+    i=0
+    # 0: before | 1: indoc | 2: after
+    indoc=0
+    intag=false
+    old_IFS="$IFS"
+    IFS=$'\n'
+    while read line; do
+        [ "$indoc" -eq 0 ] && margin=$((margin+1));
+        [ "${line:0:2}" != '##' ] && continue;
+        if [ "$line" = "$DOCBUILDER_MARKER" ]; then
+            if [ "$indoc" -eq 1 ]; then
+                indoc=2; break
+            else
+                margin=$((margin+1))
+                indoc=1
+            fi
+            continue;
+        fi
+        if [ "$indoc" -eq 1 ]; then
+            line_str=''
+            title_line="$(echo "$line" | (grep -o "${DOCBUILDER_RULES[0]}" 2>/dev/null || true) | sed "${DOCBUILDER_MASKS[0]}")"
+            fct_line="$(echo "$line" | (grep -o "${DOCBUILDER_RULES[1]}" 2>/dev/null || true) | sed "${DOCBUILDER_MASKS[1]}")"
+            var_line="$(echo "$line" | (grep -o "${DOCBUILDER_RULES[2]}" 2>/dev/null || true) | sed "${DOCBUILDER_MASKS[2]}")"
+            if [ -n "${title_line}" ]; then
+                line_str="${title_line} (line $((i+margin)))\n"
+            elif [ -n "$fct_line" ]; then
+                line_str="$fct_line"
+                intag=true
+            elif [ -n "$var_line" ]; then
+                line_str="$var_line"
+                intag=true
+            elif [ "$intag" = 'true' ]; then
+                comm_line="$(echo "$line" | (grep -o "${DOCBUILDER_RULES[3]}" 2>/dev/null || true) | sed "${DOCBUILDER_MASKS[3]}")"
+                comm_line_alt="$(echo "$line" | (grep -o "${DOCBUILDER_RULES[4]}" 2>/dev/null || true) | sed "${DOCBUILDER_MASKS[4]}")"
+                arg_line="$(echo "$line" | (grep -o "${DOCBUILDER_RULES[5]}" 2>/dev/null || true) | sed "${DOCBUILDER_MASKS[5]}")"
+                if ! $QUIET; then
+                    if [ -n "$arg_line" ]; then
+                        line_str="$arg_line"
+                    elif [ -n "$comm_line" ]; then
+                        line_str="$comm_line"
+                    elif [ -n "$comm_line_alt" ]; then
+                        line_str="$comm_line_alt"
+                    fi
+                else
+                    if [ -n "$comm_line" ] && [ -n "$comm_line_alt" ]; then intag=false; fi
+                fi
+            fi
+            [ -n "$line_str" ] && docstr+="\n${line_str}";
+        fi
+        i=$((i+1))
+    done < "$sourcefile" ;
+    IFS="$old_IFS"
+    export IFS
+    if [ -n "$output" ]
+        then echo -e "$docstr" > "$output"
+        else echo -e "$docstr"
+    fi
+    return 0
+}
+
+##@!@##
+######################
+## treat direct params ...
+
+if [ -z "$CMD_MODULE" ]; then
+    [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
+fi
+
+[ $# -eq 0 ] && usage_info && exit 1;
+rearrange_options "$@"
+[ -n "$CMD_REQ" ] && eval set -- "$CMD_REQ";
+common_options "$@"
+$DEBUG && debug;
+
+declare -x SOURCE=''
+declare -x OUTPUT=''
+declare -x TYPE=''
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -o|--output) OUTPUT="${2#=}"; shift;;
+        -t|--type) TYPE="${2#=}"; shift;;
+        -- ) shift; break;;
+        * )  ! is_known_option "$1" && error "unknown option '$1'";;
+    esac
+    shift
+done
+
+[ $# -eq 0 ] && usage_info && exit 1;
+for f in "$*"; do
+    build_documentation "$TYPE" "$OUTPUT" "$f"
+done
+
+#######################
+# a module should always exit or return with a status (0 for no error)
+[ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
+
+## vim default shell setup (must be the very last line):
+# vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh
