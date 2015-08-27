@@ -385,15 +385,15 @@ load_modules_list()
     declare -a oldCMD_OPTS_SHORT=("${CMD_OPTS_SHORT[@]}")
     declare -a oldCMD_OPTS_LONG=("${CMD_OPTS_LONG[@]}")
     init_defaults
-    [ -z "${MODULES_AVAILABLE:-}" ]   && declare -a MODULES_AVAILABLE=($(get_env_array_MODULES_AVAILABLE))
+    [ -z "${MODULES_AVAILABLE:-}" ] && declare -a MODULES_AVAILABLE=($(get_env_array_MODULES_AVAILABLE))
     for l in "${MODULES_AVAILABLE[@]}"; do
         [ "${#l}" -gt "$length" ] && length="${#l}";
     done
-    for f in "$BASH_UTILS_MODULES"/*; do
-        if [ -f "$f" ] && [ -x "$f" ]; then
+    for script in "$BASH_UTILS_MODULES"/*; do
+        if [ -f "$script" ] && [ -x "$script" ]; then
             CMD_DESCRIPTION=''
-            source "$f"
-            modules_info+="$(printf "\n    %$((length+1))s    : %s\n" "$(basename "$f")" "${CMD_DESCRIPTION:-}")"
+            source "$script"
+            modules_info+="$(printf "\n    %$((length+1))s    : %s\n" "$(basename "$script")" "${CMD_DESCRIPTION:-}")"
         fi
     done
     export PRELOAD=false
