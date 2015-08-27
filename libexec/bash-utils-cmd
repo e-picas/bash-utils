@@ -50,8 +50,8 @@ CMD_OPTS_SHORT=("${BASH_UTILS_OPTS_SHORT[@]}")
 CMD_OPTS_LONG=("${BASH_UTILS_OPTS_LONG[@]}")
 CMD_ARGS=("${BASH_UTILS_ARGS[@]}")
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_KEY
-TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_VERSION
+TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_ROOT
 TO_DEBUG[${#TO_DEBUG[@]}]=BASH_UTILS_MODULES
 set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
@@ -64,7 +64,6 @@ rearrange_options "$@"
 [ -n "$CMD_REQ" ] && eval set -- "$CMD_REQ";
 common_options "$@"
 read_from_pipe
-$DEBUG && debug;
 while [ $# -gt 0 ]; do
     case "$1" in
         -e | --exec* )

@@ -500,6 +500,7 @@ set_env_array()
 # usage: `shutdown_handler`
 shutdown_handler()
 {
+    $DEBUG && debug >&2;
     # draw your own cleanup stuff here
     return 0
 }
