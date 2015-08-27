@@ -228,18 +228,17 @@ gnu_error_string()
     return 0
 }
 
-# write help string to STDERR & exit
+# write help string to STDOUT & exit
 # usage: `help_info`
 help_info()
 {
-    {   version_info true
-        echo
-        echo -e "$CMD_DESCRIPTION"
-        echo
-        usage_info
-        echo
-        echo -e "$CMD_HELP"
-    } >&2
+    version_info true
+    echo
+    echo -e "$CMD_DESCRIPTION"
+    echo
+    usage_info
+    echo
+    echo -e "$CMD_HELP"
     exit 0
 }
 
