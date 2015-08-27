@@ -54,8 +54,10 @@ set -o nounset
 ## for dev usage: print shell input lines as they are read (set -v)
 #set -o verbose
 
+# trap user interrupt to 'die'
+trap 'die "user interrupt"' 2 3 15
 # trap errors to 'die'
-trap 'die "trapped error at ${BASH_SOURCE}:${BASH_LINENO:-}:${FUNCNAME:-}()"' 1 2 3 15 ERR
+trap 'error_usage' ERR
 # trap exit to 'shutdown_handler'
 trap 'shutdown_handler' EXIT
 ## signals (`kill -l` for full list):
@@ -195,6 +197,23 @@ error()
         echo '---'
         usage_info
     } >&2
+    exit "${2:-1}"
+}
+
+# write an optional error on STDERR & show usage string & exit
+# usage: `error_usage [string=NULL] [status=1]`
+error_usage()
+{
+    local errstr
+    errstr="${1:-}"
+    if $DEBUG || [ -n "$errstr" ]; then
+        $VERBOSE && errstr="$(gnu_error_string "${1:-unknown error}")";
+        {   echo '---'
+            echo "error: ${errstr}"
+        } >&2
+    fi
+    echo '---'
+    usage_info >&2
     exit "${2:-1}"
 }
 
