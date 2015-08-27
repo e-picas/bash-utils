@@ -690,7 +690,7 @@ readonly BASH_UTILS_SYNOPSIS="bash-utils [-f|--force] [-q|--quiet] [-v|--verbose
                   [-e|--exec[=<arg>]] [-V|--version] [-h|--help]
                   [--] <command> [arguments]";
 readonly BASH_UTILS_USAGE=''
-readonly BASH_UTILS_HELP="arguments:
+readonly BASH_UTILS_HELP="commands:
     about                   alias of '--version'
     about <module_name>     alias of '<module-name> --version'
     help                    alias of '--help'
@@ -718,6 +718,9 @@ options:
 paths:
     $BASH_UTILS
     $BASH_UTILS_MODULES
+
+see also:
+    bash-utils(1), bash-utils(7)
 ";
 declare -ax BASH_UTILS_OPTS_SHORT=(':' 'e::' f h q v V x)
 declare -ax BASH_UTILS_OPTS_LONG=('exec::' debug dry-run force help quiet verbose version)
@@ -757,13 +760,13 @@ set_env_array MODULES_AVAILABLE MODULES_AVAILABLE[@]
 #### COMMANDS INFO ####
 
 # defaults
-export DEFAULT_NAME='overwrite the DEFAULT_NAME variable to customize this information'
-export DEFAULT_VERSION='overwrite the DEFAULT_VERSION variable to customize this information'
-export DEFAULT_COPYRIGHT='overwrite the DEFAULT_COPYRIGHT variable to customize this information'
-export DEFAULT_LICENSE='overwrite the DEFAULT_LICENSE variable to customize this information'
-export DEFAULT_SOURCES='overwrite the DEFAULT_SOURCES variable to customize this information'
-export DEFAULT_DESCRIPTION='overwrite the DEFAULT_DESCRIPTION variable to customize this information'
-export DEFAULT_HELP='overwrite the DEFAULT_HELP variable to customize this information'
+export DEFAULT_NAME='override the DEFAULT_NAME variable to customize this information'
+export DEFAULT_VERSION='override the DEFAULT_VERSION variable to customize this information'
+export DEFAULT_COPYRIGHT='override the DEFAULT_COPYRIGHT variable to customize this information'
+export DEFAULT_LICENSE='override the DEFAULT_LICENSE variable to customize this information'
+export DEFAULT_SOURCES='override the DEFAULT_SOURCES variable to customize this information'
+export DEFAULT_DESCRIPTION='override the DEFAULT_DESCRIPTION variable to customize this information'
+export DEFAULT_HELP='override the DEFAULT_HELP variable to customize this information'
 export DEFAULT_SYNOPSIS=''
 export DEFAULT_USAGE=''
 declare -ax DEFAULT_OPTS_SHORT=(f h q v V x)
@@ -773,7 +776,7 @@ set_env_array DEFAULT_OPTS_SHORT DEFAULT_OPTS_SHORT[@]
 set_env_array DEFAULT_OPTS_LONG DEFAULT_OPTS_LONG[@]
 set_env_array DEFAULT_ARGS DEFAULT_ARGS[@]
 
-# CMD: to be overwritten by sub-cmd
+# CMD: to be overridden by sub-cmd
 export CMD_NAME CMD_VERSION CMD_COPYRIGHT CMD_LICENSE CMD_SOURCES CMD_DESCRIPTION CMD_HELP CMD_SYNOPSIS CMD_USAGE
 declare -ax CMD_OPTS_SHORT=()
 declare -ax CMD_OPTS_LONG=()
