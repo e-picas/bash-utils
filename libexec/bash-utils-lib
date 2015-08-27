@@ -170,7 +170,7 @@ get_path()
 log()
 {
     [ $# -eq 0 ] && return 0;
-    echo "$(date +'%x %R') ${CMD_USER}@${CMD_HOST} [$$]: $*" >> "$CMD_LOGFILE";
+    echo "$(date +'%x %R') ${USER}@${HOSTNAME} [$$]: $*" >> "$CMD_LOGFILE";
     return 0
 }
 
