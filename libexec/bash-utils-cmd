@@ -82,6 +82,8 @@ while [ $# -gt 0 ]; do
     esac
     shift
 done
+
+[ $# -eq 0 ] && usage_info && exit 1;
 while [ $# -gt 0 ]; do
     case "$1" in
         'about')    if [ $# -gt 1 ] && (module_exists "$2" 2>/dev/null || false); then
