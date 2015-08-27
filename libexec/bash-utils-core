@@ -34,11 +34,11 @@
 
 # use aliases
 shopt -s expand_aliases
-# export all modified vars (set -a)
+# export all defined variables (set -a)
 set -o allexport
-# match the POSIX 1003.2 standard ; see <http://www.gnu.org/software/bash/manual/html_node/Bash-POSIX-Mode.html>
+# force Bash to conform to the POSIX 1003.2 standard ; see <http://www.gnu.org/software/bash/manual/html_node/Bash-POSIX-Mode.html>
 set -o posix
-# exit if a command has a non-zero status (set -e)
+# abort script at first command with a non-zero status (set -e)
 set -o errexit
 # do not mask pipeline's errors
 set -o pipefail
@@ -46,16 +46,20 @@ set -o pipefail
 set -o errtrace
 # trap on DEBUG and RETURN are inherited by shell functions (set -T)
 set -o functrace
-## throw error on unset variable usage (set -u)
+# throw error on unset variable usage (set -u)
 set -o nounset
+# prevent overwriting of files by redirection (set -C - may be overridden by `... >| file`)
+set -o noclobber
 
 ## for dev usage: debug commands before to execute them (set -x)
 #set -o xtrace
 ## for dev usage: print shell input lines as they are read (set -v)
 #set -o verbose
 
+# trap user interrupt to 'die'
+trap 'die "user interrupt"' 2 3 15
 # trap errors to 'die'
-trap 'die "trapped error at ${BASH_SOURCE}:${BASH_LINENO:-}:${FUNCNAME:-}()"' 1 2 3 15 ERR
+trap 'error_usage' ERR
 # trap exit to 'shutdown_handler'
 trap 'shutdown_handler' EXIT
 ## signals (`kill -l` for full list):
@@ -198,6 +202,23 @@ error()
     exit "${2:-1}"
 }
 
+# write an optional error on STDERR & show usage string & exit
+# usage: `error_usage [string=NULL] [status=1]`
+error_usage()
+{
+    local errstr
+    errstr="${1:-}"
+    if $DEBUG || [ -n "$errstr" ]; then
+        $VERBOSE && errstr="$(gnu_error_string "${1:-unknown error}")";
+        {   echo '---'
+            echo "error: ${errstr}"
+        } >&2
+    fi
+    echo '---'
+    usage_info >&2
+    exit "${2:-1}"
+}
+
 # find an app's module
 # usage: `find_module <module_name>`
 find_module()
@@ -228,18 +249,17 @@ gnu_error_string()
     return 0
 }
 
-# write help string to STDERR & exit
+# write help string to STDOUT & exit
 # usage: `help_info`
 help_info()
 {
-    {   version_info true
-        echo
-        echo -e "$CMD_DESCRIPTION"
-        echo
-        usage_info
-        echo
-        echo -e "$CMD_HELP"
-    } >&2
+    version_info true
+    echo
+    echo -e "$CMD_DESCRIPTION"
+    echo
+    usage_info
+    echo
+    echo -e "$CMD_HELP"
     exit 0
 }
 
@@ -367,15 +387,15 @@ load_modules_list()
     declare -a oldCMD_OPTS_SHORT=("${CMD_OPTS_SHORT[@]}")
     declare -a oldCMD_OPTS_LONG=("${CMD_OPTS_LONG[@]}")
     init_defaults
-    [ -z "${MODULES_AVAILABLE:-}" ]   && declare -a MODULES_AVAILABLE=($(get_env_array_MODULES_AVAILABLE))
+    [ -z "${MODULES_AVAILABLE:-}" ] && declare -a MODULES_AVAILABLE=($(get_env_array_MODULES_AVAILABLE))
     for l in "${MODULES_AVAILABLE[@]}"; do
         [ "${#l}" -gt "$length" ] && length="${#l}";
     done
-    for f in "$BASH_UTILS_MODULES"/*; do
-        if [ -f "$f" ] && [ -x "$f" ]; then
+    for script in "$BASH_UTILS_MODULES"/*; do
+        if [ -f "$script" ] && [ -x "$script" ]; then
             CMD_DESCRIPTION=''
-            source "$f"
-            modules_info+="$(printf "\n    %$((length+1))s    : %s\n" "$(basename "$f")" "${CMD_DESCRIPTION:-}")"
+            source "$script"
+            modules_info+="$(printf "\n    %$((length+1))s    : %s\n" "$(basename "$script")" "${CMD_DESCRIPTION:-}")"
         fi
     done
     export PRELOAD=false
@@ -500,6 +520,7 @@ set_env_array()
 # usage: `shutdown_handler`
 shutdown_handler()
 {
+    $DEBUG && debug >&2;
     # draw your own cleanup stuff here
     return 0
 }
@@ -615,9 +636,7 @@ use()
 version_info()
 {
     local short="${1:-${QUIET:-false}}"
-    if [ -n "$CMD_MODULE" ] && [ "$CMD_NAME" != "$BASH_UTILS_NAME" ]; then
-        echo "$CMD_NAME $CMD_VERSION [$BASH_UTILS_MODULE_INFO $BASH_UTILS_NAME $BASH_UTILS_VERSION]"
-    elif [ -z "$CMD_MODULE" ] && [ -n "$CMD_PROG" ] && [ "$CMD_NAME" != "$BASH_UTILS_NAME" ]; then
+    if [ "$CMD_NAME" != "$BASH_UTILS_NAME" ]; then
         echo "$CMD_NAME $CMD_VERSION [$BASH_UTILS_SCRIPT_INFO $BASH_UTILS_NAME $BASH_UTILS_VERSION]"
     else
         echo "$CMD_NAME $CMD_VERSION"
@@ -668,13 +687,12 @@ This program is free software, distributed on an \"AS IS\" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.";
 readonly BASH_UTILS_SOURCES='Sources & updates: <http://github.com/piwi/bash-utils.git>'
 readonly BASH_UTILS_DESCRIPTION='A short *bash* library for better scripting.'
-readonly BASH_UTILS_MODULE_INFO='a module for:'
 readonly BASH_UTILS_SCRIPT_INFO='using:'
 readonly BASH_UTILS_SYNOPSIS="bash-utils [-f|--force] [-q|--quiet] [-v|--verbose] [-x|--debug] [--dry-run]
                   [-e|--exec[=<arg>]] [-V|--version] [-h|--help]
                   [--] <command> [arguments]";
 readonly BASH_UTILS_USAGE=''
-readonly BASH_UTILS_HELP="arguments:
+readonly BASH_UTILS_HELP="commands:
     about                   alias of '--version'
     about <module_name>     alias of '<module-name> --version'
     help                    alias of '--help'
@@ -702,6 +720,9 @@ options:
 paths:
     $BASH_UTILS
     $BASH_UTILS_MODULES
+
+see also:
+    bash-utils(1), bash-utils(7)
 ";
 declare -ax BASH_UTILS_OPTS_SHORT=(':' 'e::' f h q v V x)
 declare -ax BASH_UTILS_OPTS_LONG=('exec::' debug dry-run force help quiet verbose version)
@@ -712,22 +733,30 @@ set_env_array BASH_UTILS_ARGS BASH_UTILS_ARGS[@]
 
 ## globals
 
+# name of current called script
 CMD_PROG="$(basename "$0")"
+# real path of current called script
 CMD_ROOT="$(abs_dirname "$0")"
+# OS name
 CMD_OS="$(uname)"
-CMD_HOST="$(hostname -f)"
-CMD_USER="$(id -un)"
+# original working directory
 CMD_CWD="$(pwd)"
+# original process ID
 CMD_PID="$$"
+# original CLI call
 CMD_CALL_ORIGINAL="$0 $*"
-readonly  CMD_PROG CMD_ROOT CMD_OS CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_CALL_ORIGINAL
-export CMD_CALL=''
+readonly  CMD_PROG CMD_ROOT CMD_OS CMD_CWD CMD_PID CMD_CALL_ORIGINAL
+# final CLI call (eventually rebuilt by the `rearrange_options()` function)
+export CMD_CALL="$CMD_CALL_ORIGINAL"
+# name of current module if one is called
 export CMD_MODULE=''
+# content of a piped previous command (populated by the `read_from_pipe()` function)
 export PIPED_INPUT=''
+# list of available modules
+declare -a MODULES_AVAILABLE=()
 
 # load library & modules on PRELOAD
 source "$BASH_UTILS_ROOT"/bash-utils-lib
-declare -a MODULES_AVAILABLE=()
 export PRELOAD=true
 for f in "$BASH_UTILS_MODULES"/*; do
     if [ -f "$f" ] && [ -x "$f" ]; then
@@ -741,13 +770,13 @@ set_env_array MODULES_AVAILABLE MODULES_AVAILABLE[@]
 #### COMMANDS INFO ####
 
 # defaults
-export DEFAULT_NAME='overwrite the DEFAULT_NAME variable to customize this information'
-export DEFAULT_VERSION='overwrite the DEFAULT_VERSION variable to customize this information'
-export DEFAULT_COPYRIGHT='overwrite the DEFAULT_COPYRIGHT variable to customize this information'
-export DEFAULT_LICENSE='overwrite the DEFAULT_LICENSE variable to customize this information'
-export DEFAULT_SOURCES='overwrite the DEFAULT_SOURCES variable to customize this information'
-export DEFAULT_DESCRIPTION='overwrite the DEFAULT_DESCRIPTION variable to customize this information'
-export DEFAULT_HELP='overwrite the DEFAULT_HELP variable to customize this information'
+export DEFAULT_NAME='override the DEFAULT_NAME variable to customize this information'
+export DEFAULT_VERSION='override the DEFAULT_VERSION variable to customize this information'
+export DEFAULT_COPYRIGHT='override the DEFAULT_COPYRIGHT variable to customize this information'
+export DEFAULT_LICENSE='override the DEFAULT_LICENSE variable to customize this information'
+export DEFAULT_SOURCES='override the DEFAULT_SOURCES variable to customize this information'
+export DEFAULT_DESCRIPTION='override the DEFAULT_DESCRIPTION variable to customize this information'
+export DEFAULT_HELP='override the DEFAULT_HELP variable to customize this information'
 export DEFAULT_SYNOPSIS=''
 export DEFAULT_USAGE=''
 declare -ax DEFAULT_OPTS_SHORT=(f h q v V x)
@@ -757,7 +786,7 @@ set_env_array DEFAULT_OPTS_SHORT DEFAULT_OPTS_SHORT[@]
 set_env_array DEFAULT_OPTS_LONG DEFAULT_OPTS_LONG[@]
 set_env_array DEFAULT_ARGS DEFAULT_ARGS[@]
 
-# CMD: to be overwritten by sub-cmd
+# CMD: to be overridden by sub-cmd
 export CMD_NAME CMD_VERSION CMD_COPYRIGHT CMD_LICENSE CMD_SOURCES CMD_DESCRIPTION CMD_HELP CMD_SYNOPSIS CMD_USAGE
 declare -ax CMD_OPTS_SHORT=()
 declare -ax CMD_OPTS_LONG=()
@@ -775,8 +804,9 @@ export CMD_LOGFILE
 
 # special debug table
 declare -ax TO_DEBUG=(
-    CMD_PROG CMD_ROOT CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_OS
-    CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN
+    HOSTNAME MACHTYPE LANG SHELL BASH_VERSION SHELLOPTS USER UID
+    CMD_PROG CMD_ROOT CMD_CWD CMD_PID CMD_OS CMD_LOGFILE
+    CMD_CALL_ORIGINAL CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN
 )
 set_env_array TO_DEBUG TO_DEBUG[@]
 
