@@ -44,7 +44,7 @@ Use arguments 'usage', 'about' or 'version' for application information.";
 CMD_OPTS_SHORT=(':' f q v x V h 'a:' 'b::')
 CMD_OPTS_LONG=(debug dry-run force quiet verbose version help 'test1:' 'test2::')
 TO_DEBUG=(
-    CMD_PROG CMD_ROOT CMD_HOST CMD_USER CMD_CWD CMD_PID CMD_OS
+    CMD_PROG CMD_ROOT HOSTNAME USER CMD_CWD CMD_PID CMD_OS
     CMD_CALL VERBOSE QUIET DEBUG FORCE DRY_RUN TEST1 TEST2
 )
 declare -x TEST1=''
