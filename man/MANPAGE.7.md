@@ -3,7 +3,7 @@ Man-name:   bash-utils
 Author:     Pierre Cassat
 Section:    7
 Date: 2015-08-23
-Version: 0.0.1-rc
+Version: 0.0.1
 
 
 ## USAGE
@@ -147,7 +147,7 @@ for default options and arguments. To use this, add in your script:
     [ -n "$CMD_REQ" ] && eval set -- "$CMD_REQ";
     common_options "$@"
 
-You can **overwrite any method** by re-defining it after having sourced the library:
+You can **override any method** by re-defining it after having sourced the library:
 
     source bash-utils -- || { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils not found!" >&2; exit 1; };
     
@@ -155,7 +155,7 @@ You can **overwrite any method** by re-defining it after having sourced the libr
         # your custom error handler
     }
 
-The best practice is to create user methods instead of overwrite native ones and call them:
+The best practice is to create user methods instead of overload native ones and call them:
 
     source bash-utils -- || { echo "> ${BASH_SOURCE[0]}:${LINENO}: bash-utils not found!" >&2; exit 1; };
     

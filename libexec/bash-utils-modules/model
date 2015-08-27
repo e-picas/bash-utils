@@ -30,30 +30,29 @@
 
 #### COLORIZED CONTENTS #############################################################################
 
+# models
+export BASHUTILS_MODEL_DIRS="${BASH_UTILS_MODULES}/models/"
+[ ! -d "$BASHUTILS_MODEL_DIRS" ] && error "models directory '$BASHUTILS_MODEL_DIRS' not found";
+declare -a models_list=()
+for f in "$BASHUTILS_MODEL_DIRS"/*; do
+    _f="$(basename "$f")"
+    models_list[${#models_list[@]}]="${_f%.model}"
+done
+
 # you can define here a string about module's usage (short synopsis), description, name and version
 CMD_NAME='Model'
 CMD_VERSION='0.0.1'
 CMD_USAGE="model <type> [file_path]"
-CMD_DESCRIPTION="see one of the bash models contents or copy it in 'file_path'"
+CMD_DESCRIPTION="See one of the bash models contents or copy it in 'file_path'"
 CMD_HELP="arguments:
-    <type>      model's type in 'bash', 'bash-utils', 'module'
-    <file_path> if set, the model will be copied to that file
+       <type>          model's type in: ${models_list[@]}
+       <file_path>     if set, the model will be copied to that file
 
 Use option '--dry-run' with the '<file_path>' argument to see what will be done first.
 Use option '--quiet' without a '<file_path>' argument to get the model path.
 ";
-#CMD_OPTS_SHORT=( f q v x V h )
-#CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
-#set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
-#set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
-CMD_ARGS=(bash bash-utils module)
+CMD_ARGS=("${models_list[@]}")
 set_env_array CMD_ARGS CMD_ARGS[@]
-
-# models
-export BASHUTILS_MODEL_DIRS="${BASH_UTILS_MODULES}/models/"
-export BASHUTILS_MODEL_BASH="${BASHUTILS_MODEL_DIRS}/bash-model"
-export BASHUTILS_MODEL_BASHUTILS="${BASHUTILS_MODEL_DIRS}/bash-utils-model"
-export BASHUTILS_MODEL_BASHMODULE="${BASHUTILS_MODEL_DIRS}/bash-utils-module"
 
 ## !! REQUIRED !! ## stop here on pre-loading
 if ${PRELOAD:-false}; then return 0; fi
@@ -79,30 +78,13 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-[ ! -d "$BASHUTILS_MODEL_DIRS" ] && error "directory '$BASHUTILS_MODEL_DIRS' not found";
 type="$1"
 target=''
 source=''
 [ $# -gt 1 ] && target="$2"
 
-case "$type" in
-    'bash')         source="$BASHUTILS_MODEL_BASH";;
-    'bash-utils')   source="$BASHUTILS_MODEL_BASHUTILS";;
-    'bash-utils-module'|'bash-module'|'module')
-                    source="$BASHUTILS_MODEL_BASHMODULE"
-                    if [ -n "$target" ] && ! $FORCE; then
-                        targetfile="$(basename "$target")"
-                        if [ "$targetfile" = "$target" ]; then
-                            [ -d "$(pwd)/libexec/bash-utils-modules/" ] && \
-                                target="$(pwd)/libexec/bash-utils-modules/${target}" || \
-                                    target="${BASH_UTILS_MODULES}/${target}";
-                        fi
-                    fi
-                    ;;
-    * )             error "undefined model type '$type'";;
-esac
-
-[ ! -f "$source" ] && error "model '$source' not found";
+source="${BASHUTILS_MODEL_DIRS}/${type}.model"
+[ ! -f "$source" ] && error "undefined model type '$type'";
 if [ -n "$target" ]; then
     if $DRY_RUN; then
         comment "cp '${source/$(pwd)\//}' '${target/$(pwd)\//}' && chmod a+x '${target/$(pwd)\//}'"
@@ -116,5 +98,4 @@ else
 fi
 
 [ "$(basename "$0")" = "$(basename "${BASH_SOURCE[0]}")" ] && exit 0 || return 0;
-## vim default shell setup (must be the very last line):
 # vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=sh

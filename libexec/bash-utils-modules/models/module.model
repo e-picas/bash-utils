@@ -31,21 +31,21 @@
 #### MODULE NAME #############################################################################
 
 # you can define here a string about module's usage (short synopsis), description, name and version:
-CMD_NAME='overwrite the CMD_NAME variable to customize this information'
-CMD_VERSION='overwrite the CMD_VERSION variable to customize this information'
-CMD_DESCRIPTION='overwrite the CMD_DESCRIPTION variable to customize this information'
-CMD_HELP='overwrite the CMD_HELP variable to customize this information'
+CMD_NAME='override the CMD_NAME variable to customize this information'
+CMD_VERSION='override the CMD_VERSION variable to customize this information'
+CMD_DESCRIPTION='override the CMD_DESCRIPTION variable to customize this information'
+CMD_HELP='override the CMD_HELP variable to customize this information'
 # the synopsis should be left empty as it will be automatically generated with options declarations:
 CMD_SYNOPSIS=''
-#CMD_SYNOPSIS="$0 [-fqvx] [--debug|--dry-run|--force|--quiet|--verbose] [--] <arguments>"
+#CMD_SYNOPSIS="$0 [-fhqvVx] [--debug|--dry-run|--force|--help|--quiet|--verbose|--version] [--] <arguments>"
 # you can use `CMD_USAGE` instead, which will be added to default options:
 CMD_USAGE=''
 # custom script's options if needed:
-#CMD_OPTS_SHORT=( f q v x V h )
-#CMD_OPTS_LONG=( debug dry-run force quiet verbose version help )
-#CMD_ARGS=()
+#CMD_OPTS_SHORT=(f h q v V x)
 #set_env_array CMD_OPTS_SHORT CMD_OPTS_SHORT[@]
+#CMD_OPTS_LONG=(debug dry-run force help quiet verbose version)
 #set_env_array CMD_OPTS_LONG CMD_OPTS_LONG[@]
+#CMD_ARGS=()
 #set_env_array CMD_ARGS CMD_ARGS[@]
 
 # to add some information to the debug array, use:
