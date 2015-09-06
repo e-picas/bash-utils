@@ -32,6 +32,10 @@
 
 #### BASH OPTIONS ####
 
+# bash defaults: hB
+# h: Locate and remember (hash) commands as they are looked up for execution
+# B: The shell will perform brace expansion
+
 # use aliases
 shopt -s expand_aliases
 # export all defined variables (set -a)
