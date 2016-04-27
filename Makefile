@@ -8,13 +8,14 @@
 # GNU make:  install / cleanup / test
 # on git clones:    rebuild manpages / upgrade version / create release / validate
 #
-##> usage: make [target] [options ...]
-##   e.g.: make install DESTDIR=$HOME
+## usage: make install <DESTDIR=prefix>       # install or update the library in <prefix>
+##        make cleanup <DESTDIR=prefix>       # remove the library from <prefix>
+##        make link <DESTDIR=prefix>          # link the local library's binary in <prefix>
+##        make check                          # check your environment
 ##
-##> available options:
-##DESTDIR=/path/to/install
+##   e.g. make install /usr/local
+##        make cleanup /opt
 ##
-##> available targets:
 
 .DEFAULT_GOAL := help
 SHELL:=/usr/bin/env bash
@@ -44,10 +45,10 @@ debug:
 	fi
 
 # this will output any line of this file with a double-sharp tag
-help:            ## Show this help.
+help:
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 
-check:           ## Check current environment.
+check:
 	@$(SHELL) "$(ROOTDIR)"/test/check-env.sh
 
 # install/cleanup stuff
@@ -57,11 +58,9 @@ check-destdir:
 		exit 1; \
 	fi
 
-cleanup:         ## Cleanup library files in PREFIX.
 cleanup: check-destdir
 	rm -rf $(DESTDIR)/{bin,etc/bash_completion.d,libexec,share/man/{man1,man7}}/bash-utils*
 
-install:         ## Install library files in PREFIX.
 install: check-destdir cleanup
 	mkdir -p $(DESTDIR)/{bin,etc/bash_completion.d,libexec,share/man/{man1,man7}}
 	cp -R "$(ROOTDIR)"/bin/* $(DESTDIR)/bin/
@@ -70,7 +69,6 @@ install: check-destdir cleanup
 	cp -R "$(ROOTDIR)"/man/*.1.man $(DESTDIR)/share/man/man1/
 	cp -R "$(ROOTDIR)"/man/*.7.man $(DESTDIR)/share/man/man7/
 
-link:            ## Link local library binary file in PREFIX.
 link: check-destdir
 	@if [ ! -e "$(ROOTDIR)/bin/bash-utils" ]; then \
 		echo "Binary to link not found in '$(ROOTDIR)' (run 'make help' to get help)." >&2; \
