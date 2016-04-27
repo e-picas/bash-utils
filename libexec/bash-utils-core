@@ -475,6 +475,7 @@ rearrange_options()
         # original getopt is available
         CMD_REQ="$(getopt "shorts" "$@")"
     fi
+    [ "${CMD_REQ// /}" = '--' ] && CMD_REQ='';
     set -o posix
     set -E
     CMD_CALL="$0 $CMD_REQ"
