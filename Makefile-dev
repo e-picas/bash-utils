@@ -67,6 +67,10 @@ git-stash-back: git-clone-check git-cmd
 	@STASHED=0
 
 git-do-release: git-clone-check git-cmd
+	@if $(GIT_CMD) tag | grep $(TAGNAME); then \
+		echo "A tag named '$(TAGNAME)' already exists (run 'make help' to get help)." >&2; \
+		exit 1; \
+	fi
 	$(GIT_CMD) commit -am "Upgrade app to $(VERSION) (automatic commit)"
 	$(GIT_CMD) tag -a "$(TAGNAME)" -m "New release $(VERSION) (automatic tag)"
 	$(GIT_CMD) archive --format tar "$(TAGNAME)" | gzip -9 > "$(TARBALLNAME)"
@@ -109,11 +113,11 @@ release: git-clone-check version-check git-stash-to-master version manpages git-
 	@echo "Released tag $(TAGNAME) - nothing pushed to remote(s)";
 
 release-rollback: git-clone-check version-check
-	@if $($(GIT_CMD) log --oneline -1 | grep $(VERSION)); then \
+	@if $(GIT_CMD) log --oneline -1 | grep "$(VERSION) (automatic commit)"; then \
 		$(GIT_CMD) reset HEAD~1; \
 		$(GIT_CMD) checkout -- man/; \
 		$(GIT_CMD) checkout -- libexec/bash-utils-core; \
 	fi
-	@if $($(GIT_CMD) tag | grep $(TAGNAME)); then \
+	@if $(GIT_CMD) tag | grep $(TAGNAME); then \
 		$(GIT_CMD) tag -d $(TAGNAME); \
 	fi
