@@ -4,6 +4,7 @@ To run a test, use:
 
         bats test-file-name.bats
 
-Or use the `make.sh` script:
+Or use the `make` command:
 
-    ./make.sh test
+    cd /path/to/bash-utils
+    make tests
