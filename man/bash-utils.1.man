@@ -139,13 +139,13 @@ file that was distributed with this source code or see
 <http://www.apache.org/licenses/LICENSE-2.0>.
 .SH BUGS
 .PP
-To transmit bugs, see <http://github.com/piwi/bash-utils/issues>.
+To transmit bugs, see <http://github.com/e-picas/bash-utils/issues>.
 .SH AUTHOR
 .PP
 \fBBash-Utils\fP is created and maintained by Pierre Cassat (piwi - <http://e-piwi.fr/>)
 & contributors.
 .SH SEE ALSO
 .PP
-For documentation, sources & updates, see <http://github.com/piwi/bash-utils.git>.
+For documentation, sources & updates, see <http://github.com/e-picas/bash-utils.git>.
 .PP
 bash(1), bash-utils(7)

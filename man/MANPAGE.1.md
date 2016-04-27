@@ -2,7 +2,7 @@ Man:        Bash-Utils Manual
 Man-name:   bash-utils
 Author:     Pierre Cassat
 Section:    1
-Date: 2015-09-06
+Date: 2016-04-27
 Version: 0.0.1@dev
 
 
@@ -134,15 +134,15 @@ file that was distributed with this source code or see
 
 ## BUGS
 
-To transmit bugs, see <http://github.com/piwi/bash-utils/issues>.
+To transmit bugs, see <http://github.com/e-picas/bash-utils/issues>.
 
 ## AUTHOR
 
-**Bash-Utils** is created and maintained by Pierre Cassat (piwi - <http://e-piwi.fr/>)
+**Bash-Utils** is created and maintained by Pierre Cassat (picas - <http://picas.fr/>)
 & contributors.
 
 ## SEE ALSO
 
-For documentation, sources & updates, see <http://github.com/piwi/bash-utils.git>. 
+For documentation, sources & updates, see <http://github.com/e-picas/bash-utils.git>. 
 
 bash(1), bash-utils(7)
