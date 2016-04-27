@@ -3,8 +3,8 @@
 .\" author: Pierre Cassat
 .\" section: 7
 .\" date: 2016-04-27
-.\" version: 0.0.1@dev
-.TH  "bash-utils" "7" "2016-04-27" "Version 0.0.1@dev" "Bash-Utils Documentation"
+.\" version: 0.1.0
+.TH  "bash-utils" "7" "2016-04-27" "Version 0.1.0" "Bash-Utils Documentation"
 .SH USAGE
 .PP
 To create a script using the library, you can call the \fImodel\fP argument of the library itself, which
@@ -288,7 +288,7 @@ in case a choice is required (no prompt running the script)
 \fB-x\fP | \fB--debug\fP: enables the `\fS$DEBUG\fP` environment variable ; this should drastically increase script's verbosity
 (verbosity should be one level more than in `\fS$VERBOSE\fP` mode)
 .IP \(bu 
-\fB--dry-run\fP: enables the `\fS$DRY_RUN\fP` environment variable ; this should not de sensible stuff but inform user about
+\fB--dry-run\fP: enables the `\fS$DRY_RUN\fP` environment variable ; this should not do sensible stuff but inform user about
 what should be done
 .RE
 .PP
@@ -436,7 +436,7 @@ to make a silent sub-command call: `\fSval=$(sub-command 2>/dev/null)\fP`
 .TP
 \fIbin/bash-utils\fP | \fBlibexec/bash-utils\fP
 This is the "entry point" of \fIBash-Utils\fP ; it should be available in one of the `\fS$PATH\fP` paths for all users ;
-it acts like a loader of the library and a script's interpreter you can use in a script's \fIshebang\fP.
+it acts like a loader of the library and a script's interpreter you can use as a script's \fIshebang\fP.
 .TP
 \fBlibexec/bash-utils-core\fP
 This is the core of \fIBash-Utils\fP ; it mostly defines required functions and environment variables for the library
