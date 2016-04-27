@@ -67,9 +67,9 @@ get_version()
 #}
 
 @test "[make.sh 1] install" {
-    run $TESTBASHUTILS_MAKE install "$BASHUTILS_TMPDIR"
+    run $TESTBASHUTILS_MAKE install "DESTDIR=$BASHUTILS_TMPDIR"
     $TEST_DEBUG && {
-        echo "running: $TESTBASHUTILS_MAKE install $BASHUTILS_TMPDIR"
+        echo "running: $TESTBASHUTILS_MAKE install DESTDIR=$BASHUTILS_TMPDIR"
         echo "output: $output"
         echo "status: $status"
     } >&1
@@ -81,9 +81,9 @@ get_version()
 
 @test "[make.sh 2] cleanup" {
     # install
-    run $TESTBASHUTILS_MAKE install "$BASHUTILS_TMPDIR"
+    run $TESTBASHUTILS_MAKE install "DESTDIR=$BASHUTILS_TMPDIR"
     $TEST_DEBUG && {
-        echo "running: $TESTBASHUTILS_MAKE install $BASHUTILS_TMPDIR"
+        echo "running: $TESTBASHUTILS_MAKE install DESTDIR=$BASHUTILS_TMPDIR"
         echo "output: $output"
         echo "status: $status"
     } >&1
@@ -101,9 +101,9 @@ get_version()
     } >&1
     [ -f "$addon" ]
     # install
-    run $TESTBASHUTILS_MAKE cleanup "$BASHUTILS_TMPDIR"
+    run $TESTBASHUTILS_MAKE cleanup "DESTDIR=$BASHUTILS_TMPDIR"
     $TEST_DEBUG && {
-        echo "running: $TESTBASHUTILS_MAKE cleanup $BASHUTILS_TMPDIR"
+        echo "running: $TESTBASHUTILS_MAKE cleanup DESTDIR=$BASHUTILS_TMPDIR"
         echo "output: $output"
         echo "status: $status"
     } >&1
@@ -147,18 +147,18 @@ get_version()
     [ "$status" -ne 0 ]
     [ "$original_version" = "$(get_version)" ]
     # version only 99.99.99
-    run $TESTBASHUTILS_MAKE version 99.99.99
+    run $TESTBASHUTILS_MAKE version VERSION=99.99.99
     $TEST_DEBUG && {
-        echo "running: $TESTBASHUTILS_MAKE version 99.99.99"
+        echo "running: $TESTBASHUTILS_MAKE version VERSION=99.99.99"
         echo "output: $output"
         echo "status: $status"
     } >&1
     [ "$status" -eq 0 ]
     [ "$(get_version)" = '99.99.99' ]
     # back to original version
-    run $TESTBASHUTILS_MAKE version "$original_version"
+    run $TESTBASHUTILS_MAKE version "VERSION=$original_version"
     $TEST_DEBUG && {
-        echo "running: $TESTBASHUTILS_MAKE version $original_version"
+        echo "running: $TESTBASHUTILS_MAKE version VERSION=$original_version"
         echo "output: $output"
         echo "status: $status"
     } >&1
