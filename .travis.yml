@@ -9,7 +9,7 @@ before_install:
   - git clone https://github.com/e-picas/markdown-extended.git /tmp/markdown-extended
   - sudo ln -s /tmp/markdown-extended/bin/markdown-extended /usr/local/bin/
 script:
-  - ./make.sh test
+  - make tests
 branches:
   only:
     - master
