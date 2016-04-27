@@ -61,9 +61,9 @@ git-stash-to-master: git-clone-check git-cmd
 
 git-stash-back: git-clone-check git-cmd
 	@$(GIT_CMD) checkout "$(GITBRANCH)"
-	@ifeq ($(STASHED),1)
-		$(GIT_CMD) stash pop
-	endif
+	@if [ "$(STASHED)" = '1' ]; then \
+		$(GIT_CMD) stash pop; \
+	fi
 	@STASHED=0
 
 git-do-release: git-clone-check git-cmd
