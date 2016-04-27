@@ -75,8 +75,8 @@ The following additional options are available when you call the library itself:
 :   Execute the argument in the library's environment ; as the argument is optional, the equal sign
 is REQUIRED ; without argument, any piped content will be evaluated:
 
-        bash-utils --exec='colored-output "<bold>test</bold>"'
-        echo 'colored-output "<bold>test</bold>"' | bash-utils --exec
+        bash-utils --exec='onoff_bit true'
+        echo 'onoff_bit true' | bash-utils --exec
 
 The following additional arguments are available when you call the library itself:
 
