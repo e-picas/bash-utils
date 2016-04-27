@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # bash-utils - A *bash* library for better scripting
-# <http://github.com/piwi/bash-utils>
+# <http://github.com/e-picas/bash-utils>
 # Copyright (c) 2015 Pierre Cassat & contributors
 #
 # This program is free software: you can freely use it, redistribute it
@@ -17,7 +17,7 @@
 #
 # The sources of this program are hosted on a public repository.
 # You can modify it, to ameliorate a feature or correct an error,
-# inform about a bug and follow updates at <http://github.com/piwi/bash-utils>.
+# inform about a bug and follow updates at <http://github.com/e-picas/bash-utils>.
 #
 # You should have received a copy of the License along with this program ;
 # please see the LICENSE file that was distributed with this source code.
@@ -31,6 +31,10 @@
 #
 
 #### BASH OPTIONS ####
+
+# bash defaults: hB
+# h: Locate and remember (hash) commands as they are looked up for execution
+# B: The shell will perform brace expansion
 
 # use aliases
 shopt -s expand_aliases
@@ -471,6 +475,7 @@ rearrange_options()
         # original getopt is available
         CMD_REQ="$(getopt "shorts" "$@")"
     fi
+    [ "${CMD_REQ// /}" = '--' ] && CMD_REQ='';
     set -o posix
     set -E
     CMD_CALL="$0 $CMD_REQ"
@@ -590,11 +595,13 @@ try()
     [[ ! "$-" =~ e ]] || e=1
     # Run the command and store error messages (output to the standard error
     # stream in $error, but send regular output to file descriptor 3 which
-    # redirects to standard output
+    # redirects to standard output)
     exec 3>&1
     set +e
+    trap - ERR
     error="$("$@" 2>&1 >&3)"
     retval=$?
+    trap 'error_usage' ERR
     [ -z "$e" ] || set -e
     # if the command failed (returned a non-zero exit code)
     if [ $retval -gt 0 ]; then
@@ -680,12 +687,12 @@ readonly BASH_UTILS_ROOT="${libexecdir}"
 readonly BASH_UTILS_MODULES="${libexecdir}/bash-utils-modules"
 readonly BASH_UTILS_NAME='Bash-Utils'
 readonly BASH_UTILS_KEY='bash-utils'
-readonly BASH_UTILS_VERSION='0.0.1@dev-modules'
+readonly BASH_UTILS_VERSION='0.1.0@dev'
 readonly BASH_UTILS_COPYRIGHT='Copyright (c) 2015 Pierre Cassat & contributors'
 readonly BASH_UTILS_LICENSE="Apache Software Foundation license 2.0 <http://www.apache.org/licenses/LICENSE-2.0>
 This program is free software, distributed on an \"AS IS\" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.";
-readonly BASH_UTILS_SOURCES='Sources & updates: <http://github.com/piwi/bash-utils.git>'
+readonly BASH_UTILS_SOURCES='Sources & updates: <http://github.com/e-picas/bash-utils.git>'
 readonly BASH_UTILS_DESCRIPTION='A short *bash* library for better scripting.'
 readonly BASH_UTILS_SCRIPT_INFO='using:'
 readonly BASH_UTILS_SYNOPSIS="bash-utils [-f|--force] [-q|--quiet] [-v|--verbose] [-x|--debug] [--dry-run]

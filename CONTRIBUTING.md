@@ -66,7 +66,7 @@ Note that the "merge" of a pull-request keeps your name and profile as the "comm
 (the one who made the stuff).
 
 **BEFORE** you start a work on the code, please check that this has NOT been done yet, or part
-of it, by giving a look at <http://github.com/piwi/bash-utils/pulls>. If you 
+of it, by giving a look at <http://github.com/e-picas/bash-utils/pulls>. If you 
 find a pull-request that seems to be like the modification you were going to do, you can 
 comment the request with your vision of the thing or your experience and participate to that
 work.
@@ -86,7 +86,7 @@ Then you can create your own branch with the name of your feature:
 
 The development process of the package requires some external dependencies to work:
 
--   *Markdown-Extended*, a markdown parser: <http://github.com/piwi/markdown-extended>
+-   *Markdown-Extended*, a markdown parser: <http://github.com/e-picas/markdown-extended>
 -   *BATS*, a test suite for Bash scripts: <http://github.com/sstephenson/bats>
 -   *ShellCheck*, a Bash scripting validator: <http://github.com/koalaman/shellcheck>
 
@@ -96,7 +96,7 @@ You can *synchronize* your fork with current original repository by defining a r
 and pulling new commits:
 
     // create an "upstream" remote to the original repo
-    git remote add upstream http://github.com/piwi/bash-utils.git
+    git remote add upstream http://github.com/e-picas/bash-utils.git
 
     // get last original remote commits
     git checkout dev
@@ -151,7 +151,7 @@ To enable the completion function for a module, use:
 
 ### Generate the man-pages
 
-The manpages of the app are built with [Markdown-Extended](http://github.com/piwi/markdown-extended).
+The manpages of the app are built with [Markdown-Extended](http://github.com/e-picas/markdown-extended).
 
 To automatically re-generate the manpages of the package, you can use:
 
@@ -263,4 +263,4 @@ Useful links
 
 ----
 
-If you have questions, you can (eventually) contact me at *me [at] e [dash] piwi [dot] fr*.
+If you have questions, you can (eventually) contact me at *me [at] e [dash] e-picas [dot] fr*.

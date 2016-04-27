@@ -2,8 +2,8 @@ Man:        Bash-Utils Documentation
 Man-name:   bash-utils
 Author:     Pierre Cassat
 Section:    7
-Date: 2015-08-23
-Version: 0.0.1@dev-modules
+Date: 2016-04-27
+Version: 0.1.0@dev
 
 
 ## USAGE
@@ -177,7 +177,7 @@ Default options handled by the library are:
     in case a choice is required (no prompt running the script)
 -   **-x** | **--debug**: enables the `$DEBUG` environment variable ; this should drastically increase script's verbosity
     (verbosity should be one level more than in `$VERBOSE` mode)
--   **--dry-run**: enables the `$DRY_RUN` environment variable ; this should not de sensible stuff but inform user about
+-   **--dry-run**: enables the `$DRY_RUN` environment variable ; this should not do sensible stuff but inform user about
     what should be done
 
 The library also handles those informational options:
@@ -269,7 +269,7 @@ To make robust scripts, here are some reminders:
 
 *bin/bash-utils* | **libexec/bash-utils**
 :   This is the "entry point" of *Bash-Utils* ; it should be available in one of the `$PATH` paths for all users ;
-it acts like a loader of the library and a script's interpreter you can use in a script's *shebang*.
+it acts like a loader of the library and a script's interpreter you can use as a script's *shebang*.
 
 **libexec/bash-utils-core**
 :   This is the core of *Bash-Utils* ; it mostly defines required functions and environment variables for the library

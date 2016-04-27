@@ -1,5 +1,5 @@
 The final manpages files are generated from the `MANPAGE.X.md` markdown content
-with the help of <http://github.com/piwi/markdown-extended>.
+with the help of <http://github.com/e-picas/markdown-extended>.
 
 To generate it, run:
 
