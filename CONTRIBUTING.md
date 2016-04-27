@@ -129,8 +129,8 @@ license and copyright conditions. You can add an information about module's auth
 How-tos
 -------
 
-The `make.sh` script distributed with the sources embeds all required utilities to build, test and document
-the package.
+The `Makefile-dev` script distributed with the sources embeds all required utilities to build, test and document
+the package whith the help of (the `make` command)[https://www.gnu.org/software/make/manual/html_node/Introduction.html].
 
 ### Terminal completion
 
@@ -155,7 +155,7 @@ The manpages of the app are built with [Markdown-Extended](http://github.com/e-p
 
 To automatically re-generate the manpages of the package, you can use:
 
-    ./make.sh manpages
+    make manpages
 
 To generate them manually, you can run:
 
@@ -170,7 +170,7 @@ The unit-testing of the app is handled with [BATS](http://github.com/sstephenson
 
 You can verify that your package passes all tests running:
 
-    ./make.sh test
+    make tests
 
 All tests are stored in the `test/` directory of the package and
 are *Bats* scripts. See the documentation of Bats for more info.
@@ -184,7 +184,7 @@ To test the lib manually, you can run:
 You can check the code common errors using [ShellCheck](http://github.com/koalaman/shellcheck)
 by running:
 
-    ./make.sh validate
+    make code-check
 
 The default behavior of such a validation will ignore the following rules:
 
@@ -204,9 +204,9 @@ Tom Preston-Werner for more info about the release version name construction rul
 
 You can build a new release running:
 
-    ./make.sh release X.Y.Z
+    make release VERSION=X.Y.Z
 
-This will call first the `version X.Y.Z` and `manpages` actions of `make.sh`.
+This will call first the `version X.Y.Z` and `manpages` actions of Makefile.
 
 To make a new release of the package manually, you must follow these steps:
 
@@ -217,11 +217,11 @@ To make a new release of the package manually, you must follow these steps:
 
 2.  validate unit-tests:
 
-        ./make.sh test
+        make tests
 
 3.  bump new version number and commit:
 
-        ./make.sh version X.Y.Z-STATE
+        make version VERSION=X.Y.Z-STATE
 
 4.  update the changelog ; you can use <https://github.com/atelierspierrot/atelierspierrot/blob/master/console/git-changelog.sh>.
 
