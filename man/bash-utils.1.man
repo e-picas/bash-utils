@@ -2,9 +2,9 @@
 .\" man-name: bash-utils
 .\" author: Pierre Cassat
 .\" section: 1
-.\" date: 2015-08-22
-.\" version: 0.0.1-rc
-.TH  "bash-utils" "1" "2015-08-22" "Version 0.0.1-rc" "Bash-Utils Manual"
+.\" date: 2016-04-27
+.\" version: 0.0.1@dev
+.TH  "bash-utils" "1" "2016-04-27" "Version 0.0.1@dev" "Bash-Utils Manual"
 .SH NAME
 .PP
 Bash-Utils - A short \fIbash\fP library for better scripting.
@@ -142,7 +142,7 @@ file that was distributed with this source code or see
 To transmit bugs, see <http://github.com/e-picas/bash-utils/issues>.
 .SH AUTHOR
 .PP
-\fBBash-Utils\fP is created and maintained by Pierre Cassat (piwi - <http://e-piwi.fr/>)
+\fBBash-Utils\fP is created and maintained by Pierre Cassat (picas - <http://picas.fr/>)
 & contributors.
 .SH SEE ALSO
 .PP

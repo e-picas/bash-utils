@@ -2,9 +2,9 @@
 .\" man-name: bash-utils
 .\" author: Pierre Cassat
 .\" section: 7
-.\" date: 2015-08-22
-.\" version: 0.0.1-rc
-.TH  "bash-utils" "7" "2015-08-22" "Version 0.0.1-rc" "Bash-Utils Documentation"
+.\" date: 2016-04-27
+.\" version: 0.0.1@dev
+.TH  "bash-utils" "7" "2016-04-27" "Version 0.0.1@dev" "Bash-Utils Documentation"
 .SH USAGE
 .PP
 To create a script using the library, you can call the \fImodel\fP argument of the library itself, which
@@ -236,7 +236,7 @@ common_options "$@"
 .EE
 .RE
 .PP
-You can \fBoverwrite any method\fP by re-defining it after having sourced the library:
+You can \fBoverride any method\fP by re-defining it after having sourced the library:
 .RS
 
 .EX
@@ -252,7 +252,7 @@ error() {
 .EE
 .RE
 .PP
-The best practice is to create user methods instead of overwrite native ones and call them:
+The best practice is to create user methods instead of overload native ones and call them:
 .RS
 
 .EX
@@ -277,10 +277,10 @@ Default options handled by the library are:
 .RS
 .IP \(bu 
 \fB-q\fP | \fB--quiet\fP: enables the `\fS$QUIET\fP` environment variables ; this should decrease script's output (only errors or
-required output should be returned) ; this options disables the `\fS$VERBOSE\fP` environment variable
+required output should be returned) ; this option disables the `\fS$VERBOSE\fP` environment variable
 .IP \(bu 
 \fB-v\fP | \fB--verbose\fP: enables the `\fS$VERBOSE\fP` environment variable ; this should increase script's verbosity (inform
-user about what is happening) ; this options disables the `\fS$QUIET\fP` environment variable
+user about what is happening) ; this option disables the `\fS$QUIET\fP` environment variable
 .IP \(bu 
 \fB-f\fP | \fB--force\fP: enables the `\fS$FORCE\fP` environment variable ; this should let the user to choose all default behaviors
 in case a choice is required (no prompt running the script)
@@ -301,7 +301,7 @@ The library also handles those informational options:
 .RE
 .PP
 The output of the informational arguments listed above are constructed using the `\fSCMD_...\fP` environment
-variables you may define for each script.
+variables you may define for each script (see the \fICustomize your script\fP section above).
 .PP
 These options are handled by the \fIgetopt\fP program. You can add your own options by overriding the following variables:
 .RS
@@ -328,10 +328,6 @@ For each option added, you MUST define your own treatment for it in a parsing lo
 .RS
 
 .EX
-CMD_OPTS_SHORT=':fqvxo:'
-.br
-CMD_OPTS_LONG='debug,dry-run,force,quiet,verbose,my-option'
-.br
 while [ $# -gt 0 ]; do
 .br
     case "$1" in
@@ -444,10 +440,10 @@ it acts like a loader of the library and a script's interpreter you can use in a
 .TP
 \fBlibexec/bash-utils-core\fP
 This is the core of \fIBash-Utils\fP ; it mostly defines required functions and environment variables for the library
-to work by itself and to handle its modules.
+to work by itself and to handle its modules ; it uses almost only bash \fIbuiltins\fP.
 .TP
 \fBlibexec/bash-utils-lib\fP
-This is the library of functions ; it embeds various functions commonly used in \fIbash\fP scripts.
+This is the library of functions ; it embeds various useful functions and variables commonly used in \fIbash\fP scripts.
 .TP
 \fBlibexec/bash-utils-cmd\fP
 This is the script that handles default parameters and actions of \fIBash-Utils\fP when you call it directly.
