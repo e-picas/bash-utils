@@ -1,7 +1,7 @@
 Bash-Utils - Utilities for Bash scripting
 =========================================
 
-[![Build Status](https://travis-ci.org/piwi/bash-utils.svg)](https://travis-ci.org/piwi/bash-utils)
+[![Build Status](https://travis-ci.org/e-picas/bash-utils.svg)](https://travis-ci.org/e-picas/bash-utils)
 
 The `Bash-Utils` command is a small library of utilities to quickly build robust and complete
 [Bash](https://en.wikipedia.org/wiki/Bash_%28Unix_shell%29) scripts.
@@ -40,7 +40,7 @@ This way, any user can use it in its scripts by *sourcing* it:
 
 For a full download and installation from the command line, run:
 
-    wget --no-check-certificate https://github.com/piwi/bash-utils/archive/master.tar.gz
+    wget --no-check-certificate https://github.com/e-picas/bash-utils/archive/master.tar.gz
     tar -xvf master.tar.gz
     cd bash-utils*
     ./make.sh install /usr/local/bin

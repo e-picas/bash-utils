@@ -75,8 +75,8 @@ The following additional options are available when you call the library itself:
 :   Execute the argument in the library's environment ; as the argument is optional, the equal sign
 is REQUIRED ; without argument, any piped content will be evaluated:
 
-        bash-utils --exec='colored-output "<bold>test</bold>"'
-        echo 'colored-output "<bold>test</bold>"' | bash-utils --exec
+        bash-utils --exec='onoff_bit true'
+        echo 'onoff_bit true' | bash-utils --exec
 
 The following additional arguments are available when you call the library itself:
 
@@ -134,15 +134,15 @@ file that was distributed with this source code or see
 
 ## BUGS
 
-To transmit bugs, see <http://github.com/piwi/bash-utils/issues>.
+To transmit bugs, see <http://github.com/e-picas/bash-utils/issues>.
 
 ## AUTHOR
 
-**Bash-Utils** is created and maintained by Pierre Cassat (piwi - <http://e-piwi.fr/>)
+**Bash-Utils** is created and maintained by Pierre Cassat (picas - <http://picas.fr/>)
 & contributors.
 
 ## SEE ALSO
 
-For documentation, sources & updates, see <http://github.com/piwi/bash-utils.git>. 
+For documentation, sources & updates, see <http://github.com/e-picas/bash-utils.git>. 
 
 bash(1), bash-utils(7)

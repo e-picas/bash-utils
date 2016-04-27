@@ -6,13 +6,14 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq bats
   - sudo ln -s "$(pwd)/bin/bash-utils" /usr/local/bin/
-  - git clone https://github.com/piwi/markdown-extended.git /tmp/markdown-extended
+  - git clone https://github.com/e-picas/markdown-extended.git /tmp/markdown-extended
   - sudo ln -s /tmp/markdown-extended/bin/markdown-extended /usr/local/bin/
 script:
   - ./make.sh test
 branches:
   only:
     - master
+    - dev
     - dev-modules
 notifications:
   email:
