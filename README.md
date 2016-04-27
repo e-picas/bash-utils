@@ -32,7 +32,7 @@ Installation
 
 To make the library accessible for all users, the best practice is to install it in a global path like `/usr/local/bin/`:
 
-    ./make.sh install /usr/local/bin
+    make install DESTDIR=/usr/local/bin
 
 This way, any user can use it in its scripts by *sourcing* it:
 
@@ -43,9 +43,9 @@ For a full download and installation from the command line, run:
     wget --no-check-certificate https://github.com/e-picas/bash-utils/archive/master.tar.gz
     tar -xvf master.tar.gz
     cd bash-utils*
-    ./make.sh install /usr/local/bin
+    make install DESTDIR=/usr/local/bin
 
-You can use the `make.sh` script to clean-up an installed library or update it ; to get a full usage, run `./make.sh`.
+You can use the `make` command to clean-up an installed library or update it ; to get a full usage, run `make`.
 
 
 Starter template

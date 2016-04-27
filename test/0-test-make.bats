@@ -66,7 +66,7 @@ get_version()
 #    [ true = false ]
 #}
 
-@test "[make.sh 1] install" {
+@test "[make 1] install" {
     run $TESTBASHUTILS_MAKE install "DESTDIR=$BASHUTILS_TMPDIR"
     $TEST_DEBUG && {
         echo "running: $TESTBASHUTILS_MAKE install DESTDIR=$BASHUTILS_TMPDIR"
@@ -79,7 +79,7 @@ get_version()
     [ -f "${BASHUTILS_TMPDIR}/share/man/man1/bash-utils.1.man" ]
 }
 
-@test "[make.sh 2] cleanup" {
+@test "[make 2] cleanup" {
     # install
     run $TESTBASHUTILS_MAKE install "DESTDIR=$BASHUTILS_TMPDIR"
     $TEST_DEBUG && {
@@ -114,7 +114,7 @@ get_version()
     [ -f "$addon" ]
 }
 
-@test "[make.sh 3] manpages" {
+@test "[make 3] manpages" {
     # test manpages are NOT here
     setup_manpages
     [ ! -f "$TESTBASHUTILS_MANPAGE1" ]
@@ -133,7 +133,7 @@ get_version()
     teardown_manpages
 }
 
-@test "[make.sh 4] version" {
+@test "[make 4] version" {
     # git original version
     original_version="$(get_version)"
     [ -n "$original_version" ]

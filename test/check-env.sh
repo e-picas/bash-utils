@@ -128,7 +128,7 @@ run_test 'searching for global "bash-utils"' \
     '( [ "$out" -gt 1 ] && [ -n "$bashutilscmd" ] ) && return 1 || return 0' \
     'the *Bash-Utils* library is NOT installed' \
     "${bashutilscmd}" \
-    "you should install it running \"./make.sh /usr/local/bin\"";
+    "you should install it running \"make install DESTDIR=/usr/local/bin\"";
 
 
 echo

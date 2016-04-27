@@ -6,7 +6,8 @@ To load it during development, use:
 
     source etc/bash_completion.d/bash-utils-completion
 
-To install it, use the `make.sh` script (global install):
+To install it, use the `make` command (global install):
 
-    ./make.sh install /install/path
+    cd /path/to/bash-utils
+    make install DESTDIR=/install/path
 
